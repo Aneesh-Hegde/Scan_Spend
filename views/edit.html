@@ -1,0 +1,27 @@
+{{block "edit" .}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+  </head>
+  <body>
+    <div id="edit-product">
+     <form hx-post="/update/{{.product.Name}}/{{.product.ID}}" hx-target="#edit-product" hx-swap="outerHTML">
+        <label for="product">Product Name:</label>
+        <input type="text" name="product" value="{{.product.ProductName}}">
+        <br>
+        <label for="qunatity">Quantity:</label>
+        <input type="text" name="quantity" value="{{.product.Quantity}}">
+        <br>
+        <label for="Amount">Amount:</label>
+        <input type="text" name="amount" value="{{.product.Amount}}">
+        <br>
+        <button type="submit">Done</button>
+      </form> 
+    </div>
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,70 @@
+{{block "text" .}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+    
+  </head>
+  <body>
+    <h4>Products are</h4>
+    <div id="products-container">
+     {{if .}}
+            {{range .product}} <!-- Iterate over products for this file -->
+      {{template "product" .}} 
+      {{end}}
+      {{block "total" .}}
+      <p>Total:{{.total}}</p>
+      {{end}}
+      {{else}}
+        <p>No products available.</p>
+        {{end}}   
+          </div>
+   
+
+<script>
+  function editAndDeleteProduct(productId, fileName, action) {
+    if (action === 'edit') {
+      // Trigger HTMX request for editing the product
+      htmx.ajax("POST", "/edit/" + fileName + "/" + productId, {
+        target: "#product" + productId,  // Update the product in the DOM
+        swap: "outerHTML"
+      });
+
+    } else if (action === 'delete') {
+      // Trigger HTMX request for deleting the product
+      htmx.ajax("DELETE", "/delete/" + fileName + "/" + productId, {
+        target: "#product" + productId,  // Remove the product from the DOM
+        swap: "outerHTML"
+      });
+    }
+
+    // After either edit or delete, update the total
+    htmx.ajax("POST", "/update-total"+fileName, {
+      target: "#total-container",  // Update the total amount
+      swap: "outerHTML"
+    });
+  }
+</script>
+
+  </body>
+</html>
+
+{{end}}
+
+{{block "product" .}}
+<div id="product{{.ID}}">
+  <p>Product Name: {{.ProductName}}</p>
+  <p>Quantity: {{.Quantity}}</p>
+  <p>Amount: {{.Amount}}</p>
+
+  <button id="edit-button-{{.ID}}" onclick="editAndDeleteProduct('{{.ID}}', '{{.Name}}', 'edit')">
+    Edit
+  </button>
+  
+  <button id="delete-button-{{.ID}}" onclick="editAndDeleteProduct('{{.ID}}', '{{.Name}}', 'delete')">
+    Delete
+  </button></div>
+{{end}}

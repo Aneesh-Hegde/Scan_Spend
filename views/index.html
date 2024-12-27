@@ -1,0 +1,44 @@
+{{block "index" .}} <!-- Use the index block correctly -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>File Upload</title>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+  </head>
+  <body>
+    <h1>Upload Single File with Fields</h1>
+
+    <!-- Form for file upload -->
+    <div id="page">
+
+      {{block "form" .}}
+      <form hx-post="/upload" hx-target="#page" hx-swap="innerHTML" enctype="multipart/form-data">
+        Name: <input type="text" name="name"><br>
+        Email: <input type="email" name="email"><br>
+        File: <input type="file" name="file"><br><br>
+        <input type="submit" value="Submit">
+      </form>
+
+      {{end}}
+      <!-- Section for displaying uploaded files -->
+      {{block "files" .}} 
+      <div id="uploaded-files">
+        {{if gt (len .Filenames) 0}}
+        <p>Files uploaded:</p>
+        {{range .Filenames}}
+        <button hx-post="/get-text/{{.}}" hx-target="#text" hx-swap="innerHTML">{{.}}</button><br>
+        {{end}}
+        {{else}}
+        <p>No files uploaded yet.</p>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+    <!-- Section for displaying the OCR results -->
+    <div id="text"></div>
+
+  </body>
+</html>
+{{end}}
