@@ -26,49 +26,46 @@ type FileName struct {
 }
 
 func upload(c echo.Context) error {
-	// Read form fields
-	// name := c.FormValue("name")
-	// email := c.FormValue("email")
-
-	//-----------
-	// Read file
-	//-----------
-
-	// Source
+	// Read file from form data
 	file, err := c.FormFile("file") // Make sure this key matches the frontend
 	if err != nil {
-		// If the file is not found in the form or there's another error
 		return c.JSON(400, map[string]string{"status": "error", "message": fmt.Sprintf("Error retrieving file: %v", err)})
 	}
 
 	// Open the uploaded file
 	src, err := file.Open()
 	if err != nil {
-		// Handle error if file cannot be opened
 		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error opening file: %v", err)})
 	}
 	defer src.Close()
 
-	// Create a destination file to save the uploaded file
-	dst, err := os.Create(file.Filename)
+	// Ensure the uploads directory exists
+	uploadDir := "uploads"
+	err = os.MkdirAll(uploadDir, os.ModePerm)
 	if err != nil {
-		// Handle error if file cannot be created
+		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error creating directory: %v", err)})
+	}
+
+	// Create the destination file path
+	dst, err := os.Create(fmt.Sprintf("%s/%s", uploadDir, file.Filename))
+	if err != nil {
 		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error creating file: %v", err)})
 	}
 	defer dst.Close()
 
 	// Copy the content of the uploaded file to the destination file
 	if _, err := io.Copy(dst, src); err != nil {
-		// Handle error if copying fails
 		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error copying file: %v", err)})
 	}
 
 	// Append the uploaded filename to the list
 	files.Filenames = append(files.Filenames, file.Filename)
-
-	// Return a success JSON response
+	err = os.Remove(file.Filename)
+	if err != nil {
+		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error deleting source file: %v", err)})
+	}
+	// Return a success JSON response with the filename
 	return c.JSON(200, map[string]string{"status": "success", "message": "Upload successful", "filename": file.Filename})
-	// return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully with fields name=%s and email=%s.</p>", file.Filename, name, email))
 }
 
 // func extractProductAndPrices(text string) ([]Product, error) {
