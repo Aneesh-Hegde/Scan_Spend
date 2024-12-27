@@ -55,11 +55,15 @@ const Upload: React.FC = () => {
       <input type='file' onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
       {uploadMessage && <p>{uploadMessage}</p>} {/* Display message */}
-      <ul>
-        {filesNames.map((file, index) => (
-          <li key={index}>{file}</li>
-        ))}
-      </ul>
+      {filesNames.length > 0 ? (
+        <ul>
+          {filesNames.map((file, index) => (
+            <li key={index}>{file}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No files uploaded yet.</p>
+      )}
     </div>
   )
 }
