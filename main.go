@@ -14,6 +14,7 @@ import (
 	// "strings"
 	"bytes"
 	"encoding/json"
+	"github.com/joho/godotenv"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -34,30 +35,39 @@ func upload(c echo.Context) error {
 	//-----------
 
 	// Source
-	file, err := c.FormFile("file")
+	file, err := c.FormFile("file") // Make sure this key matches the frontend
 	if err != nil {
-		return err
+		// If the file is not found in the form or there's another error
+		return c.JSON(400, map[string]string{"status": "error", "message": fmt.Sprintf("Error retrieving file: %v", err)})
 	}
+
+	// Open the uploaded file
 	src, err := file.Open()
 	if err != nil {
-		return err
+		// Handle error if file cannot be opened
+		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error opening file: %v", err)})
 	}
 	defer src.Close()
 
-	// Destination
+	// Create a destination file to save the uploaded file
 	dst, err := os.Create(file.Filename)
 	if err != nil {
-		return err
+		// Handle error if file cannot be created
+		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error creating file: %v", err)})
 	}
 	defer dst.Close()
 
-	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
+	// Copy the content of the uploaded file to the destination file
+	if _, err := io.Copy(dst, src); err != nil {
+		// Handle error if copying fails
+		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error copying file: %v", err)})
 	}
+
+	// Append the uploaded filename to the list
 	files.Filenames = append(files.Filenames, file.Filename)
-	c.Render(200, "form", nil)
-	return c.Render(200, "files", files)
+
+	// Return a success JSON response
+	return c.JSON(200, map[string]string{"status": "success", "message": "Upload successful", "filename": file.Filename})
 	// return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully with fields name=%s and email=%s.</p>", file.Filename, name, email))
 }
 
@@ -148,7 +158,7 @@ type Product struct {
 
 func extractProductDataFromText(text string) ([]Product, error) {
 	// Your Gemini API key (replace with actual key)
-	apiKey := "API_KEY"
+	apiKey := os.Getenv("API_KEY")
 
 	// Create the request body for Gemini API
 	// Construct the request body
@@ -269,97 +279,66 @@ type AllData struct {
 var filesProduct = make(map[string]AllData)
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	e := echo.New()
-	e.Renderer = newTemplate()
+
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	// e.Static("/", "public")
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000"}, // Your frontend URL
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
+	}))
+
+	// Serve static files (adjust path as necessary)
+	e.Static("/uploads", "uploads")
+
+	// Route to display the list of uploaded files (rendering logic removed)
 	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "index", files)
+		return c.JSON(http.StatusOK, map[string]interface{}{"files": files.Filenames})
 	})
 
+	// Route for file upload
 	e.POST("/upload", upload)
 
+	// Route to serve a file (adjust file name and path as needed)
 	e.GET("/file", func(c echo.Context) error {
 		c.Attachment("celebi.png", "celebi.png")
-		return c.Render(200, "index", nil)
+		return c.String(http.StatusOK, "File served")
 	})
 
-	// 	e.POST("get-text/:file",func(c echo.Context)error{
-	// 		filename:=c.Param("file")
-	// 		client := gosseract.NewClient()
-	// 		defer client.Close()
-	//
-	// 		err := client.SetImage(filename)
-	// 		if err != nil {
-	// 			log.Fatalf("Failed to set image: %v", err)
-	// 		}
-	//
-	// 		text, err := client.Text()
-	// 		if err != nil {
-	// 			log.Fatalf("Failed to extract text: %v", err)
-	// 		}
-	//
-	// 		fmt.Println("Extracted Text:")
-	// 		fmt.Println(text)
-	//
-	// // 		products, err := extractProductAndPrices(text)
-	// // 	if err != nil {
-	// // 		fmt.Println("Error:", err)
-	// // 	}
-	// //
-	// // data := struct {
-	// // 		Products []Product
-	// // 	}{
-	// // 		Products: products,
-	// // 	}
-	//
-	// 		// return c.Render(200,"text",data)
-	// 		return c.Render(200,"text",map[string]string{"Text":text})
-	//
-	// 	})
-
+	// Route to extract text from an image file (using OCR)
 	e.POST("/get-text/:file", func(c echo.Context) error {
 		filename := c.Param("file")
-		fmt.Println("Received ID:", filename)
 		client := gosseract.NewClient()
 		defer client.Close()
 
-		err := client.SetImage(filename)
+		// Set the image file for OCR
+		err := client.SetImage("uploads/" + filename)
 		if err != nil {
-			log.Fatalf("Failed to set image: %v", err)
+			return c.String(http.StatusInternalServerError, "Failed to set image")
 		}
 
+		// Perform OCR to extract text
 		text, err := client.Text()
 		if err != nil {
-			log.Fatalf("Failed to extract text: %v", err)
+			return c.String(http.StatusInternalServerError, "Failed to extract text")
 		}
 
-		fmt.Println("Extracted Text:")
-		fmt.Println(text)
-
-		// 	products, err := ExtractDataFromText(text)
-		// if err != nil {
-		// 	return c.String(http.StatusInternalServerError, fmt.Sprintf("Error: %v", err))
-		// }
-		//
-		// Print the extracted products (you can print to console or log)
-		// fmt.Println("Extracted Products:")
-		// for i, product := range products {
-		// 	fmt.Printf("Product %d:\n", i+1)
-		// 	for key, value := range product {
-		// 		fmt.Printf("  %s: %s\n", key, value)
-		// 	}
-		// 	fmt.Println()
-		// }
+		// Extract product data from text and calculate total
 		extractedData, err := extractProductDataFromText(text)
 		if err != nil {
-			fmt.Println("Error occured")
+			return c.String(http.StatusInternalServerError, "Failed to extract product data")
 		}
-		var data []map[string]string
 
+		var data []map[string]string
 		var id = 0
 		var total = 0.0
+
+		// Process extracted data
 		for i := range extractedData {
 			id++
 			extractedData[i].ID = strconv.Itoa(id)
@@ -368,7 +347,11 @@ func main() {
 			amount, _ := strconv.ParseFloat(extractedData[i].Amount, 64)
 			total += quantity * amount
 		}
+
+		// Store the extracted product data and total
 		filesProduct[filename] = AllData{Products: extractedData, Total: total}
+
+		// Convert extracted data for rendering
 		for _, product := range extractedData {
 			temp := map[string]string{
 				"ProductName": product.ProductName,
@@ -377,22 +360,22 @@ func main() {
 				"ID":          product.ID,
 				"Filename":    product.Name,
 			}
-			fmt.Println(product.ProductName, product.Quantity, product.Amount, product.ID, product.Name)
 			data = append(data, temp)
 		}
 
-		for _, product := range data {
-			fmt.Println(product["ProductName"], product["Quantity"], product["Amount"])
-		}
-		return c.Render(200, "text", map[string]interface{}{"product": extractedData, "total": total})
+		// Return the extracted data and total
+		return c.JSON(http.StatusOK, map[string]interface{}{"product": extractedData, "total": total})
 	})
 
+	// Route to edit a product
 	e.POST("/edit/:file/:id", func(c echo.Context) error {
 		filename := c.Param("file")
 		id := c.Param("id")
 		editingData := filesProduct[filename]
 		total := filesProduct[filename].Total
 		var editProduct Product
+
+		// Find the product to edit
 		for _, data := range editingData.Products {
 			if data.ID == id {
 				editProduct = data
@@ -403,8 +386,12 @@ func main() {
 				break
 			}
 		}
-		return c.Render(200, "edit", map[string]Product{"product": editProduct})
+
+		// Return the product to edit
+		return c.JSON(http.StatusOK, map[string]Product{"product": editProduct})
 	})
+
+	// Route to update a product
 	e.POST("/update/:file/:id", func(c echo.Context) error {
 		filename := c.Param("file")
 		id := c.Param("id")
@@ -414,6 +401,8 @@ func main() {
 		editingData := filesProduct[filename]
 		total := filesProduct[filename].Total
 		var editedData Product
+
+		// Find and update the product
 		for _, data := range editingData.Products {
 			if data.ID == id {
 				data.ProductName = productname
@@ -427,17 +416,21 @@ func main() {
 				break
 			}
 		}
-		return c.Render(200, "product", editedData)
+
+		// Return the updated product
+		return c.JSON(http.StatusOK, editedData)
 	})
 
+	// Route to delete a product
 	e.DELETE("/:file/:id", func(c echo.Context) error {
 		filename := c.Param("file")
 		id := c.Param("id")
 		editingData := filesProduct[filename]
 		total := filesProduct[filename].Total
+
+		// Find and delete the product
 		for i, data := range editingData.Products {
 			if data.ID == id {
-
 				quantity, _ := strconv.ParseFloat(data.Quantity, 64)
 				amount, _ := strconv.ParseFloat(data.Amount, 64)
 				total -= quantity * amount
@@ -447,11 +440,10 @@ func main() {
 				break
 			}
 		}
-		return c.String(200, "")
+
+		return c.String(http.StatusOK, "Product deleted")
 	})
 
-	// e.POST("")//update total
-
+	// Start the server
 	e.Logger.Fatal(e.Start(":1323"))
-
 }
