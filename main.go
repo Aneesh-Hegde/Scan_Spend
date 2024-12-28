@@ -60,10 +60,6 @@ func upload(c echo.Context) error {
 
 	// Append the uploaded filename to the list
 	files.Filenames = append(files.Filenames, file.Filename)
-	err = os.Remove(file.Filename)
-	if err != nil {
-		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error deleting source file: %v", err)})
-	}
 	// Return a success JSON response with the filename
 	return c.JSON(200, map[string]string{"status": "success", "message": "Upload successful", "filename": file.Filename})
 }

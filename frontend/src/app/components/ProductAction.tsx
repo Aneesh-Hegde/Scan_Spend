@@ -18,7 +18,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ filename, productId, on
   // Fetch product for editing
   const fetchProductForEdit = async () => {
     try {
-      const response = await api.post(`/edit/${filename}/${productId}`);
+      const response = await api.post(`http://localhost:1323/edit/${filename}/${productId}`);
       const product = response.data.product;
       setProductName(product.productName);
       setQuantity(product.quantity);
