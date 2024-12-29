@@ -33,4 +33,8 @@ jobs:
       - name: Build the frontend
         run: |
           cd frontend
-          npm start
+          npm run build
+      - name: Run build frontend
+        run: |
+          cd frontend
+          npm run build
