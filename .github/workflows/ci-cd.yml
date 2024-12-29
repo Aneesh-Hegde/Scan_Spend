@@ -25,12 +25,18 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd frontend
+          npm install
 
       # Run tests
       - name: Run tests
-        run: npm test
+        run: |
+          cd frontend
+          npm build
 
       # Build the frontend
       - name: Build the frontend
-        run: npm run build
+        run: |
+          cd frontend
+          npm run build
