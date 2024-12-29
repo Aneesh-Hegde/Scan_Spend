@@ -39,4 +39,4 @@ jobs:
       - name: Build the frontend
         run: |
           cd frontend
-          npm run build
+          npm start
