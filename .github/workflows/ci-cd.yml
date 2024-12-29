@@ -33,7 +33,7 @@ jobs:
       - name: Run tests
         run: |
           cd frontend
-          npm build
+          npm test
 
       # Build the frontend
       - name: Build the frontend
