@@ -1,15 +1,15 @@
-export interface Product{
-  id:string;
-  productName: string;
+export interface Product {
+  ID: string;
+  product_name: string;
   quantity: string;
   amount: string;
-  filename: string
+  Name: string
 
 }
-export interface UploadResponse{
+export interface UploadResponse {
   filenames: []
 }
-export interface ProductResponse{
-  product:Product[]
+export interface ProductResponse {
+  product: Product[]
   total: number
 }

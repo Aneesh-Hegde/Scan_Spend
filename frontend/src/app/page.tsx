@@ -5,24 +5,20 @@ import ProductList from './components/ProductList';
 import { toast, ToastContainer } from 'react-toastify';  // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css';  // Import Toastify CSS
 import api from './utils/api'
-
-interface Product {
-  product_name: string;
-  quantity: string;
-  amount: string;
-  category: string;
-}
+import EditProductForm from './components/EditProductForm';
+import { Product } from './types/types'
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
   const [products, setProducts] = useState<Product[]>([]); // To store the products data
   const [filename, setFilename] = useState<string>(''); // To store the selected filename
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
   // Fetch list of all filenames from the backend when component mounts
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await api.get('http://localhost:1323/');
+        const response = await api.get('/');
         const data = response.data;
         setFiles(data.files); // Assuming the response has a "files" array
       } catch (error) {
@@ -51,7 +47,6 @@ const Page: React.FC = () => {
     setFilename(filename);
     try {
       const response = await api.post(`/get-text/${filename}`, {
-        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -69,6 +64,17 @@ const Page: React.FC = () => {
       toast.error('Error fetching product data');
     }
   };
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product)
+  }
+  const handleUpdate = (updatedProduct: Product) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.ID === updatedProduct.ID ? updatedProduct : product)
+    )
+    api.post(`edit/${updatedProduct.Name}/${updatedProduct.ID}`)
+    setEditingProduct(null)
+  }
 
   return (
     <div>
@@ -96,9 +102,13 @@ const Page: React.FC = () => {
         {products.length === 0 ? (
           <p>No products to display</p>
         ) : (
-          <ProductList products={products} onEdit={(product) => console.log('Edit', product)} />
+          <ProductList products={products} onEdit={handleEdit} />
+
         )}
       </div>
+      {editingProduct &&
+        (<EditProductForm product={editingProduct} onUpdate={handleUpdate} />)
+      }
 
       {/* ToastContainer is added here */}
       <ToastContainer />

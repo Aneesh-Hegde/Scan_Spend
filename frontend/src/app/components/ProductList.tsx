@@ -1,13 +1,6 @@
 "use client"
 import React from "react";
-
-type Product = {
-  product_name: string;
-  quantity: string;
-  amount: string;
-  category: string;
-};
-
+import { Product } from "../types/types";
 type ProductListProps = {
   products: Product[];
   onEdit: (product: Product) => void;  // Update the type to receive the whole product for editing
@@ -33,7 +26,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onEdit }) => {
               <td>{product.product_name}</td>
               <td>{product.quantity}</td>
               <td>{product.amount}</td>
-              <td>{product.category}</td>
+              {/* <td>{product.category}</td> */}
               <td>
                 <button onClick={() => onEdit(product)}>Edit</button>
               </td>
