@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react';
-
+import api from '../utils/api'
 interface UploadProps {
   onFileUpload: (filename: string) => void;
 }
@@ -16,12 +16,11 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:1323/upload', {
-        method: 'POST',
+      const response = await api.post('/upload', {
         body: formData,
       });
 
-      const data = await response.json();
+      const data = response.data;
       setUploadMessage(data.message);
       if (data.status === 'success') {
         onFileUpload(data.filename);

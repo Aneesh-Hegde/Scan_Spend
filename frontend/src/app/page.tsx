@@ -4,6 +4,7 @@ import Upload from './components/Upload';
 import ProductList from './components/ProductList';
 import { toast, ToastContainer } from 'react-toastify';  // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css';  // Import Toastify CSS
+import api from './utils/api'
 
 interface Product {
   product_name: string;
@@ -21,8 +22,8 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await fetch('http://localhost:1323/');
-        const data = await response.json();
+        const response = await api.get('http://localhost:1323/');
+        const data = response.data;
         setFiles(data.files); // Assuming the response has a "files" array
       } catch (error) {
         toast.error('Error fetching filenames');
@@ -36,8 +37,8 @@ const Page: React.FC = () => {
   const handleFileUpload = async () => {
     try {
       // Triggering the file list refresh after upload
-      const response = await fetch('http://localhost:1323/');
-      const data = await response.json();
+      const response = await api.get('http://localhost:1323/');
+      const data = response.data;
       setFiles(data.files); // Updating the files list with the latest data from the backend
       toast.success('File uploaded successfully');
     } catch (error) {
@@ -49,14 +50,14 @@ const Page: React.FC = () => {
   const handleFileClick = async (filename: string) => {
     setFilename(filename);
     try {
-      const response = await fetch(`http://localhost:1323/get-text/${filename}`, {
+      const response = await api.post(`/get-text/${filename}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      const data = await response.json();
+      const data = response.data
 
       if (data && data.product) {
         setProducts(data.product); // Assuming the response has a "product" field

@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-
+import api from '../utils/api'
 interface UploadProps {
   onFileUpload: (filename: string) => void;
 }
@@ -27,12 +27,13 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:1323/upload', {
-        method: 'POST',
-        body: formData,
+      const response = await api.post('/upload', formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.status === 'success') {
         onFileUpload(data.filename);
