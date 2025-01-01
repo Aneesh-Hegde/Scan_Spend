@@ -33,7 +33,7 @@ const Page: React.FC = () => {
   }, []); // This effect runs once when the component mounts
 
   const handleUpdate = (updatedProduct: Product) => {
-    HandleUpdate({ products, updatedProduct, setProducts, setEditingProduct })
+    HandleUpdate({ updatedProduct, setProducts, setEditingProduct })
   }
 
   return (
