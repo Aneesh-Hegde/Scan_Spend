@@ -34,7 +34,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onUpdate }) => {
             <th>Product Name</th>
             <th>Quantity</th>
             <th>Amount</th>
-            {/* <th>Category</th> */}
+            <th>Category</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -67,14 +67,14 @@ const ProductList: React.FC<ProductListProps> = ({ products, onUpdate }) => {
                       onChange={handleChange}
                     />
                   </td>
-                  {/* <td> */}
-                  {/*   <input */}
-                  {/*     type="text" */}
-                  {/*     name="category" */}
-                  {/*     value={formData?.category || ""} */}
-                  {/*     onChange={handleChange} */}
-                  {/*   /> */}
-                  {/* </td> */}
+                  <td>
+                    <input
+                      type="text"
+                      name="category"
+                      value={formData?.category || ""}
+                      onChange={handleChange}
+                    />
+                  </td>
                   <td>
                     <button onClick={handleSave}>Save</button>
                     <button onClick={() => setEditingId(null)}>Cancel</button>
@@ -85,7 +85,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onUpdate }) => {
                   <td>{product.product_name}</td>
                   <td>{product.quantity}</td>
                   <td>{product.amount}</td>
-                  {/* <td>{product.category}</td> */}
+                  <td>{product.category}</td>
                   <td>
                     <button onClick={() => handleEdit(product)}>Edit</button>
                   </td>
