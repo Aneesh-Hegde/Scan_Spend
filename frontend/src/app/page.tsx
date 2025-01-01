@@ -102,7 +102,7 @@ const Page: React.FC = () => {
         {products.length === 0 ? (
           <p>No products to display</p>
         ) : (
-          <ProductList products={products} onEdit={handleEdit} />
+          <ProductList products={products} onUpdate={handleUpdate} />
 
         )}
       </div>
