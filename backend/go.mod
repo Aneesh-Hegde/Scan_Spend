@@ -1,4 +1,4 @@
-module expenseManager
+module github.com/Aneesh-Hegde/expenseManager
 
 go 1.23.2
 
