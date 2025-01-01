@@ -64,9 +64,6 @@ const Page: React.FC = () => {
       toast.error('Error fetching product data');
     }
   };
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product)
-  }
   const handleUpdate = (updatedProduct: Product) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
