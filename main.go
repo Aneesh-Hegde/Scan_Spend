@@ -147,6 +147,7 @@ type Product struct {
 	Amount      string `json:"amount"`
 	ID          string
 	Name        string
+	Category    string `json:"category"`
 }
 
 func extractProductDataFromText(text string) ([]Product, error) {
@@ -161,7 +162,7 @@ func extractProductDataFromText(text string) ([]Product, error) {
 				Parts: []ContentPart{
 					{
 						Text: fmt.Sprintf(
-							"Please extract the product name, quantity and amount from this text and format it as a json array of objects where each object has the fields 'product_name', 'quantity', and 'amount'.Also add category field for each product.Provide the output in JSON format without any markdown or backticks and each value should be in string. Here's the text:\n%s",
+							"Please extract the product name, quantity and amount from this text and format it as a json array of objects where each object has the fields 'product_name', 'quantity', and 'amount'.Also add category field for each product in easy words,.You can check for product name online to have close precision for category.Add category based on an expense tracker.Provide the output in JSON format without any markdown or backticks and each value should be in string. Here's the text:\n%s",
 							text,
 						),
 					},
@@ -352,6 +353,7 @@ func main() {
 				"Amount":      product.Amount,
 				"ID":          product.ID,
 				"Filename":    product.Name,
+				"Category":    product.Category,
 			}
 			data = append(data, temp)
 		}
@@ -391,6 +393,7 @@ func main() {
 		productname := c.FormValue("product")
 		quantity := c.FormValue("quantity")
 		amount := c.FormValue("amount")
+		category := c.FormValue("category")
 		editingData := filesProduct[filename]
 		total := filesProduct[filename].Total
 		var editedData Product
@@ -399,6 +402,7 @@ func main() {
 		for _, data := range editingData.Products {
 			if data.ID == id {
 				data.ProductName = productname
+				data.Category = category
 				data.Quantity = quantity
 				data.Amount = amount
 				quantity, _ := strconv.ParseFloat(data.Quantity, 64)
