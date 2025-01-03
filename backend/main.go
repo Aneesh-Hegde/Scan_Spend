@@ -54,6 +54,16 @@ func main() {
 	// Route to delete a product
 	e.DELETE("/:file/:id", utils.DeleteProduct)
 
+	e.POST("/login", utils.Login) // Login route that generates the JWT
+
+	// Protected Routes
+	e.GET("/profile", func(c echo.Context) error {
+		// Get the user ID from the context if needed
+		userID := c.Get("user_id").(string)
+		// Fetch user profile from database using userID
+		return c.JSON(http.StatusOK, map[string]string{"user_id": userID, "profile": "user profile data"})
+	}, utils.JWTMiddleware)
+
 	// Start the server
 	e.Logger.Fatal(e.Start(":1323"))
 }
