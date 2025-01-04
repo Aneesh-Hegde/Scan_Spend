@@ -1,16 +1,23 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
+	"github.com/Aneesh-Hegde/expenseManager/db"
+	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/Aneesh-Hegde/expenseManager/states"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"log"
-	"net/http"
 )
 
 func main() {
+	db.InitDB()
+	redis.InitRedis()
+	defer db.CloseDB()
+	defer redis.CloseRedis()
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")

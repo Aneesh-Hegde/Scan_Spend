@@ -23,10 +23,10 @@ func UpdateProduct(c echo.Context) error {
 		if data.ID == id {
 			data.ProductName = productname
 			data.Category = category
-			data.Quantity = quantity
-			data.Amount = amount
-			quantity, _ := strconv.ParseFloat(data.Quantity, 64)
-			amount, _ := strconv.ParseFloat(data.Amount, 64)
+			data.Quantity, _ = strconv.ParseFloat(quantity, 64)
+			data.Amount, _ = strconv.ParseFloat(amount, 64)
+			quantity := data.Quantity
+			amount := data.Amount
 			total += quantity * amount
 			editingData.Total = total
 			editedData = data

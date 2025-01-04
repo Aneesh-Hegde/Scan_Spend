@@ -36,10 +36,10 @@ type GeminiResponse struct {
 	Error string `json:"error"`
 }
 type Product struct {
-	ProductName string `json:"product_name"`
-	Quantity    string `json:"quantity"`
-	Amount      string `json:"amount"`
-	ID          string
-	Name        string
-	Category    string `json:"category"`
+	ProductName string  `json:"product_name"`
+	Quantity    float64 `json:"quantity"`
+	Amount      float64 `json:"amount"`
+	ID          string  `json:"id"`
+	FileName    string  `json:"filename"`
+	Category    string  `json:"category"`
 }

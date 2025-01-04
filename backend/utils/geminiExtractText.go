@@ -9,8 +9,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
+
+type RawProduct struct {
+	ProductName string `json:"product_name"`
+	Quantity    string `json:"quantity"`
+	Amount      string `json:"amount"`
+	Category    string `json:"category"`
+}
 
 func ExtractProductDataFromText(text string) ([]states.Product, error) {
 	// Your Gemini API key (replace with actual key)
@@ -89,14 +97,36 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 	} else {
 		fmt.Println("No generated content in the response.")
 	}
-	var products []states.Product
 	jsonDataWithBackticks := geminiResponse.Candidates[0].Content.Parts[0].Text
 	cleanedJSON := strings.TrimPrefix(jsonDataWithBackticks, "```json\n")
 	cleanedJSON = strings.TrimSuffix(cleanedJSON, "```")
 	fmt.Println(cleanedJSON)
-	err = json.Unmarshal([]byte(cleanedJSON), &products)
+	var rawProducts []RawProduct
+	err = json.Unmarshal([]byte(cleanedJSON), &rawProducts)
 	if err != nil {
 		log.Fatalf("Error unmarshalling JSON: %v", err)
+	}
+	// Convert rawProducts to final products with numeric fields
+	var products []states.Product
+	for _, raw := range rawProducts {
+		quantity, err := strconv.ParseFloat(raw.Quantity, 64)
+		if err != nil {
+			log.Printf("Error converting quantity to float: %v", err)
+			continue // Skip invalid entries
+		}
+
+		amount, err := strconv.ParseFloat(raw.Amount, 64)
+		if err != nil {
+			log.Printf("Error converting amount to float: %v", err)
+			continue // Skip invalid entries
+		}
+
+		products = append(products, states.Product{
+			ProductName: raw.ProductName,
+			Quantity:    quantity,
+			Amount:      amount,
+			Category:    raw.Category,
+		})
 	}
 
 	return products, nil

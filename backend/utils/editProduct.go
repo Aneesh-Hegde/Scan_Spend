@@ -4,7 +4,6 @@ import (
 	"github.com/Aneesh-Hegde/expenseManager/states"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
 func EditProduct(c echo.Context) error {
@@ -18,8 +17,8 @@ func EditProduct(c echo.Context) error {
 	for _, data := range editingData.Products {
 		if data.ID == id {
 			editProduct = data
-			quantity, _ := strconv.ParseFloat(data.Quantity, 64)
-			amount, _ := strconv.ParseFloat(data.Amount, 64)
+			quantity := data.Quantity
+			amount := data.Amount
 			total -= quantity * amount
 			editingData.Total = total
 			break

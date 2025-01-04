@@ -4,7 +4,6 @@ import (
 	"github.com/Aneesh-Hegde/expenseManager/states"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
 )
 
 func DeleteProduct(c echo.Context) error {
@@ -16,8 +15,8 @@ func DeleteProduct(c echo.Context) error {
 	// Find and delete the product
 	for i, data := range editingData.Products {
 		if data.ID == id {
-			quantity, _ := strconv.ParseFloat(data.Quantity, 64)
-			amount, _ := strconv.ParseFloat(data.Amount, 64)
+			quantity := data.Quantity
+			amount := data.Amount
 			total -= quantity * amount
 			editingData.Products = append(editingData.Products[:i], editingData.Products[i+1:]...)
 			editingData.Total = total
