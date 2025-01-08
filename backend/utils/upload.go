@@ -2,47 +2,65 @@ package utils
 
 import (
 	"fmt"
-	"github.com/Aneesh-Hegde/expenseManager/states"
-	"github.com/labstack/echo/v4"
 	"io"
 	"os"
+	"path/filepath"
+
+	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
+	"github.com/Aneesh-Hegde/expenseManager/states"
 )
 
-func Upload(c echo.Context) error {
-	// Read file from form data
-	file, err := c.FormFile("file") // Make sure this key matches the frontend
-	if err != nil {
-		return c.JSON(400, map[string]string{"status": "error", "message": fmt.Sprintf("Error retrieving file: %v", err)})
-	}
+type FileUploadServer struct {
+	pb.UnimplementedFileProcessingServiceServer
+}
 
-	// Open the uploaded file
-	src, err := file.Open()
-	if err != nil {
-		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error opening file: %v", err)})
-	}
-	defer src.Close()
-
+func (s *FileUploadServer) Upload(stream pb.FileProcessingService_UploadServer) error {
 	// Ensure the uploads directory exists
 	uploadDir := "uploads"
-	err = os.MkdirAll(uploadDir, os.ModePerm)
+	err := os.MkdirAll(uploadDir, os.ModePerm)
 	if err != nil {
-		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error creating directory: %v", err)})
+		return fmt.Errorf("Error creating upload directory: %v", err)
 	}
 
-	// Create the destination file path
-	dst, err := os.Create(fmt.Sprintf("%s/%s", uploadDir, file.Filename))
+	// Receive the first part of the stream to get the filename
+	req, err := stream.Recv()
 	if err != nil {
-		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error creating file: %v", err)})
+		return fmt.Errorf("Error receiving filename: %v", err)
 	}
-	defer dst.Close()
 
-	// Copy the content of the uploaded file to the destination file
-	if _, err := io.Copy(dst, src); err != nil {
-		return c.JSON(500, map[string]string{"status": "error", "message": fmt.Sprintf("Error copying file: %v", err)})
+	// Save the file path to the upload directory
+	filePath := filepath.Join(uploadDir, req.GetFilename())
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("Error creating file: %v", err)
+	}
+	defer file.Close()
+
+	// Start receiving file chunks and writing them to the file
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			// End of stream
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("Error receiving file content: %v", err)
+		}
+
+		// Write the content to the file
+		_, err = file.Write(req.GetContent())
+		if err != nil {
+			return fmt.Errorf("Error writing file content: %v", err)
+		}
 	}
 
 	// Append the uploaded filename to the list
-	states.Files.Filenames = append(states.Files.Filenames, file.Filename)
+	states.Files.Filenames = append(states.Files.Filenames, req.GetFilename())
+
 	// Return a success JSON response with the filename
-	return c.JSON(200, map[string]string{"status": "success", "message": "Upload successful", "filename": file.Filename})
+	return stream.SendAndClose(&pb.UploadResponse{
+		Status:   "success",
+		Message:  "File uploaded successfully",
+		Filename: req.GetFilename(),
+	})
 }

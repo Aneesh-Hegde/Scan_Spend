@@ -38,7 +38,7 @@ const Page: React.FC = () => {
 
   return (
     <div>
-      <Upload onFileUpload={() => HandleFileUpload(setFiles)} /> {/* Passing file upload handler to Upload component */}
+      <Upload onFileUpload={(filename) => HandleFileUpload(filename, setFiles)} /> {/* Passing file upload handler to Upload component */}
 
       <div>
         <h3>Available Files</h3>

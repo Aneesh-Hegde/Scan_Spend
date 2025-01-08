@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package fileprocessing;
+
+option go_package = "grpc/";
+
+service FileProcessingService {
+  rpc Upload(stream UploadRequest) returns (UploadResponse);
+}
+
+message UploadRequest {
+  string filename = 1;
+  bytes content = 2;
+}
+
+message UploadResponse {
+  string status = 1;
+  string message = 2;
+  string filename = 3;
+}
+
