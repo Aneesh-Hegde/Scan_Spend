@@ -2,53 +2,83 @@ import * as jspb from 'google-protobuf'
 
 
 
-export class UploadRequest extends jspb.Message {
+export class GetTextRequest extends jspb.Message {
   getFilename(): string;
-  setFilename(value: string): UploadRequest;
-
-  getContent(): Uint8Array | string;
-  getContent_asU8(): Uint8Array;
-  getContent_asB64(): string;
-  setContent(value: Uint8Array | string): UploadRequest;
+  setFilename(value: string): GetTextRequest;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): UploadRequest.AsObject;
-  static toObject(includeInstance: boolean, msg: UploadRequest): UploadRequest.AsObject;
-  static serializeBinaryToWriter(message: UploadRequest, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): UploadRequest;
-  static deserializeBinaryFromReader(message: UploadRequest, reader: jspb.BinaryReader): UploadRequest;
+  toObject(includeInstance?: boolean): GetTextRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetTextRequest): GetTextRequest.AsObject;
+  static serializeBinaryToWriter(message: GetTextRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetTextRequest;
+  static deserializeBinaryFromReader(message: GetTextRequest, reader: jspb.BinaryReader): GetTextRequest;
 }
 
-export namespace UploadRequest {
+export namespace GetTextRequest {
   export type AsObject = {
     filename: string,
-    content: Uint8Array | string,
   }
 }
 
-export class UploadResponse extends jspb.Message {
-  getStatus(): string;
-  setStatus(value: string): UploadResponse;
+export class GetTextResponse extends jspb.Message {
+  getProductsList(): Array<Product>;
+  setProductsList(value: Array<Product>): GetTextResponse;
+  clearProductsList(): GetTextResponse;
+  addProducts(value?: Product, index?: number): Product;
 
-  getMessage(): string;
-  setMessage(value: string): UploadResponse;
-
-  getFilename(): string;
-  setFilename(value: string): UploadResponse;
+  getTotal(): string;
+  setTotal(value: string): GetTextResponse;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): UploadResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: UploadResponse): UploadResponse.AsObject;
-  static serializeBinaryToWriter(message: UploadResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): UploadResponse;
-  static deserializeBinaryFromReader(message: UploadResponse, reader: jspb.BinaryReader): UploadResponse;
+  toObject(includeInstance?: boolean): GetTextResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetTextResponse): GetTextResponse.AsObject;
+  static serializeBinaryToWriter(message: GetTextResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetTextResponse;
+  static deserializeBinaryFromReader(message: GetTextResponse, reader: jspb.BinaryReader): GetTextResponse;
 }
 
-export namespace UploadResponse {
+export namespace GetTextResponse {
   export type AsObject = {
-    status: string,
-    message: string,
-    filename: string,
+    productsList: Array<Product.AsObject>,
+    total: string,
+  }
+}
+
+export class Product extends jspb.Message {
+  getId(): string;
+  setId(value: string): Product;
+
+  getProductName(): string;
+  setProductName(value: string): Product;
+
+  getQuantity(): number;
+  setQuantity(value: number): Product;
+
+  getAmount(): number;
+  setAmount(value: number): Product;
+
+  getName(): string;
+  setName(value: string): Product;
+
+  getCategory(): string;
+  setCategory(value: string): Product;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Product.AsObject;
+  static toObject(includeInstance: boolean, msg: Product): Product.AsObject;
+  static serializeBinaryToWriter(message: Product, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Product;
+  static deserializeBinaryFromReader(message: Product, reader: jspb.BinaryReader): Product;
+}
+
+export namespace Product {
+  export type AsObject = {
+    id: string,
+    productName: string,
+    quantity: number,
+    amount: number,
+    name: string,
+    category: string,
   }
 }
 

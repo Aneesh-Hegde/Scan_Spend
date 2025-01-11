@@ -1,75 +1,106 @@
 package utils
 
 import (
-	"net/http"
+	"context"
+	"fmt"
+	"path/filepath"
 	"strconv"
 
 	"github.com/Aneesh-Hegde/expenseManager/db"
+	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/Aneesh-Hegde/expenseManager/states"
-	"github.com/labstack/echo/v4"
 	"github.com/otiai10/gosseract/v2"
 )
 
-func GetText(c echo.Context) error {
-	filename := c.Param("file")
+func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, error) {
+	filename := req.GetFilename()
+
+	// Check if product data is already cached in Redis
+	cachedProducts, err := redis.GetCachedProductData(filename)
+	if err == nil && cachedProducts != nil {
+		var grpcProducts []*pb.Product
+		for _, product := range cachedProducts {
+			grpcProducts = append(grpcProducts, &pb.Product{
+				Id:          product.ID,
+				ProductName: product.ProductName,
+				Quantity:    float32(product.Quantity),
+				Amount:      float32(product.Amount),
+				Category:    product.Category,
+			})
+		}
+		total := calculateTotal(cachedProducts)
+		return &pb.GetTextResponse{
+			Products: grpcProducts,
+			Total:    strconv.FormatFloat(total, 'f', 2, 64),
+		}, nil
+	}
+
+	// OCR to extract text from the image
 	client := gosseract.NewClient()
 	defer client.Close()
 
-	// Set the image file for OCR
-	err := client.SetImage("uploads/" + filename)
+	err = client.SetImage(filepath.Join("uploads", filename))
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to set image")
+		return nil, fmt.Errorf("failed to set image: %w", err)
 	}
 
-	// Check if product data is cached in Redis
-	cachedProducts, err := redis.GetCachedProductData(filename)
-	if err == nil && cachedProducts != nil {
-		// If products are cached, return them from Redis
-		return c.JSON(http.StatusOK, map[string]interface{}{"product": cachedProducts})
-	}
-
-	// Perform OCR to extract text from the image
 	text, err := client.Text()
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to extract text")
+		return nil, fmt.Errorf("failed to extract text: %w", err)
 	}
 
 	// Extract product data from text
 	extractedData, err := ExtractProductDataFromText(text)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to extract product data")
+		return nil, fmt.Errorf("failed to extract product data: %w", err)
 	}
-
-	// Initialize variables for storing processed data and total
-	var id = 0
-	var total = 0.0
-	var data []states.Product
 
 	// Process extracted data
-	for i := range extractedData {
-		id++
-		extractedData[i].ID = strconv.Itoa(id)
-		extractedData[i].FileName = filename
-		total += extractedData[i].Quantity * extractedData[i].Amount
-		data = append(data, extractedData[i])
+	var products []states.Product
+	total := 0.0
+	for i, product := range extractedData {
+		product.ID = strconv.Itoa(i + 1)
+		product.FileName = filename
+		total += product.Quantity * product.Amount
+		products = append(products, product)
 	}
 
-	// Store the extracted product data in the global state (optional)
-	states.FilesProduct[filename] = states.AllData{Products: extractedData, Total: total}
-
-	// Cache the product data in Redis for future requests
-	err = redis.CacheProductData(filename, data)
+	// Cache the product data
+	err = redis.CacheProductData(filename, products)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to cache products in Redis")
+		return nil, fmt.Errorf("failed to cache product data: %w", err)
 	}
 
-	// Store the extracted product data in the database (optional)
-	err = db.StoreProductData(1, filename, data)
+	// Store the extracted product data in the database
+	err = db.StoreProductData(1, filename, products)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to insert products into database")
+		return nil, fmt.Errorf("failed to insert products into database: %w", err)
 	}
 
-	// Return the extracted products and total
-	return c.JSON(http.StatusOK, map[string]interface{}{"product": data, "total": total})
+	// Prepare gRPC response
+	var grpcProducts []*pb.Product
+	for _, product := range products {
+		grpcProducts = append(grpcProducts, &pb.Product{
+			Id:          product.ID,
+			ProductName: product.ProductName,
+			Quantity:    float32(product.Quantity),
+			Amount:      float32(product.Amount),
+			Name:        filename,
+			Category:    product.Category,
+		})
+	}
+
+	return &pb.GetTextResponse{
+		Products: grpcProducts,
+		Total:    strconv.FormatFloat(total, 'f', 2, 64),
+	}, nil
+}
+
+func calculateTotal(products []states.Product) float64 {
+	total := 0.0
+	for _, product := range products {
+		total += product.Quantity * product.Amount
+	}
+	return total
 }

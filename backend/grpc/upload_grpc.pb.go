@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.1
-// source: grpc_schema/upload.proto
+// source: upload.proto
 
 package grpc
 
@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FileProcessingService_Upload_FullMethodName = "/fileprocessing.FileProcessingService/Upload"
+	FileProcessingService_GetText_FullMethodName = "/fileprocessing.FileProcessingService/GetText"
 )
 
 // FileProcessingServiceClient is the client API for FileProcessingService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileProcessingServiceClient interface {
-	Upload(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadRequest, UploadResponse], error)
+	GetText(ctx context.Context, in *GetTextRequest, opts ...grpc.CallOption) (*GetTextResponse, error)
 }
 
 type fileProcessingServiceClient struct {
@@ -37,24 +37,21 @@ func NewFileProcessingServiceClient(cc grpc.ClientConnInterface) FileProcessingS
 	return &fileProcessingServiceClient{cc}
 }
 
-func (c *fileProcessingServiceClient) Upload(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadRequest, UploadResponse], error) {
+func (c *fileProcessingServiceClient) GetText(ctx context.Context, in *GetTextRequest, opts ...grpc.CallOption) (*GetTextResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &FileProcessingService_ServiceDesc.Streams[0], FileProcessingService_Upload_FullMethodName, cOpts...)
+	out := new(GetTextResponse)
+	err := c.cc.Invoke(ctx, FileProcessingService_GetText_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[UploadRequest, UploadResponse]{ClientStream: stream}
-	return x, nil
+	return out, nil
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type FileProcessingService_UploadClient = grpc.ClientStreamingClient[UploadRequest, UploadResponse]
 
 // FileProcessingServiceServer is the server API for FileProcessingService service.
 // All implementations must embed UnimplementedFileProcessingServiceServer
 // for forward compatibility.
 type FileProcessingServiceServer interface {
-	Upload(grpc.ClientStreamingServer[UploadRequest, UploadResponse]) error
+	GetText(context.Context, *GetTextRequest) (*GetTextResponse, error)
 	mustEmbedUnimplementedFileProcessingServiceServer()
 }
 
@@ -65,8 +62,8 @@ type FileProcessingServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedFileProcessingServiceServer struct{}
 
-func (UnimplementedFileProcessingServiceServer) Upload(grpc.ClientStreamingServer[UploadRequest, UploadResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method Upload not implemented")
+func (UnimplementedFileProcessingServiceServer) GetText(context.Context, *GetTextRequest) (*GetTextResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetText not implemented")
 }
 func (UnimplementedFileProcessingServiceServer) mustEmbedUnimplementedFileProcessingServiceServer() {}
 func (UnimplementedFileProcessingServiceServer) testEmbeddedByValue()                               {}
@@ -89,12 +86,23 @@ func RegisterFileProcessingServiceServer(s grpc.ServiceRegistrar, srv FileProces
 	s.RegisterService(&FileProcessingService_ServiceDesc, srv)
 }
 
-func _FileProcessingService_Upload_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(FileProcessingServiceServer).Upload(&grpc.GenericServerStream[UploadRequest, UploadResponse]{ServerStream: stream})
+func _FileProcessingService_GetText_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTextRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileProcessingServiceServer).GetText(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileProcessingService_GetText_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileProcessingServiceServer).GetText(ctx, req.(*GetTextRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type FileProcessingService_UploadServer = grpc.ClientStreamingServer[UploadRequest, UploadResponse]
 
 // FileProcessingService_ServiceDesc is the grpc.ServiceDesc for FileProcessingService service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -102,13 +110,12 @@ type FileProcessingService_UploadServer = grpc.ClientStreamingServer[UploadReque
 var FileProcessingService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "fileprocessing.FileProcessingService",
 	HandlerType: (*FileProcessingServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
+	Methods: []grpc.MethodDesc{
 		{
-			StreamName:    "Upload",
-			Handler:       _FileProcessingService_Upload_Handler,
-			ClientStreams: true,
+			MethodName: "GetText",
+			Handler:    _FileProcessingService_GetText_Handler,
 		},
 	},
-	Metadata: "grpc_schema/upload.proto",
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "upload.proto",
 }

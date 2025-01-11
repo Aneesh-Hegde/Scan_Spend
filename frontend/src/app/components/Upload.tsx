@@ -1,9 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { FileProcessingServiceClient } from "../grpc_schema/UploadServiceClientPb"; // Generated client
-import { UploadRequest, UploadResponse } from "../grpc_schema/upload_pb"; // Generated message classes
-import { RpcError } from "grpc-web";
+import axios from "axios";
 
 interface UploadProps {
   onFileUpload: (filename: string) => void;
@@ -12,7 +10,6 @@ interface UploadProps {
 const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,58 +27,47 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
 
     try {
       setLoading(true);
-      setUploadProgress(0);
 
       const chunkSize = 1024 * 1024; // 1MB chunks
-      const client = new FileProcessingServiceClient("http://localhost:8080"); // Envoy proxy URL
-      const filereader = new FileReader();
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      const uploadUrl = "http://localhost:8080/upload"; // Server URL
+
       let offset = 0;
 
-      // Function to handle sending chunks and updating progress
-      const uploadNextChunk = () => {
+      // Function to upload the next chunk
+      const uploadNextChunk = async () => {
         if (offset >= file.size) {
           setLoading(false); // Done with upload
           toast.success("Upload complete");
+          onFileUpload(file.name); // Notify parent component that upload is complete
           return;
         }
 
+        // Get the next chunk of the file
         const chunk = file.slice(offset, offset + chunkSize);
-        filereader.readAsArrayBuffer(chunk);
 
-        filereader.onload = () => {
-          const fileContent = new Uint8Array(filereader.result as ArrayBuffer);
-          const request = new UploadRequest();
-          request.setFilename(file.name);
-          request.setContent(fileContent);
+        const formData = new FormData();
+        formData.append("file", chunk, file.name); // Append the chunk as a Blob
+        formData.append("chunk_number", (Math.floor(offset / chunkSize) + 1).toString()); // Chunk number (1-based)
+        formData.append("total_chunks", totalChunks.toString()); // Total number of chunks
+        formData.append("filename", file.name); // Send the original filename
 
-          // Send chunk to server using rpcCall
-          client.upload(request, {}, (error: RpcError | null, response: UploadResponse | undefined) => {
-            if (error) {
-              setLoading(false);
-              toast.error(`Error: ${error.message}`);
-              return;
-            }
-
-            // Handle successful upload response
-            setUploadProgress(Math.min((offset / file.size) * 100, 100));
-
-
-
-            // Move the offset and upload the next chunk
-            offset += chunkSize;
-            if (offset >= file.size) {
-              console.log(response ? response.getFilename() : "")
-              onFileUpload(response ? response.getFilename() : "");
-            }
-            uploadNextChunk();
+        try {
+          // Send the chunk to the server using Axios
+          const response = await axios.post(uploadUrl, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data", // This will ensure that the server understands the request is file data
+            },
           });
-        };
 
-        // Handle file reading errors
-        filereader.onerror = () => {
-          toast.error("Error reading file");
+          console.log(response)
+          // After a successful chunk upload, move to the next chunk
+          offset += chunkSize;
+          uploadNextChunk(); // Recursively upload the next chunk
+        } catch (error: any) {
+          toast.error(`Error uploading file: ${error.message}`);
           setLoading(false);
-        };
+        }
       };
 
       // Start uploading the first chunk
@@ -97,9 +83,8 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
     <div>
       <input type="file" onChange={handleFileChange} />
       <button onClick={handleFileUpload} disabled={loading}>
-        {loading ? `Uploading (${uploadProgress}%)` : "Upload"}
+        {loading ? "Uploading..." : "Upload"}
       </button>
-      {loading && <progress value={uploadProgress} max={100} />}
     </div>
   );
 };

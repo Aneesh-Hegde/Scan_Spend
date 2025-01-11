@@ -39,47 +39,47 @@ export class FileProcessingServiceClient {
     this.options_ = options;
   }
 
-  methodDescriptorUpload = new grpcWeb.MethodDescriptor(
-    '/fileprocessing.FileProcessingService/Upload',
+  methodDescriptorGetText = new grpcWeb.MethodDescriptor(
+    '/fileprocessing.FileProcessingService/GetText',
     grpcWeb.MethodType.UNARY,
-    upload_pb.UploadRequest,
-    upload_pb.UploadResponse,
-    (request: upload_pb.UploadRequest) => {
+    upload_pb.GetTextRequest,
+    upload_pb.GetTextResponse,
+    (request: upload_pb.GetTextRequest) => {
       return request.serializeBinary();
     },
-    upload_pb.UploadResponse.deserializeBinary
+    upload_pb.GetTextResponse.deserializeBinary
   );
 
-  upload(
-    request: upload_pb.UploadRequest,
-    metadata?: grpcWeb.Metadata | null): Promise<upload_pb.UploadResponse>;
+  getText(
+    request: upload_pb.GetTextRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<upload_pb.GetTextResponse>;
 
-  upload(
-    request: upload_pb.UploadRequest,
+  getText(
+    request: upload_pb.GetTextRequest,
     metadata: grpcWeb.Metadata | null,
     callback: (err: grpcWeb.RpcError,
-               response: upload_pb.UploadResponse) => void): grpcWeb.ClientReadableStream<upload_pb.UploadResponse>;
+               response: upload_pb.GetTextResponse) => void): grpcWeb.ClientReadableStream<upload_pb.GetTextResponse>;
 
-  upload(
-    request: upload_pb.UploadRequest,
+  getText(
+    request: upload_pb.GetTextRequest,
     metadata?: grpcWeb.Metadata | null,
     callback?: (err: grpcWeb.RpcError,
-               response: upload_pb.UploadResponse) => void) {
+               response: upload_pb.GetTextResponse) => void) {
     if (callback !== undefined) {
       return this.client_.rpcCall(
         this.hostname_ +
-          '/fileprocessing.FileProcessingService/Upload',
+          '/fileprocessing.FileProcessingService/GetText',
         request,
         metadata || {},
-        this.methodDescriptorUpload,
+        this.methodDescriptorGetText,
         callback);
     }
     return this.client_.unaryCall(
     this.hostname_ +
-      '/fileprocessing.FileProcessingService/Upload',
+      '/fileprocessing.FileProcessingService/GetText',
     request,
     metadata || {},
-    this.methodDescriptorUpload);
+    this.methodDescriptorGetText);
   }
 
 }

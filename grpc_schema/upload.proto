@@ -5,17 +5,23 @@ package fileprocessing;
 option go_package = "grpc/";
 
 service FileProcessingService {
-  rpc Upload(stream UploadRequest) returns (UploadResponse);
+  rpc GetText(GetTextRequest) returns (GetTextResponse);
 }
 
-message UploadRequest {
+message GetTextRequest {
   string filename = 1;
-  bytes content = 2;
 }
 
-message UploadResponse {
-  string status = 1;
-  string message = 2;
-  string filename = 3;
+message GetTextResponse {
+  repeated Product products = 1;
+  string total = 2;
 }
 
+message Product {
+  string id = 1;
+  string product_name = 2;
+  float quantity = 3;
+  float amount = 4;
+  string name = 5;
+  string category = 6;
+}

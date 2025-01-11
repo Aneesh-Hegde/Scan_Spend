@@ -2,65 +2,70 @@ package utils
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"io"
 	"os"
 	"path/filepath"
-
-	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
-	"github.com/Aneesh-Hegde/expenseManager/states"
 )
 
-type FileUploadServer struct {
-	pb.UnimplementedFileProcessingServiceServer
-}
-
-func (s *FileUploadServer) Upload(stream pb.FileProcessingService_UploadServer) error {
-	// Ensure the uploads directory exists
+func Upload(c echo.Context) error {
+	// Ensure the upload directory exists
 	uploadDir := "uploads"
 	err := os.MkdirAll(uploadDir, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("Error creating upload directory: %v", err)
+		fmt.Println("Error creating upload directory:", err) // Log error
+		return c.String(500, fmt.Sprintf("Error creating upload directory: %v", err))
 	}
 
-	// Receive the first part of the stream to get the filename
-	req, err := stream.Recv()
+	// Get the file from the request
+	file, err := c.FormFile("file") // "file" is the field name in FormData
 	if err != nil {
-		return fmt.Errorf("Error receiving filename: %v", err)
+		fmt.Println("Error getting file:", err) // Log error
+		return c.String(400, fmt.Sprintf("Error getting file: %v", err))
 	}
 
-	// Save the file path to the upload directory
-	filePath := filepath.Join(uploadDir, req.GetFilename())
-	file, err := os.Create(filePath)
+	// Log that the file is received
+	fmt.Println("File received:", file.Filename)
+
+	// Get other fields like chunk_number, total_chunks, filename
+	chunkNumber := c.FormValue("chunk_number")
+	totalChunks := c.FormValue("total_chunks")
+	filename := c.FormValue("filename")
+
+	// Log chunk data
+	fmt.Println("Chunk Number:", chunkNumber)
+	fmt.Println("Total Chunks:", totalChunks)
+	fmt.Println("Filename:", filename)
+
+	// Process the file chunk
+	filePath := filepath.Join(uploadDir, filename)
+
+	// Open the file in append mode to add chunks
+	outFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
-		return fmt.Errorf("Error creating file: %v", err)
+		fmt.Println("Error opening file:", err) // Log error
+		return c.String(500, fmt.Sprintf("Error opening file: %v", err))
 	}
-	defer file.Close()
+	defer outFile.Close()
 
-	// Start receiving file chunks and writing them to the file
-	for {
-		req, err := stream.Recv()
-		if err == io.EOF {
-			// End of stream
-			break
-		}
-		if err != nil {
-			return fmt.Errorf("Error receiving file content: %v", err)
-		}
+	// Open the incoming file chunk for reading
+	inFile, err := file.Open()
+	if err != nil {
+		fmt.Println("Error opening uploaded file:", err) // Log error
+		return c.String(500, fmt.Sprintf("Error opening uploaded file: %v", err))
+	}
+	defer inFile.Close()
 
-		// Write the content to the file
-		_, err = file.Write(req.GetContent())
-		if err != nil {
-			return fmt.Errorf("Error writing file content: %v", err)
-		}
+	// Copy the chunk to the file
+	_, err = io.Copy(outFile, inFile)
+	if err != nil {
+		fmt.Println("Error saving file:", err) // Log error
+		return c.String(500, fmt.Sprintf("Error saving file: %v", err))
 	}
 
-	// Append the uploaded filename to the list
-	states.Files.Filenames = append(states.Files.Filenames, req.GetFilename())
+	// Log that the upload is successful
+	fmt.Println("File uploaded successfully:", file.Filename)
 
-	// Return a success JSON response with the filename
-	return stream.SendAndClose(&pb.UploadResponse{
-		Status:   "success",
-		Message:  "File uploaded successfully",
-		Filename: req.GetFilename(),
-	})
+	// Respond to the client
+	return c.String(200, fmt.Sprintf("File uploaded successfully (chunk %s/%s)", chunkNumber, totalChunks))
 }
