@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
+	auth "github.com/Aneesh-Hegde/expenseManager/auth_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
+	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,6 +26,72 @@ type server struct {
 func (s *server) GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, error) {
 	return utils.GetText(ctx, req)
 }
+
+type authServer struct {
+	auth.UnimplementedAuthServiceServer
+}
+
+// Register a new user
+func (s *authServer) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.AuthResponse, error) {
+	hashedPassword, err := jwt.HashPassword(req.GetPassword())
+	log.Print(string(hashedPassword))
+	if err != nil {
+		log.Printf("error hashing password: %v", err)
+		return nil, err
+	}
+
+	query := `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id`
+	var userID int
+	err = db.DB.QueryRow(ctx, query, req.GetName(), req.GetEmail(), hashedPassword).Scan(&userID)
+	if err != nil {
+		log.Printf("error hashing password: %v", err)
+		return nil, err
+	}
+
+	return &auth.AuthResponse{
+		Message: "User registered successfully",
+		UserId:  int32(userID),
+	}, nil
+}
+
+// Login a user and return a JWT token
+func (s *authServer) Login(ctx context.Context, req *auth.LoginRequest) (*auth.AuthResponse, error) {
+	var userID int
+	var passwordHash string
+	query := `SELECT id, password_hash FROM users WHERE email = $1`
+	err := db.DB.QueryRow(ctx, query, req.GetEmail()).Scan(&userID, &passwordHash)
+	if err != nil {
+		return nil, fmt.Errorf("invalid credentials: %v", err)
+	}
+
+	if !jwt.CheckPasswordHash(req.GetPassword(), passwordHash) {
+		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	token, err := jwt.GenerateJWT(userID)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate token: %v", err)
+	}
+
+	return &auth.AuthResponse{
+		Message: "Login successful",
+		Token:   token,
+		UserId:  int32(userID),
+	}, nil
+}
+
+// Validate JWT token and extract user ID
+func (s *authServer) ValidateToken(ctx context.Context, req *auth.ValidateTokenRequest) (*auth.AuthResponse, error) {
+	_, err := jwt.ValidateJWT(req.GetToken())
+	if err != nil {
+		return nil, fmt.Errorf("invalid or expired token: %v", err)
+	}
+
+	return &auth.AuthResponse{
+		Message: "Token is valid",
+	}, nil
+}
+
 func main() {
 	db.InitDB()
 	redis.InitRedis()
@@ -97,6 +166,9 @@ func main() {
 	server := &server{}
 	pb.RegisterFileProcessingServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
+
+	authServer := &authServer{}
+	auth.RegisterAuthServiceServer(grpcServer, authServer)
 
 	// Echo HTTP server setup (without TLS)
 	e := echo.New()

@@ -1,34 +1,30 @@
 "use client"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { AuthServiceClient } from '../grpc_schema/AuthServiceClientPb';
 import toast from 'react-hot-toast';
-import api from '../utils/api';
+import { LoginRegister } from '../grpc_schema/auth_pb';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await api.post('/login', {
-        username,
-        password,
-      });
-
-      const token = response.data.token;
-      if (token) {
-        localStorage.setItem('authToken', token); // Save token to localStorage
-        toast.success('Login successful!');
-        router.push('/profile'); // Redirect to the profile page
+    const client = new AuthServiceClient("http://localhost:8080")
+    const request = new LoginRegister()
+    request.setPassword(password)
+    request.setEmail(email)
+    client.login(request, {}, (err: any, response) => {
+      if (err) {
+        toast.error(err)
       } else {
-        toast.error('Login failed. Please try again.');
+        toast.success(response)
+        localStorage.setItem("token", response.getToken())
+        router.push('/')
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Something went wrong');
-    }
+    })
   };
 
   return (
@@ -36,13 +32,7 @@ export default function Login() {
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
         <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div>
           <label>Password</label>

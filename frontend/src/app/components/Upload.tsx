@@ -30,7 +30,6 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
 
       const chunkSize = 1024 * 1024; // 1MB chunks
       const totalChunks = Math.ceil(file.size / chunkSize);
-      const uploadUrl = "http://localhost:8080/upload"; // Server URL
 
       let offset = 0;
 
@@ -54,7 +53,7 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
 
         try {
           // Send the chunk to the server using Axios
-          const response = await axios.post(uploadUrl, formData, {
+          const response = await axios.post("/", formData, {
             headers: {
               "Content-Type": "multipart/form-data", // This will ensure that the server understands the request is file data
             },

@@ -1,4 +1,4 @@
-package utils
+package jwt
 
 import (
 	"log"
@@ -13,14 +13,14 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userID string) (string, error) {
+func GenerateJWT(userID int) (string, error) {
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	if secretKey == "" {
 		log.Fatal("JWT secret key not set")
 	}
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
-		UserID: userID,
+		UserID: string(userID),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			Issuer:    "CELEBI",
