@@ -32,7 +32,7 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 				Parts: []states.ContentPart{
 					{
 						Text: fmt.Sprintf(
-							"Please extract the product name, quantity and amount from this text and format it as a json array of objects where each object has the fields 'product_name', 'quantity', and 'amount'.Also add category field for each product in easy words,.You can check for product name online to have close precision for category.Add category in broder perspective based on an expense tracker.Provide the output in JSON format without any markdown or backticks and each value should be in string. Here's the text:\n%s",
+							"Please extract the product name, quantity and amount from this text and format it as a json array of objects where each object has the fields 'product_name', 'quantity', and 'amount'.Also add category field for each product in easy words,.You can check for product name online to have close precision for category.Add category in broder perspective based(like food,household,etc) on an expense tracker.Provide the output in JSON format without any markdown or backticks and each value should be in string. Here's the text:\n%s",
 							text,
 						),
 					},
