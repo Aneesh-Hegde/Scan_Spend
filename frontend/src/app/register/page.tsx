@@ -1,9 +1,9 @@
 "use client"
 import React from "react";
-import Register from '../components/Register'
-const RegisterPage = () => {
+import RegisterUser from '../components/RegisterUser'
+const RegisterUserPage = () => {
   return (
-    <Register />
+    <RegisterUser />
   )
 }
-export default RegisterPage;
+export default RegisterUserPage;

@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FileProcessingService_GetText_FullMethodName = "/fileprocessing.FileProcessingService/GetText"
+	FileProcessingService_GetText_FullMethodName  = "/fileprocessing.FileProcessingService/GetText"
+	FileProcessingService_SaveToDB_FullMethodName = "/fileprocessing.FileProcessingService/SaveToDB"
 )
 
 // FileProcessingServiceClient is the client API for FileProcessingService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileProcessingServiceClient interface {
 	GetText(ctx context.Context, in *GetTextRequest, opts ...grpc.CallOption) (*GetTextResponse, error)
+	SaveToDB(ctx context.Context, in *GetProducts, opts ...grpc.CallOption) (*DBMessage, error)
 }
 
 type fileProcessingServiceClient struct {
@@ -47,11 +49,22 @@ func (c *fileProcessingServiceClient) GetText(ctx context.Context, in *GetTextRe
 	return out, nil
 }
 
+func (c *fileProcessingServiceClient) SaveToDB(ctx context.Context, in *GetProducts, opts ...grpc.CallOption) (*DBMessage, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DBMessage)
+	err := c.cc.Invoke(ctx, FileProcessingService_SaveToDB_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileProcessingServiceServer is the server API for FileProcessingService service.
 // All implementations must embed UnimplementedFileProcessingServiceServer
 // for forward compatibility.
 type FileProcessingServiceServer interface {
 	GetText(context.Context, *GetTextRequest) (*GetTextResponse, error)
+	SaveToDB(context.Context, *GetProducts) (*DBMessage, error)
 	mustEmbedUnimplementedFileProcessingServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedFileProcessingServiceServer struct{}
 
 func (UnimplementedFileProcessingServiceServer) GetText(context.Context, *GetTextRequest) (*GetTextResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetText not implemented")
+}
+func (UnimplementedFileProcessingServiceServer) SaveToDB(context.Context, *GetProducts) (*DBMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveToDB not implemented")
 }
 func (UnimplementedFileProcessingServiceServer) mustEmbedUnimplementedFileProcessingServiceServer() {}
 func (UnimplementedFileProcessingServiceServer) testEmbeddedByValue()                               {}
@@ -104,6 +120,24 @@ func _FileProcessingService_GetText_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileProcessingService_SaveToDB_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProducts)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileProcessingServiceServer).SaveToDB(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileProcessingService_SaveToDB_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileProcessingServiceServer).SaveToDB(ctx, req.(*GetProducts))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileProcessingService_ServiceDesc is the grpc.ServiceDesc for FileProcessingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var FileProcessingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetText",
 			Handler:    _FileProcessingService_GetText_Handler,
+		},
+		{
+			MethodName: "SaveToDB",
+			Handler:    _FileProcessingService_SaveToDB_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

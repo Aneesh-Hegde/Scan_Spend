@@ -4,9 +4,10 @@ import { Product } from "../types/types";
 type ProductListProps = {
   products: Product[];
   onUpdate: (onUpdate: Product) => void;  // Update the type to receive the whole product for editing
+  saveProduct: () => void;
 };
 
-const ProductList: React.FC<ProductListProps> = ({ products, onUpdate }) => {
+const ProductList: React.FC<ProductListProps> = ({ products, onUpdate, saveProduct }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Product | null>(null);
 
@@ -95,6 +96,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onUpdate }) => {
           ))}
         </tbody>
       </table>
+      <button onClick={saveProduct}>Save</button>
     </div>
   );
 };

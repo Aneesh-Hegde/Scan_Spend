@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
+import api from "../utils/api";
 
 interface UploadProps {
   onFileUpload: (filename: string) => void;
@@ -50,10 +51,10 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
         formData.append("chunk_number", (Math.floor(offset / chunkSize) + 1).toString()); // Chunk number (1-based)
         formData.append("total_chunks", totalChunks.toString()); // Total number of chunks
         formData.append("filename", file.name); // Send the original filename
-
+        formData.append("userId", "1");
         try {
           // Send the chunk to the server using Axios
-          const response = await axios.post("/", formData, {
+          const response = await api.post("/upload", formData, {
             headers: {
               "Content-Type": "multipart/form-data", // This will ensure that the server understands the request is file data
             },

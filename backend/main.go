@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	auth "github.com/Aneesh-Hegde/expenseManager/auth_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
+	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
 	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
 	"github.com/joho/godotenv"
@@ -26,13 +26,17 @@ type server struct {
 func (s *server) GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, error) {
 	return utils.GetText(ctx, req)
 }
+func (s *server) SaveToDB(ctx context.Context, req *pb.GetProducts) (*pb.DBMessage, error) {
+	products := req.GetProducts()
+	return db.StoreProductData(1, req.GetFilename(), products)
+}
 
-type authServer struct {
-	auth.UnimplementedAuthServiceServer
+type UserServiceServer struct {
+	user.UnimplementedUserServiceServer
 }
 
 // Register a new user
-func (s *authServer) Register(ctx context.Context, req *auth.RegisterRequest) (*auth.AuthResponse, error) {
+func (s *UserServiceServer) RegisterUser(ctx context.Context, req *user.RegisterUserRequest) (*user.UserResponse, error) {
 	hashedPassword, err := jwt.HashPassword(req.GetPassword())
 	log.Print(string(hashedPassword))
 	if err != nil {
@@ -40,25 +44,24 @@ func (s *authServer) Register(ctx context.Context, req *auth.RegisterRequest) (*
 		return nil, err
 	}
 
-	query := `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id`
+	query := `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING user_id`
 	var userID int
-	err = db.DB.QueryRow(ctx, query, req.GetName(), req.GetEmail(), hashedPassword).Scan(&userID)
+	err = db.DB.QueryRow(ctx, query, req.GetUsername(), req.GetEmail(), hashedPassword).Scan(&userID)
 	if err != nil {
 		log.Printf("error hashing password: %v", err)
 		return nil, err
 	}
 
-	return &auth.AuthResponse{
-		Message: "User registered successfully",
-		UserId:  int32(userID),
+	return &user.UserResponse{
+		Message: fmt.Sprintf("User registered successfully with ID: %d", userID),
 	}, nil
 }
 
 // Login a user and return a JWT token
-func (s *authServer) Login(ctx context.Context, req *auth.LoginRequest) (*auth.AuthResponse, error) {
+func (s *UserServiceServer) LoginUser(ctx context.Context, req *user.LoginUserRequest) (*user.LoginResponse, error) {
 	var userID int
 	var passwordHash string
-	query := `SELECT id, password_hash FROM users WHERE email = $1`
+	query := `SELECT user_id, password_hash FROM users WHERE email = $1`
 	err := db.DB.QueryRow(ctx, query, req.GetEmail()).Scan(&userID, &passwordHash)
 	if err != nil {
 		return nil, fmt.Errorf("invalid credentials: %v", err)
@@ -73,24 +76,62 @@ func (s *authServer) Login(ctx context.Context, req *auth.LoginRequest) (*auth.A
 		return nil, fmt.Errorf("could not generate token: %v", err)
 	}
 
-	return &auth.AuthResponse{
-		Message: "Login successful",
-		Token:   token,
-		UserId:  int32(userID),
+	return &user.LoginResponse{
+		Token: token,
+	}, nil
+}
+
+//Get user profile information
+
+func (s *UserServiceServer) GetUserProfile(ctx context.Context, req *user.GetUserProfileRequest) (*user.UserProfile, error) {
+	var userProfile user.UserProfile
+	query := `SELECT user_id,username,email FROM users WHERE user_id=$1`
+	err := db.DB.QueryRow(ctx, query, req.GetUserId()).Scan(&userProfile.UserId, &userProfile.Username, &userProfile.Email)
+	if err != nil {
+		log.Printf("Error fetching user profile: %v", err)
+		return nil, fmt.Errorf("could not find user profile: %v", err)
+	}
+
+	return &userProfile, nil
+}
+
+// UpdateUser updates user profile information
+func (s *UserServiceServer) UpdateUser(ctx context.Context, req *user.UpdateUserRequest) (*user.UserResponse, error) {
+	// Hash the new password if it's provided
+	var hashedPassword string
+	if req.GetPassword() != "" {
+		var err error
+		hashedPassword, err = jwt.HashPassword(req.GetPassword())
+		if err != nil {
+			log.Printf("Error hashing password: %v", err)
+			return nil, fmt.Errorf("could not hash password: %v", err)
+		}
+	}
+
+	// Update user information in the database
+	query := `UPDATE users SET username = $1, email = $2, password_hash = $3 WHERE user_id = $4`
+	_, err := db.DB.Exec(ctx, query, req.GetUsername(), req.GetEmail(), hashedPassword, req.GetUserId())
+	if err != nil {
+		log.Printf("Error updating user: %v", err)
+		return nil, fmt.Errorf("could not update user: %v", err)
+	}
+
+	return &user.UserResponse{
+		Message: "User information updated successfully",
 	}, nil
 }
 
 // Validate JWT token and extract user ID
-func (s *authServer) ValidateToken(ctx context.Context, req *auth.ValidateTokenRequest) (*auth.AuthResponse, error) {
-	_, err := jwt.ValidateJWT(req.GetToken())
-	if err != nil {
-		return nil, fmt.Errorf("invalid or expired token: %v", err)
-	}
-
-	return &auth.AuthResponse{
-		Message: "Token is valid",
-	}, nil
-}
+// func (s *UserServiceServer) ValidateToken(ctx context.Context, req *user.ValidateTokenRequest) (*user.userResponse, error) {
+// 	_, err := jwt.ValidateJWT(req.GetToken())
+// 	if err != nil {
+// 		return nil, fmt.Errorf("invalid or expired token: %v", err)
+// 	}
+//
+// 	return &auth.AuthResponse{
+// 		Message: "Token is valid",
+// 	}, nil
+// }
 
 func main() {
 	db.InitDB()
@@ -167,8 +208,8 @@ func main() {
 	pb.RegisterFileProcessingServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
-	authServer := &authServer{}
-	auth.RegisterAuthServiceServer(grpcServer, authServer)
+	UserServiceServer := &UserServiceServer{}
+	user.RegisterUserServiceServer(grpcServer, UserServiceServer)
 
 	// Echo HTTP server setup (without TLS)
 	e := echo.New()

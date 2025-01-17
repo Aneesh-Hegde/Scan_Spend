@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package file;
+
+option go_package ="/grpc_file";
+
+service FileService{
+rpc GetUserFile(UserFileRequest)returns(UserFileResponse);
+}
+
+message File{
+  int32 file_id=1;
+  string file_name=2;
+  string upload_date=3;
+}
+
+message UserFileResponse{
+  repeated File files=1;
+}
+
+message UserFileRequest{
+  int32 user_id=1;
+}

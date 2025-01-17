@@ -1,0 +1,48 @@
+syntax="proto3";
+
+package auth;
+
+option go_package="/user_grpc";
+
+service UserService {
+  rpc RegisterUser(RegisterUserRequest) returns (UserResponse);
+  rpc LoginUser(LoginUserRequest) returns (LoginResponse);
+  rpc GetUserProfile(GetUserProfileRequest) returns (UserProfile);
+  rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
+}
+
+message RegisterUserRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message LoginUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message GetUserProfileRequest {
+  int32 user_id = 1;
+}
+
+message UpdateUserRequest {
+  int32 user_id = 1;
+  string username=2;
+  string email = 3;
+  string password = 4;
+}
+
+message UserProfile {
+  int32 user_id = 1;
+  string username = 2;
+  string email = 3;
+}
+
+message UserResponse {
+  string message = 1;
+}
+
+message LoginResponse {
+  string token = 1;
+}

@@ -2,10 +2,14 @@ package utils
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+
+	"github.com/Aneesh-Hegde/expenseManager/db"
+	"github.com/labstack/echo/v4"
 )
 
 func Upload(c echo.Context) error {
@@ -31,7 +35,12 @@ func Upload(c echo.Context) error {
 	chunkNumber := c.FormValue("chunk_number")
 	totalChunks := c.FormValue("total_chunks")
 	filename := c.FormValue("filename")
-
+	userIdStr := c.FormValue("userId")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		log.Fatal("Error in parsing user Id")
+	}
+	fmt.Println(userId)
 	// Log chunk data
 	fmt.Println("Chunk Number:", chunkNumber)
 	fmt.Println("Total Chunks:", totalChunks)
@@ -65,6 +74,13 @@ func Upload(c echo.Context) error {
 
 	// Log that the upload is successful
 	fmt.Println("File uploaded successfully:", file.Filename)
+
+	query := "INSERT INTO file_metadata (user_id,file_name) VALUES ($1,$2)"
+	_, err = db.DB.Exec(c.Request().Context(), query, userId, filename)
+	log.Print("file data uploaded")
+	if err != nil {
+		log.Print(err)
+	}
 
 	// Respond to the client
 	return c.String(200, fmt.Sprintf("File uploaded successfully (chunk %s/%s)", chunkNumber, totalChunks))

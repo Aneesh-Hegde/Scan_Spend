@@ -10,6 +10,7 @@ import { Product } from './types/types'
 import HandleFileUpload from './utils/handleFileUpload';
 import HandleFileClick from './utils/handleFileClick';
 import HandleUpdate from './utils/handleUpdate';
+import HandleProductSave from './utils/handleProductSave';
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
@@ -34,6 +35,9 @@ const Page: React.FC = () => {
 
   const handleUpdate = (updatedProduct: Product) => {
     HandleUpdate({ updatedProduct, setProducts, setEditingProduct })
+  }
+  const handleSave = () => {
+    HandleProductSave(products, filename)
   }
 
   return (
@@ -66,7 +70,7 @@ const Page: React.FC = () => {
         {products.length === 0 ? (
           <p>No products to display</p>
         ) : (
-          <ProductList products={products} onUpdate={handleUpdate} />
+          <ProductList products={products} onUpdate={handleUpdate} saveProduct={handleSave} />
 
         )}
       </div>

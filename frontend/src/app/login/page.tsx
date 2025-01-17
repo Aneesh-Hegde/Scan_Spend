@@ -1,8 +1,15 @@
 import React from "react";
-import Login from "../components/Login"; // Adjust path as needed
+import LoginUser from "../components/LoginUser"; // Adjust path as needed
+import { toast, ToastContainer } from 'react-toastify';  // Import ToastContainer
 
 const LoginPage = () => {
-  return <Login />;
+
+  return (
+    <div>
+      <LoginUser />
+      <ToastContainer />
+    </div>
+  )
 };
 
 export default LoginPage;

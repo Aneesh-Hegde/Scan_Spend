@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/Aneesh-Hegde/expenseManager/db"
+	// "github.com/Aneesh-Hegde/expenseManager/db"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/Aneesh-Hegde/expenseManager/states"
@@ -73,10 +73,10 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 	}
 
 	// Store the extracted product data in the database
-	err = db.StoreProductData(1, filename, products)
-	if err != nil {
-		return nil, fmt.Errorf("failed to insert products into database: %w", err)
-	}
+	// err = db.StoreProductData(1, filename, products)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to insert products into database: %w", err)
+	// }
 
 	// Prepare gRPC response
 	var grpcProducts []*pb.Product

@@ -12,7 +12,6 @@ const HandleUpdate = ({ updatedProduct, setProducts, setEditingProduct }: Update
     prevProducts.map((product) =>
       product.ID === updatedProduct.ID ? updatedProduct : product)
   )
-  api.post(`edit/${updatedProduct.Name}/${updatedProduct.ID}`)
   setEditingProduct(null)
 }
 export default HandleUpdate

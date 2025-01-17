@@ -82,3 +82,45 @@ export namespace Product {
   }
 }
 
+export class GetProducts extends jspb.Message {
+  getProductsList(): Array<Product>;
+  setProductsList(value: Array<Product>): GetProducts;
+  clearProductsList(): GetProducts;
+  addProducts(value?: Product, index?: number): Product;
+
+  getFilename(): string;
+  setFilename(value: string): GetProducts;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetProducts.AsObject;
+  static toObject(includeInstance: boolean, msg: GetProducts): GetProducts.AsObject;
+  static serializeBinaryToWriter(message: GetProducts, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetProducts;
+  static deserializeBinaryFromReader(message: GetProducts, reader: jspb.BinaryReader): GetProducts;
+}
+
+export namespace GetProducts {
+  export type AsObject = {
+    productsList: Array<Product.AsObject>,
+    filename: string,
+  }
+}
+
+export class DBMessage extends jspb.Message {
+  getMessage(): string;
+  setMessage(value: string): DBMessage;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): DBMessage.AsObject;
+  static toObject(includeInstance: boolean, msg: DBMessage): DBMessage.AsObject;
+  static serializeBinaryToWriter(message: DBMessage, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): DBMessage;
+  static deserializeBinaryFromReader(message: DBMessage, reader: jspb.BinaryReader): DBMessage;
+}
+
+export namespace DBMessage {
+  export type AsObject = {
+    message: string,
+  }
+}
+

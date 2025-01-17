@@ -6,6 +6,7 @@ option go_package = "grpc/";
 
 service FileProcessingService {
   rpc GetText(GetTextRequest) returns (GetTextResponse);
+rpc SaveToDB(GetProducts) returns (DBMessage);
 }
 
 message GetTextRequest {
@@ -24,4 +25,13 @@ message Product {
   float amount = 4;
   string name = 5;
   string category = 6;
+}
+
+message GetProducts{
+  repeated Product products=1;
+  string filename=2;
+}
+ 
+message DBMessage{
+  string message=1;
 }

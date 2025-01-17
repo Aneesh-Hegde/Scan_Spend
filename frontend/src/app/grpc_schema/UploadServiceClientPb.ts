@@ -82,5 +82,48 @@ export class FileProcessingServiceClient {
     this.methodDescriptorGetText);
   }
 
+  methodDescriptorSaveToDB = new grpcWeb.MethodDescriptor(
+    '/fileprocessing.FileProcessingService/SaveToDB',
+    grpcWeb.MethodType.UNARY,
+    upload_pb.GetProducts,
+    upload_pb.DBMessage,
+    (request: upload_pb.GetProducts) => {
+      return request.serializeBinary();
+    },
+    upload_pb.DBMessage.deserializeBinary
+  );
+
+  saveToDB(
+    request: upload_pb.GetProducts,
+    metadata?: grpcWeb.Metadata | null): Promise<upload_pb.DBMessage>;
+
+  saveToDB(
+    request: upload_pb.GetProducts,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: upload_pb.DBMessage) => void): grpcWeb.ClientReadableStream<upload_pb.DBMessage>;
+
+  saveToDB(
+    request: upload_pb.GetProducts,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: upload_pb.DBMessage) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/fileprocessing.FileProcessingService/SaveToDB',
+        request,
+        metadata || {},
+        this.methodDescriptorSaveToDB,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/fileprocessing.FileProcessingService/SaveToDB',
+    request,
+    metadata || {},
+    this.methodDescriptorSaveToDB);
+  }
+
 }
 
