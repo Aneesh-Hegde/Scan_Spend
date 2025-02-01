@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
+  db:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: example_password
+      POSTGRES_DB: products
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+      - envoy
+      - redis
+    container_name: go-backend
+    environment:
+      DB_URL: postgres://user:example_password@db:5432/products?sslmode=disable
+    restart: on-failure
+    ports:
+      - "8081:8081"
+      - "50051:50051"
+    volumes:
+      - ./:/src
+    networks:
+      - app
+
+  frontend:
+    build: ./frontend
+    container_name: nextjs-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - envoy
+    networks:
+      - app
+
+  envoy:
+    build: 
+      dockerfile: Dockerfile-envoy
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    networks:
+      - app
+
+volumes:
+  postgres_data:
+    driver: local
+  cache:
+    driver: local
+
+networks:
+  app:
+    driver: bridge
+

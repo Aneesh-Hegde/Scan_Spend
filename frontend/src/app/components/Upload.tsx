@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import axios from "axios";
 import api from "../utils/api";
 
 interface UploadProps {

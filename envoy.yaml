@@ -57,7 +57,7 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: 127.0.0.1
+                      address: backend
                       port_value: 50051  # Your gRPC service running on port 50051
 
     - name: http_upload_backend
@@ -72,5 +72,5 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: 127.0.0.1
+                      address: backend
                       port_value: 8081  # Your HTTP file upload service running on port 8081

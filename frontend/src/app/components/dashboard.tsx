@@ -1,8 +1,8 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { AuthServiceClient } from '../grpc_schema/AuthServiceClientPb';
-import { ValidateTokenRequest } from '../grpc_schema/auth_pb';
-import { useRouter } from 'next/router';
+import { UserServiceClient } from '../grpc_schema/UserServiceClientPb';
+import { GetUserProfileRequest } from '../grpc_schema/user_pb';
+import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
   const [message, setMessage] = useState('');
@@ -10,22 +10,22 @@ const Dashboard = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    // const token = localStorage.getItem('token');
+    const token = 1;
     if (!token) {
       router.push('/login');
       return;
     }
 
-    const client = new AuthServiceClient("http://localhost:8080");
-    const request = new ValidateTokenRequest();
-    request.setToken(token);
+    const client = new UserServiceClient("http://localhost:8080");
+    const request = new GetUserProfileRequest();
+    request.setUserId(token);
 
-    client.validateToken(request, {}, (err, response) => {
+    client.getUserProfile(request, {}, (err, response) => {
       if (err) {
         alert(`Invalid session: ${err.message}`);
         router.push('/login');
       } else {
-        setMessage(response.getMessage());
         setUserID(response.getUserId());
       }
     });
