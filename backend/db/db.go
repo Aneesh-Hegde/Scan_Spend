@@ -9,16 +9,11 @@ import (
 	// "github.com/Aneesh-Hegde/expenseManager/states"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/jackc/pgx/v4"
-	"github.com/joho/godotenv"
 )
 
 var DB *pgx.Conn
 
 func InitDB() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	// Initialize PostgreSQL connection
 	dbURL := os.Getenv("DB_URL")
@@ -28,6 +23,18 @@ func InitDB() {
 		log.Fatalf("Unable to connect to database: %v", err)
 	}
 	DB = conn
+	currDir, err := os.Getwd()
+	filepath := fmt.Sprintf("%s/tables.sql", currDir)
+	sqlBytes, err := os.ReadFile(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sqlCommand := string(sqlBytes)
+	_, err = DB.Exec(context.Background(), sqlCommand)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func CloseDB() {

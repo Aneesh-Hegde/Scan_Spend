@@ -9,7 +9,6 @@ import (
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
 	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
@@ -138,10 +137,6 @@ func main() {
 	redis.InitRedis()
 	defer db.CloseDB()
 	defer redis.CloseRedis()
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	// e := echo.New()
 	//
 	// e.Use(middleware.Logger())

@@ -30,6 +30,8 @@ services:
       - envoy
       - redis
     container_name: go-backend
+    env_file:
+      - ./backend/.env
     environment:
       DB_URL: postgres://user:example_password@db:5432/products?sslmode=disable
     restart: on-failure

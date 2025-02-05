@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /root/
 COPY --from=builder /app/main .
-COPY .env .env
+COPY ./db/tables.sql tables.sql
 EXPOSE 8081
 CMD ["./main"]
 

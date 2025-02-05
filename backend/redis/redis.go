@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/Aneesh-Hegde/expenseManager/states"
 	"github.com/go-redis/redis/v8"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"time"
@@ -14,10 +13,6 @@ import (
 var RedisClient *redis.Client
 
 func InitRedis() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Printf("Error in loading .env %v", err)
-	}
 	redisAddr := os.Getenv("REDIS_ADDR")
 	redisPassword := os.Getenv("REDIS_PASSWORD")
 	RedisClient = redis.NewClient(&redis.Options{
@@ -25,7 +20,7 @@ func InitRedis() {
 		Password: redisPassword,
 		DB:       0,
 	})
-	_, err = RedisClient.Ping(context.Background()).Result()
+	_, err := RedisClient.Ping(context.Background()).Result()
 	if err != nil {
 		log.Printf("Error in connecting to Redis %v", err)
 	}
