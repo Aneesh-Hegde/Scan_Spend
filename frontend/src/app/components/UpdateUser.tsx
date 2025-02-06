@@ -13,7 +13,8 @@ const UpdateUserProfile = () => {
     e.preventDefault();
 
     const request = new UpdateUserRequest();
-    request.setUserId(1); // Assume userId is 1 for this example
+    const userId: string | null = localStorage.getItem("token")
+    request.setUserId(userId ? userId : ''); // Assume userId is 1 for this example
     request.setUsername(username);
     request.setEmail(email);
     request.setPassword(password);

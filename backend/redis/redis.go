@@ -3,11 +3,12 @@ package redis
 import (
 	"context"
 	"encoding/json"
-	"github.com/Aneesh-Hegde/expenseManager/states"
-	"github.com/go-redis/redis/v8"
 	"log"
 	"os"
 	"time"
+
+	"github.com/Aneesh-Hegde/expenseManager/states"
+	"github.com/go-redis/redis/v8"
 )
 
 var RedisClient *redis.Client

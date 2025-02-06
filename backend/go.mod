@@ -6,7 +6,6 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/jackc/pgx/v4 v4.18.3
-	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/otiai10/gosseract/v2 v2.4.1
 	golang.org/x/crypto v0.32.0

@@ -17,8 +17,10 @@ const HandleProductSave = (products: type_product[], filename: string) => {
 
   })
   const request = new GetProducts()
+  const userid: string | null = localStorage.getItem("token")
   request.setProductsList(grpc_products)
   request.setFilename(filename)
+  request.setUserid(userid ? userid : '')
   client.saveToDB(request, {}, (err, res: DBMessage) => {
     if (err) {
       toaster.error("Error in saving product")

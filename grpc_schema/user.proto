@@ -23,18 +23,18 @@ message LoginUserRequest {
 }
 
 message GetUserProfileRequest {
-  int32 user_id = 1;
+  string user_id = 1;
 }
 
 message UpdateUserRequest {
-  int32 user_id = 1;
+  string user_id = 1;
   string username=2;
   string email = 3;
   string password = 4;
 }
 
 message UserProfile {
-  int32 user_id = 1;
+  string user_id = 1;
   string username = 2;
   string email = 3;
 }

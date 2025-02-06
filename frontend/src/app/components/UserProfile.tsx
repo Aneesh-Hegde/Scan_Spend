@@ -10,7 +10,8 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserProfile = () => {
       const request = new GetUserProfileRequest();
-      request.setUserId(1); // Assume userId is 1 for this example
+      const userId: string | null = localStorage.getItem("token")
+      request.setUserId(userId ? userId : '') // Assume userId is 1 for this example
 
       grpcClient.getUserProfile(request, {}, (err: any, response: any) => {
         if (err) {

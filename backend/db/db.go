@@ -113,7 +113,7 @@ func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.
 
 	// Step 6: Insert products into the database
 	insertProductQuery := `
-        INSERT INTO products (user_id, product_name, quantity, price, category_id, file_name, description)
+        INSERT INTO products (user_id, name, quantity, price, category_id, file_name, description)
         VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	for _, product := range products {

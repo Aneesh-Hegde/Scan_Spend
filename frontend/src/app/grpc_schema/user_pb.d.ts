@@ -51,8 +51,8 @@ export namespace LoginUserRequest {
 }
 
 export class GetUserProfileRequest extends jspb.Message {
-  getUserId(): number;
-  setUserId(value: number): GetUserProfileRequest;
+  getUserId(): string;
+  setUserId(value: string): GetUserProfileRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetUserProfileRequest.AsObject;
@@ -64,13 +64,13 @@ export class GetUserProfileRequest extends jspb.Message {
 
 export namespace GetUserProfileRequest {
   export type AsObject = {
-    userId: number,
+    userId: string,
   }
 }
 
 export class UpdateUserRequest extends jspb.Message {
-  getUserId(): number;
-  setUserId(value: number): UpdateUserRequest;
+  getUserId(): string;
+  setUserId(value: string): UpdateUserRequest;
 
   getUsername(): string;
   setUsername(value: string): UpdateUserRequest;
@@ -91,7 +91,7 @@ export class UpdateUserRequest extends jspb.Message {
 
 export namespace UpdateUserRequest {
   export type AsObject = {
-    userId: number,
+    userId: string,
     username: string,
     email: string,
     password: string,
@@ -99,8 +99,8 @@ export namespace UpdateUserRequest {
 }
 
 export class UserProfile extends jspb.Message {
-  getUserId(): number;
-  setUserId(value: number): UserProfile;
+  getUserId(): string;
+  setUserId(value: string): UserProfile;
 
   getUsername(): string;
   setUsername(value: string): UserProfile;
@@ -118,7 +118,7 @@ export class UserProfile extends jspb.Message {
 
 export namespace UserProfile {
   export type AsObject = {
-    userId: number,
+    userId: string,
     username: string,
     email: string,
   }

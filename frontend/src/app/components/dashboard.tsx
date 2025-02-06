@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
   const [message, setMessage] = useState('');
-  const [userID, setUserID] = useState<number | null>(null);
+  const [userID, setUserID] = useState<string | null>('');
   const router = useRouter();
 
   useEffect(() => {
     // const token = localStorage.getItem('token');
-    const token = 1;
+    const token: string | null = localStorage.getItem("token");
     if (!token) {
       router.push('/login');
       return;

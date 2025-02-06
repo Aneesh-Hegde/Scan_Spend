@@ -91,6 +91,9 @@ export class GetProducts extends jspb.Message {
   getFilename(): string;
   setFilename(value: string): GetProducts;
 
+  getUserid(): string;
+  setUserid(value: string): GetProducts;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetProducts.AsObject;
   static toObject(includeInstance: boolean, msg: GetProducts): GetProducts.AsObject;
@@ -103,6 +106,7 @@ export namespace GetProducts {
   export type AsObject = {
     productsList: Array<Product.AsObject>,
     filename: string,
+    userid: string,
   }
 }
 

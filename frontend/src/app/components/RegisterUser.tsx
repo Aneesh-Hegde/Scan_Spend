@@ -20,7 +20,10 @@ const RegisterUser = () => {
     request.setPassword(password);
 
     grpcClient.registerUser(request, {}, (err: any, response: UserResponse) => {
-      console.log(response)
+      console.log(response.getMessage())
+      const getToken = response.getMessage().split('token:')
+      console.log(getToken)
+      localStorage.setItem("token", getToken[1])
       if (err) {
         console.error('Error:', err);
         toast.error('Failed to register');
