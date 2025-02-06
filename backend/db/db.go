@@ -8,27 +8,39 @@ import (
 
 	// "github.com/Aneesh-Hegde/expenseManager/states"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-var DB *pgx.Conn
+var DB *pgxpool.Pool
 
 func InitDB() {
-
-	// Initialize PostgreSQL connection
 	dbURL := os.Getenv("DB_URL")
 	log.Println(dbURL)
-	conn, err := pgx.Connect(context.Background(), dbURL)
+
+	config, err := pgxpool.ParseConfig(dbURL)
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v", err)
+		log.Fatalf("Unable to parse database URL: %v", err)
 	}
-	DB = conn
+
+	config.MaxConns = 10
+	config.MinConns = 2
+
+	DB, err = pgxpool.ConnectConfig(context.Background(), config)
+	if err != nil {
+		log.Fatalf("Unable to connect to the database: %v", err)
+	}
+	log.Println("Successfully connected to the database.")
+
 	currDir, err := os.Getwd()
-	filepath := fmt.Sprintf("%s/tables.sql", currDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	filepath := fmt.Sprintf("%s/db/tables.sql", currDir)
 	sqlBytes, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	sqlCommand := string(sqlBytes)
 	_, err = DB.Exec(context.Background(), sqlCommand)
 	if err != nil {
@@ -38,7 +50,7 @@ func InitDB() {
 }
 
 func CloseDB() {
-	DB.Close(context.Background())
+	DB.Close()
 }
 
 func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.DBMessage, error) {
