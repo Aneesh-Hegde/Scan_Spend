@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS products (
     user_id INT NOT NULL,
     category_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
+    quantity INT NOT NULL,
+    file_name VARCHAR(255),
     description TEXT,
     price NUMERIC(10, 2) NOT NULL,
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
