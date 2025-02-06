@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -9,7 +10,7 @@ import (
 )
 
 type Claims struct {
-	UserID string `json:"user_id"`
+	UserID int `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
@@ -20,7 +21,7 @@ func GenerateJWT(userID int) (string, error) {
 	}
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
-		UserID: string(userID),
+		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			Issuer:    "CELEBI",
@@ -34,21 +35,23 @@ func GenerateJWT(userID int) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateJWT(tokenStr string) (string, error) {
+func ValidateJWT(tokenStr string) (int, error) {
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	if secretKey == "" {
 		log.Fatal("JWT secretKey not set")
 	}
+	fmt.Println(tokenStr)
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		return "", nil
+		return 0, err
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return "", jwt.NewValidationError("invalid token", jwt.ValidationErrorClaimsInvalid)
+		return 0, jwt.NewValidationError("invalid token", jwt.ValidationErrorClaimsInvalid)
 	}
+	fmt.Println(claims)
 	return claims.UserID, nil
 }
