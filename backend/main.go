@@ -2,20 +2,20 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"net"
+	"net/http"
+
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
-	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
+	"github.com/Aneesh-Hegde/expenseManager/utils/auth"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
-	"net"
-	"net/http"
 )
 
 type server struct {
@@ -26,8 +26,7 @@ func (s *server) GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTe
 	return utils.GetText(ctx, req)
 }
 func (s *server) SaveToDB(ctx context.Context, req *pb.GetProducts) (*pb.DBMessage, error) {
-	products := req.GetProducts()
-	return db.StoreProductData(1, req.GetFilename(), products)
+	return db.SaveProducts(ctx, req)
 }
 
 type UserServiceServer struct {
@@ -36,88 +35,23 @@ type UserServiceServer struct {
 
 // Register a new user
 func (s *UserServiceServer) RegisterUser(ctx context.Context, req *user.RegisterUserRequest) (*user.UserResponse, error) {
-	hashedPassword, err := jwt.HashPassword(req.GetPassword())
-	log.Print(string(hashedPassword))
-	if err != nil {
-		log.Printf("error hashing password: %v", err)
-		return nil, err
-	}
-
-	query := `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING user_id`
-	var userID int
-	err = db.DB.QueryRow(ctx, query, req.GetUsername(), req.GetEmail(), hashedPassword).Scan(&userID)
-	if err != nil {
-		log.Printf("error hashing password: %v", err)
-		return nil, err
-	}
-
-	return &user.UserResponse{
-		Message: fmt.Sprintf("User registered successfully with ID: %d", userID),
-	}, nil
+	return auth.Register(ctx, req)
 }
 
 // Login a user and return a JWT token
 func (s *UserServiceServer) LoginUser(ctx context.Context, req *user.LoginUserRequest) (*user.LoginResponse, error) {
-	var userID int
-	var passwordHash string
-	query := `SELECT user_id, password_hash FROM users WHERE email = $1`
-	err := db.DB.QueryRow(ctx, query, req.GetEmail()).Scan(&userID, &passwordHash)
-	if err != nil {
-		return nil, fmt.Errorf("invalid credentials: %v", err)
-	}
-
-	if !jwt.CheckPasswordHash(req.GetPassword(), passwordHash) {
-		return nil, fmt.Errorf("invalid credentials")
-	}
-
-	token, err := jwt.GenerateJWT(userID)
-	if err != nil {
-		return nil, fmt.Errorf("could not generate token: %v", err)
-	}
-
-	return &user.LoginResponse{
-		Token: token,
-	}, nil
+	return auth.Login(ctx, req)
 }
 
 //Get user profile information
 
 func (s *UserServiceServer) GetUserProfile(ctx context.Context, req *user.GetUserProfileRequest) (*user.UserProfile, error) {
-	var userProfile user.UserProfile
-	query := `SELECT user_id,username,email FROM users WHERE user_id=$1`
-	err := db.DB.QueryRow(ctx, query, req.GetUserId()).Scan(&userProfile.UserId, &userProfile.Username, &userProfile.Email)
-	if err != nil {
-		log.Printf("Error fetching user profile: %v", err)
-		return nil, fmt.Errorf("could not find user profile: %v", err)
-	}
-
-	return &userProfile, nil
+	return auth.UserProfile(ctx, req)
 }
 
 // UpdateUser updates user profile information
 func (s *UserServiceServer) UpdateUser(ctx context.Context, req *user.UpdateUserRequest) (*user.UserResponse, error) {
-	// Hash the new password if it's provided
-	var hashedPassword string
-	if req.GetPassword() != "" {
-		var err error
-		hashedPassword, err = jwt.HashPassword(req.GetPassword())
-		if err != nil {
-			log.Printf("Error hashing password: %v", err)
-			return nil, fmt.Errorf("could not hash password: %v", err)
-		}
-	}
-
-	// Update user information in the database
-	query := `UPDATE users SET username = $1, email = $2, password_hash = $3 WHERE user_id = $4`
-	_, err := db.DB.Exec(ctx, query, req.GetUsername(), req.GetEmail(), hashedPassword, req.GetUserId())
-	if err != nil {
-		log.Printf("Error updating user: %v", err)
-		return nil, fmt.Errorf("could not update user: %v", err)
-	}
-
-	return &user.UserResponse{
-		Message: "User information updated successfully",
-	}, nil
+	return auth.UpdateUser(ctx, req)
 }
 
 // Validate JWT token and extract user ID
