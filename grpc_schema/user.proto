@@ -34,7 +34,7 @@ message UpdateUserRequest {
 }
 
 message UserProfile {
-  string user_id = 1;
+  int32 user_id = 1;
   string username = 2;
   string email = 3;
 }

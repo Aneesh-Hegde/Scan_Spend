@@ -99,8 +99,8 @@ export namespace UpdateUserRequest {
 }
 
 export class UserProfile extends jspb.Message {
-  getUserId(): string;
-  setUserId(value: string): UserProfile;
+  getUserId(): number;
+  setUserId(value: number): UserProfile;
 
   getUsername(): string;
   setUsername(value: string): UserProfile;
@@ -118,7 +118,7 @@ export class UserProfile extends jspb.Message {
 
 export namespace UserProfile {
   export type AsObject = {
-    userId: string,
+    userId: number,
     username: string,
     email: string,
   }

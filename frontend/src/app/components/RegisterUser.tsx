@@ -1,5 +1,5 @@
 "use client"
-import { useState, FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { RegisterUserRequest, UserResponse } from '../grpc_schema/user_pb'; // Path to generated Protobuf message
 import grpcClient from '../utils/userClient';
 import { toast } from 'react-toastify';

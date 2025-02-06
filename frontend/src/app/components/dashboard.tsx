@@ -1,27 +1,28 @@
 "use client"
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserServiceClient } from '../grpc_schema/UserServiceClientPb';
-import { GetUserProfileRequest } from '../grpc_schema/user_pb';
+import { GetUserProfileRequest, UserProfile } from '../grpc_schema/user_pb';
 import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
   const [message, setMessage] = useState('');
-  const [userID, setUserID] = useState<string | null>('');
+  const [userID, setUserID] = useState<number | null>(0);
   const router = useRouter();
-
   useEffect(() => {
-    // const token = localStorage.getItem('token');
-    const token: string | null = localStorage.getItem("token");
-    if (!token) {
-      router.push('/login');
-      return;
+    if (typeof window !== undefined) {
+      const token: string | null = localStorage.getItem("token");
+      if (!token) {
+        router.push('/login');
+        return;
+      }
     }
 
     const client = new UserServiceClient("http://localhost:8080");
     const request = new GetUserProfileRequest();
-    request.setUserId(token);
+    const token: string | null = localStorage.getItem("token");
+    request.setUserId(token ? token : '');
 
-    client.getUserProfile(request, {}, (err, response) => {
+    client.getUserProfile(request, {}, (err, response: UserProfile) => {
       if (err) {
         alert(`Invalid session: ${err.message}`);
         router.push('/login');

@@ -907,7 +907,7 @@ proto.auth.UserProfile.prototype.toObject = function(opt_includeInstance) {
  */
 proto.auth.UserProfile.toObject = function(includeInstance, msg) {
   var f, obj = {
-userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+userId: jspb.Message.getFieldWithDefault(msg, 1, 0),
 username: jspb.Message.getFieldWithDefault(msg, 2, ""),
 email: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
@@ -947,7 +947,7 @@ proto.auth.UserProfile.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {number} */ (reader.readInt32());
       msg.setUserId(value);
       break;
     case 2:
@@ -988,8 +988,8 @@ proto.auth.UserProfile.prototype.serializeBinary = function() {
 proto.auth.UserProfile.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getUserId();
-  if (f.length > 0) {
-    writer.writeString(
+  if (f !== 0) {
+    writer.writeInt32(
       1,
       f
     );
@@ -1012,20 +1012,20 @@ proto.auth.UserProfile.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string user_id = 1;
- * @return {string}
+ * optional int32 user_id = 1;
+ * @return {number}
  */
 proto.auth.UserProfile.prototype.getUserId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
 /**
- * @param {string} value
+ * @param {number} value
  * @return {!proto.auth.UserProfile} returns this
  */
 proto.auth.UserProfile.prototype.setUserId = function(value) {
-  return jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3IntField(this, 1, value);
 };
 
 

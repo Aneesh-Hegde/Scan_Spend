@@ -11,7 +11,6 @@ import (
 
 func Register(ctx context.Context, req *user.RegisterUserRequest) (*user.UserResponse, error) {
 	hashedPassword, err := jwt.HashPassword(req.GetPassword())
-	log.Print(string(hashedPassword))
 	if err != nil {
 		log.Printf("error hashing password: %v", err)
 		return nil, err
