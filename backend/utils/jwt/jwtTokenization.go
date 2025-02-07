@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -40,7 +39,6 @@ func ValidateJWT(tokenStr string) (int, error) {
 	if secretKey == "" {
 		log.Fatal("JWT secretKey not set")
 	}
-	fmt.Println(tokenStr)
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
@@ -52,6 +50,5 @@ func ValidateJWT(tokenStr string) (int, error) {
 	if !ok || !token.Valid {
 		return 0, jwt.NewValidationError("invalid token", jwt.ValidationErrorClaimsInvalid)
 	}
-	fmt.Println(claims)
 	return claims.UserID, nil
 }
