@@ -12,6 +12,7 @@ import (
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
 	"github.com/Aneesh-Hegde/expenseManager/utils/auth"
+	// "github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
@@ -54,6 +55,17 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *user.UpdateUser
 	return auth.UpdateUser(ctx, req)
 }
 
+func (s *UserServiceServer) GenerateVerifyToken(ctx context.Context, req *user.TokenRequest) (*user.TokenResponse, error) {
+	return auth.EmailToken(ctx, req)
+}
+
+func (s *UserServiceServer) VerifyUser(ctx context.Context, req *user.VerifyRequest) (*user.VerifyResponse, error) {
+	return &user.VerifyResponse{
+		Validation: true,
+	}, nil
+	// return auth.EmailToken(ctx, req)
+}
+
 // Validate JWT token and extract user ID
 // func (s *UserServiceServer) ValidateToken(ctx context.Context, req *user.ValidateTokenRequest) (*user.userResponse, error) {
 // 	_, err := jwt.ValidateJWT(req.GetToken())
@@ -67,6 +79,7 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *user.UpdateUser
 // }
 
 func main() {
+	// err := godotenv.Load(".env")
 	db.InitDB()
 	redis.InitRedis()
 	defer db.CloseDB()

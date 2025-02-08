@@ -9,6 +9,8 @@ service UserService {
   rpc LoginUser(LoginUserRequest) returns (LoginResponse);
   rpc GetUserProfile(GetUserProfileRequest) returns (UserProfile);
   rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
+  rpc GenerateVerifyToken(TokenRequest) returns (TokenResponse);
+  rpc VerifyUser(VerifyRequest) returns (VerifyResponse);
 }
 
 message RegisterUserRequest {
@@ -45,4 +47,22 @@ message UserResponse {
 
 message LoginResponse {
   string token = 1;
+}
+
+message TokenRequest{
+  string email=1;
+  string username=2;
+}
+
+message TokenResponse{
+  string token=1;
+  string message=2;
+}
+ 
+message VerifyRequest{
+  string token=1;
+}
+ 
+message VerifyResponse{
+  bool validation=1;
 }

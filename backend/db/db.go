@@ -35,7 +35,7 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filepath := fmt.Sprintf("%s/tables.sql", currDir)
+	filepath := fmt.Sprintf("%s/db/tables.sql", currDir)
 	sqlBytes, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Fatal(err)

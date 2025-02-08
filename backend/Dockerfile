@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /root/
 COPY --from=builder /app/main .
-COPY ./db/tables.sql tables.sql
+COPY ./db/tables.sql ./db/tables.sql
 EXPOSE 8081
 CMD ["./main"]
 

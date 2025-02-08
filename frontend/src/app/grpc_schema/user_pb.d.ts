@@ -160,3 +160,83 @@ export namespace LoginResponse {
   }
 }
 
+export class TokenRequest extends jspb.Message {
+  getEmail(): string;
+  setEmail(value: string): TokenRequest;
+
+  getUsername(): string;
+  setUsername(value: string): TokenRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): TokenRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: TokenRequest): TokenRequest.AsObject;
+  static serializeBinaryToWriter(message: TokenRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): TokenRequest;
+  static deserializeBinaryFromReader(message: TokenRequest, reader: jspb.BinaryReader): TokenRequest;
+}
+
+export namespace TokenRequest {
+  export type AsObject = {
+    email: string,
+    username: string,
+  }
+}
+
+export class TokenResponse extends jspb.Message {
+  getToken(): string;
+  setToken(value: string): TokenResponse;
+
+  getMessage(): string;
+  setMessage(value: string): TokenResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): TokenResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: TokenResponse): TokenResponse.AsObject;
+  static serializeBinaryToWriter(message: TokenResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): TokenResponse;
+  static deserializeBinaryFromReader(message: TokenResponse, reader: jspb.BinaryReader): TokenResponse;
+}
+
+export namespace TokenResponse {
+  export type AsObject = {
+    token: string,
+    message: string,
+  }
+}
+
+export class VerifyRequest extends jspb.Message {
+  getToken(): string;
+  setToken(value: string): VerifyRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VerifyRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: VerifyRequest): VerifyRequest.AsObject;
+  static serializeBinaryToWriter(message: VerifyRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VerifyRequest;
+  static deserializeBinaryFromReader(message: VerifyRequest, reader: jspb.BinaryReader): VerifyRequest;
+}
+
+export namespace VerifyRequest {
+  export type AsObject = {
+    token: string,
+  }
+}
+
+export class VerifyResponse extends jspb.Message {
+  getValidation(): boolean;
+  setValidation(value: boolean): VerifyResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VerifyResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: VerifyResponse): VerifyResponse.AsObject;
+  static serializeBinaryToWriter(message: VerifyResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VerifyResponse;
+  static deserializeBinaryFromReader(message: VerifyResponse, reader: jspb.BinaryReader): VerifyResponse;
+}
+
+export namespace VerifyResponse {
+  export type AsObject = {
+    validation: boolean,
+  }
+}
+

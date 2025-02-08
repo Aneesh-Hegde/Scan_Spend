@@ -211,5 +211,91 @@ export class UserServiceClient {
     this.methodDescriptorUpdateUser);
   }
 
+  methodDescriptorGenerateVerifyToken = new grpcWeb.MethodDescriptor(
+    '/auth.UserService/GenerateVerifyToken',
+    grpcWeb.MethodType.UNARY,
+    user_pb.TokenRequest,
+    user_pb.TokenResponse,
+    (request: user_pb.TokenRequest) => {
+      return request.serializeBinary();
+    },
+    user_pb.TokenResponse.deserializeBinary
+  );
+
+  generateVerifyToken(
+    request: user_pb.TokenRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<user_pb.TokenResponse>;
+
+  generateVerifyToken(
+    request: user_pb.TokenRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: user_pb.TokenResponse) => void): grpcWeb.ClientReadableStream<user_pb.TokenResponse>;
+
+  generateVerifyToken(
+    request: user_pb.TokenRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: user_pb.TokenResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/auth.UserService/GenerateVerifyToken',
+        request,
+        metadata || {},
+        this.methodDescriptorGenerateVerifyToken,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/auth.UserService/GenerateVerifyToken',
+    request,
+    metadata || {},
+    this.methodDescriptorGenerateVerifyToken);
+  }
+
+  methodDescriptorVerifyUser = new grpcWeb.MethodDescriptor(
+    '/auth.UserService/VerifyUser',
+    grpcWeb.MethodType.UNARY,
+    user_pb.VerifyRequest,
+    user_pb.VerifyResponse,
+    (request: user_pb.VerifyRequest) => {
+      return request.serializeBinary();
+    },
+    user_pb.VerifyResponse.deserializeBinary
+  );
+
+  verifyUser(
+    request: user_pb.VerifyRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<user_pb.VerifyResponse>;
+
+  verifyUser(
+    request: user_pb.VerifyRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: user_pb.VerifyResponse) => void): grpcWeb.ClientReadableStream<user_pb.VerifyResponse>;
+
+  verifyUser(
+    request: user_pb.VerifyRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: user_pb.VerifyResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/auth.UserService/VerifyUser',
+        request,
+        metadata || {},
+        this.methodDescriptorVerifyUser,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/auth.UserService/VerifyUser',
+    request,
+    metadata || {},
+    this.methodDescriptorVerifyUser);
+  }
+
 }
 
