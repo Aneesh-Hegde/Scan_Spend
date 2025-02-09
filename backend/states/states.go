@@ -42,4 +42,5 @@ type Product struct {
 	ID          string  `json:"id"`
 	FileName    string  `json:"filename"`
 	Category    string  `json:"category"`
+	Date        string  `json:"date`
 }

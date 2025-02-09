@@ -125,8 +125,8 @@ func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.
 
 	// Step 6: Insert products into the database
 	insertProductQuery := `
-        INSERT INTO products (user_id, name, quantity, price, category_id, file_name, description)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)`
+        INSERT INTO products (user_id, name, quantity, price, category_id, file_name, description,date_added)
+        VALUES ($1, $2, $3, $4, $5, $6, $7,TO_TIMESTAMP($8,'DD/MM/YYYY'))`
 
 	for _, product := range products {
 		categoryID := existingCategories[product.Category]
@@ -143,6 +143,7 @@ func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.
 			categoryID,
 			filename, // File Name as per schema
 			"",       // Assuming we don't have description, set it to an empty string or NULL
+			product.Date,
 		)
 		if err != nil {
 			log.Printf("Error inserting product %s: %v", product.ProductName, err)

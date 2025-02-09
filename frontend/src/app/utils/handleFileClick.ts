@@ -33,6 +33,7 @@ const HandleFileClick = ({
 
     // Handle the gRPC response
     const products = response.getProductsList();
+    console.log(response)
     if (products && products.length > 0) {
       // Map gRPC response products to your Product type
       setProducts(
@@ -43,6 +44,7 @@ const HandleFileClick = ({
           amount: product.getAmount(),
           Name: product.getName(),
           category: product.getCategory(),
+          Date: product.getDate()
         }))
       );
       toast.success('Products extracted successfully');

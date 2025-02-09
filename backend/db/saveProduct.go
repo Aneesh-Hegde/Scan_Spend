@@ -15,6 +15,6 @@ func SaveProducts(ctx context.Context, req *pb.GetProducts) (*pb.DBMessage, erro
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(userId)
+	fmt.Println(userId, products)
 	return StoreProductData(userId, req.GetFilename(), products)
 }

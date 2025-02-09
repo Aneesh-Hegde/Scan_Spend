@@ -13,6 +13,7 @@ const HandleProductSave = (products: type_product[], filename: string) => {
     newProduct.setAmount(product.amount)
     newProduct.setName(product.Name)
     newProduct.setCategory(product.category)
+    newProduct.setDate(product.Date)
     return newProduct
 
   })

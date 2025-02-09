@@ -26,6 +26,7 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 				ProductName: product.ProductName,
 				Quantity:    float32(product.Quantity),
 				Amount:      float32(product.Amount),
+				Date:        product.Date,
 				Category:    product.Category,
 			})
 		}
@@ -55,7 +56,7 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract product data: %w", err)
 	}
-
+	fmt.Print(extractedData)
 	// Process extracted data
 	var products []states.Product
 	total := 0.0
@@ -87,6 +88,7 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 			Quantity:    float32(product.Quantity),
 			Amount:      float32(product.Amount),
 			Name:        filename,
+			Date:        product.Date,
 			Category:    product.Category,
 		})
 	}

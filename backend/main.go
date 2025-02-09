@@ -12,7 +12,7 @@ import (
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
 	"github.com/Aneesh-Hegde/expenseManager/utils/auth"
-	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
@@ -79,7 +79,7 @@ func (s *UserServiceServer) VerifyUser(ctx context.Context, req *user.VerifyRequ
 // }
 
 func main() {
-	// err := godotenv.Load(".env")
+	err := godotenv.Load(".env")
 	db.InitDB()
 	redis.InitRedis()
 	defer db.CloseDB()

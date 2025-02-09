@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package fileprocessing;
+// import "google/protobuf/timestamp.proto";
 
 option go_package = "grpc/";
 
@@ -24,7 +25,8 @@ message Product {
   float quantity = 3;
   float amount = 4;
   string name = 5;
-  string category = 6;
+  string date=6;
+  string category = 7;
 }
 
 message GetProducts{

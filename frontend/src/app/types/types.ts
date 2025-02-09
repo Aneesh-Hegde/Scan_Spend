@@ -5,6 +5,7 @@ export interface Product {
   amount: number;
   Name: string
   category: string
+  Date: string
 
 }
 export interface UploadResponse {

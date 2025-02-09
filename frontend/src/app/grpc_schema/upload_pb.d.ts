@@ -60,6 +60,9 @@ export class Product extends jspb.Message {
   getName(): string;
   setName(value: string): Product;
 
+  getDate(): string;
+  setDate(value: string): Product;
+
   getCategory(): string;
   setCategory(value: string): Product;
 
@@ -78,6 +81,7 @@ export namespace Product {
     quantity: number,
     amount: number,
     name: string,
+    date: string,
     category: string,
   }
 }

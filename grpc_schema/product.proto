@@ -3,6 +3,7 @@ syntax= "proto3";
 package product;
 option go_package="/product";
 
+// import "google/protobuf/timestamp.proto";
 
 service ProductService {
   rpc AddProduct(AddProductRequest) returns (ProductResponse);
@@ -17,6 +18,8 @@ message AddProductRequest {
   string name = 3;
   string description = 4;
   float price = 5;
+  string date=6;
+
 }
 
 message UpdateProductRequest {
