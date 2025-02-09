@@ -87,6 +87,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-.env
+.env*
 next-env.d.ts
 uploads/
