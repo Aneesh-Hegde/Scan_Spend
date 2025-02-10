@@ -11,6 +11,7 @@ import {
 } from "../grpc_schema/user_pb"; // Path to generated Protobuf messages
 import grpcClient from "../utils/userClient";
 import { signUpWithEmail } from "../utils/authService";
+import Cookies from 'js-cookie'
 
 const RegisterUser = () => {
   const [username, setUsername] = useState<string>("");
@@ -75,6 +76,8 @@ const RegisterUser = () => {
         }
 
         localStorage.setItem("token", token);
+        Cookies.set("token", token)
+
         toast.success("Registration successful! Please verify your email.");
         resolve(token);
       });

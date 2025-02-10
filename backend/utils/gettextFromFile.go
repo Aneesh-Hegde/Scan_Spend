@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	// "github.com/Aneesh-Hegde/expenseManager/db"
+	"github.com/Aneesh-Hegde/expenseManager/data"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/Aneesh-Hegde/expenseManager/states"
@@ -35,6 +36,15 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 			Products: grpcProducts,
 			Total:    strconv.FormatFloat(total, 'f', 2, 64),
 		}, nil
+	}
+
+	productFromDB, err := data.GetFileProduct(ctx, filename, req.GetToken())
+	if err == nil && productFromDB != nil {
+		fmt.Println("From db")
+		return productFromDB, nil
+	}
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	// OCR to extract text from the image

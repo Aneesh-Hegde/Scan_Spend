@@ -4,6 +4,7 @@ import { LoginUserRequest, LoginResponse } from '../grpc_schema/user_pb'; // Pat
 import grpcClient from '../utils/userClient';
 import { toast } from "react-toastify";
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie'
 
 const LoginUser = () => {
   const [email, setEmail] = useState<string>('');
@@ -22,6 +23,8 @@ const LoginUser = () => {
         console.error('Error:', err);
         toast.error('Failed to login');
       } else {
+        localStorage.setItem("token", response.getToken())
+        Cookies.set("token", response.getToken())
         toast.success('Login successful!');
         router.push('/')
 

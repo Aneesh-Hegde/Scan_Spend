@@ -6,8 +6,10 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/Aneesh-Hegde/expenseManager/data"
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
+	files "github.com/Aneesh-Hegde/expenseManager/grpc_file"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
@@ -66,6 +68,14 @@ func (s *UserServiceServer) VerifyUser(ctx context.Context, req *user.VerifyRequ
 	// return auth.EmailToken(ctx, req)
 }
 
+type FileService struct {
+	files.UnimplementedFileServiceServer
+}
+
+func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser) (*files.FileList, error) {
+	return data.GetFiles(ctx, req)
+}
+
 // Validate JWT token and extract user ID
 // func (s *UserServiceServer) ValidateToken(ctx context.Context, req *user.ValidateTokenRequest) (*user.userResponse, error) {
 // 	_, err := jwt.ValidateJWT(req.GetToken())
@@ -79,63 +89,11 @@ func (s *UserServiceServer) VerifyUser(ctx context.Context, req *user.VerifyRequ
 // }
 
 func main() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load(".env-dev")
 	db.InitDB()
 	redis.InitRedis()
 	defer db.CloseDB()
 	defer redis.CloseRedis()
-	// e := echo.New()
-	//
-	// e.Use(middleware.Logger())
-	// e.Use(middleware.Recover())
-	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-	// 	AllowOrigins: []string{"http://localhost:3000"}, // Your frontend URL
-	// 	AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
-	// 	AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
-	// }))
-
-	// Serve static files (adjust path as necessary)
-	// e.Static("/uploads", "uploads")
-
-	// Route to display the list of uploaded files (rendering logic removed)
-	// e.GET("/", func(c echo.Context) error {
-	// 	return c.JSON(http.StatusOK, map[string]interface{}{"files": states.Files.Filenames})
-	// })
-	//
-	// // Route for file upload
-	// e.POST("/upload", utils.Upload)
-	//
-	// // Route to serve a file (adjust file name and path as needed)
-	// e.GET("/file", func(c echo.Context) error {
-	// 	c.Attachment("celebi.png", "celebi.png")
-	// 	return c.String(http.StatusOK, "File served")
-	// })
-	//
-	// // Route to extract text from an image file (using OCR)
-	// e.POST("/get-text/:file", utils.GetText)
-	//
-	// // Route to edit a product
-	// e.POST("/edit/:file/:id", utils.EditProduct)
-	//
-	// // Route to update a product
-	// e.POST("/update/:file/:id", utils.UpdateProduct)
-	//
-	// // Route to delete a product
-	// e.DELETE("/:file/:id", utils.DeleteProduct)
-	//
-	// e.POST("/login", utils.Login) // Login route that generates the JWT
-	//
-	// // Protected Routes
-	// e.GET("/profile", func(c echo.Context) error {
-	// 	// Get the user ID from the context if needed
-	// 	userID := c.Get("user_id").(string)
-	// 	// Fetch user profile from database using userID
-	// 	return c.JSON(http.StatusOK, map[string]string{"user_id": userID, "profile": "user profile data"})
-	// }, utils.JWTMiddleware)
-	//
-	// // Start the server
-	// e.Logger.Fatal(e.Start(":1323"))
-
 	// Create a TCP listener for gRPC
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -153,6 +111,8 @@ func main() {
 	UserServiceServer := &UserServiceServer{}
 	user.RegisterUserServiceServer(grpcServer, UserServiceServer)
 
+	FileService := &FileService{}
+	files.RegisterFileServiceServer(grpcServer, FileService)
 	// Echo HTTP server setup (without TLS)
 	e := echo.New()
 	e.Use(middleware.Logger())

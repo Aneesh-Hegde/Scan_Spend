@@ -11,6 +11,8 @@ import HandleFileUpload from './utils/handleFileUpload';
 import HandleFileClick from './utils/handleFileClick';
 import HandleUpdate from './utils/handleUpdate';
 import HandleProductSave from './utils/handleProductSave';
+import fileclient from './utils/fileClient';
+import { GetFileByUser, File, FileList } from './grpc_schema/file_pb'
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
@@ -22,9 +24,18 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await api.get('/');
-        const data = response.data;
-        setFiles(data.files); // Assuming the response has a "files" array
+        const request = new GetFileByUser()
+        const token: string | null = localStorage.getItem("token")
+        request.setToken(token ? token : "")
+        fileclient.getAllFiles(request, {}, (error: any, response: FileList) => {
+          if (error) {
+            console.log(error)
+          }
+          const allFile: File[] = response.getAllfilesList()
+          const filenames: string[] = allFile.map(ele => ele.getFilename())
+          setFiles(filenames)
+          toast.success("Files extracted successfully")
+        })
       } catch (error) {
         toast.error('Error fetching filenames');
       }

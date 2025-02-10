@@ -22,6 +22,8 @@ const HandleFileClick = ({
   // Prepare gRPC request
   const request = new GetTextRequest();
   request.setFilename(filename);
+  const token: string | null = localStorage.getItem("token")
+  request.setToken(token ? token : "")
 
   // Call gRPC method using the callback
   client.getText(request, {}, (err: grpcWeb.RpcError, response: GetTextResponse) => {

@@ -5,19 +5,17 @@ package file;
 option go_package ="/grpc_file";
 
 service FileService{
-rpc GetUserFile(UserFileRequest)returns(UserFileResponse);
+  rpc GetAllFiles(GetFileByUser) returns (FileList);
+}
+
+message GetFileByUser{
+  string token=1;
 }
 
 message File{
-  int32 file_id=1;
-  string file_name=2;
-  string upload_date=3;
+  string filename=1;
 }
 
-message UserFileResponse{
-  repeated File files=1;
-}
-
-message UserFileRequest{
-  int32 user_id=1;
+message FileList {
+  repeated File allfiles = 1;
 }

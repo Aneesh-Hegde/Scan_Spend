@@ -6,6 +6,9 @@ export class GetTextRequest extends jspb.Message {
   getFilename(): string;
   setFilename(value: string): GetTextRequest;
 
+  getToken(): string;
+  setToken(value: string): GetTextRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetTextRequest.AsObject;
   static toObject(includeInstance: boolean, msg: GetTextRequest): GetTextRequest.AsObject;
@@ -17,6 +20,7 @@ export class GetTextRequest extends jspb.Message {
 export namespace GetTextRequest {
   export type AsObject = {
     filename: string,
+    token: string,
   }
 }
 

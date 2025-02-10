@@ -12,6 +12,7 @@ rpc SaveToDB(GetProducts) returns (DBMessage);
 
 message GetTextRequest {
   string filename = 1;
+  string token=2;
 }
 
 message GetTextResponse {
