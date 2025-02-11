@@ -34,20 +34,25 @@ message DeleteProductRequest {
 }
 
 message GetProductsByUserRequest {
-  int32 user_id = 1;
-}
-
-message Product {
-  int32 product_id = 1;
-  string name = 2;
-  string description = 3;
-  float price = 4;
-}
-
-message ProductsList {
-  repeated Product products = 1;
+  string token = 1;
 }
 
 message ProductResponse {
   string message = 1;
 }
+
+
+message Product {
+  string id = 1;
+  string product_name = 2;
+  float quantity = 3;
+  float amount = 4;
+  string name = 5;
+  string date=6;
+  string category = 7;
+}
+message ProductsList{
+  repeated Product products=1;
+}
+
+

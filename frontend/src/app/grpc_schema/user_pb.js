@@ -296,8 +296,7 @@ proto.auth.RegisterUserRequest.prototype.toObject = function(opt_includeInstance
 proto.auth.RegisterUserRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
 username: jspb.Message.getFieldWithDefault(msg, 1, ""),
-email: jspb.Message.getFieldWithDefault(msg, 2, ""),
-password: jspb.Message.getFieldWithDefault(msg, 3, "")
+email: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -342,10 +341,6 @@ proto.auth.RegisterUserRequest.deserializeBinaryFromReader = function(msg, reade
       var value = /** @type {string} */ (reader.readString());
       msg.setEmail(value);
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setPassword(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -389,13 +384,6 @@ proto.auth.RegisterUserRequest.serializeBinaryToWriter = function(message, write
       f
     );
   }
-  f = message.getPassword();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
-  }
 };
 
 
@@ -435,24 +423,6 @@ proto.auth.RegisterUserRequest.prototype.setEmail = function(value) {
 };
 
 
-/**
- * optional string password = 3;
- * @return {string}
- */
-proto.auth.RegisterUserRequest.prototype.getPassword = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.auth.RegisterUserRequest} returns this
- */
-proto.auth.RegisterUserRequest.prototype.setPassword = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
-};
-
-
 
 
 
@@ -485,8 +455,7 @@ proto.auth.LoginUserRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.auth.LoginUserRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-email: jspb.Message.getFieldWithDefault(msg, 1, ""),
-password: jspb.Message.getFieldWithDefault(msg, 2, "")
+email: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -527,10 +496,6 @@ proto.auth.LoginUserRequest.deserializeBinaryFromReader = function(msg, reader) 
       var value = /** @type {string} */ (reader.readString());
       msg.setEmail(value);
       break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setPassword(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -567,13 +532,6 @@ proto.auth.LoginUserRequest.serializeBinaryToWriter = function(message, writer) 
       f
     );
   }
-  f = message.getPassword();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
 };
 
 
@@ -592,24 +550,6 @@ proto.auth.LoginUserRequest.prototype.getEmail = function() {
  */
 proto.auth.LoginUserRequest.prototype.setEmail = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
-};
-
-
-/**
- * optional string password = 2;
- * @return {string}
- */
-proto.auth.LoginUserRequest.prototype.getPassword = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.auth.LoginUserRequest} returns this
- */
-proto.auth.LoginUserRequest.prototype.setPassword = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -777,8 +717,7 @@ proto.auth.UpdateUserRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
 userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
 username: jspb.Message.getFieldWithDefault(msg, 2, ""),
-email: jspb.Message.getFieldWithDefault(msg, 3, ""),
-password: jspb.Message.getFieldWithDefault(msg, 4, "")
+email: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -827,10 +766,6 @@ proto.auth.UpdateUserRequest.deserializeBinaryFromReader = function(msg, reader)
       var value = /** @type {string} */ (reader.readString());
       msg.setEmail(value);
       break;
-    case 4:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setPassword(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -878,13 +813,6 @@ proto.auth.UpdateUserRequest.serializeBinaryToWriter = function(message, writer)
   if (f.length > 0) {
     writer.writeString(
       3,
-      f
-    );
-  }
-  f = message.getPassword();
-  if (f.length > 0) {
-    writer.writeString(
-      4,
       f
     );
   }
@@ -942,24 +870,6 @@ proto.auth.UpdateUserRequest.prototype.getEmail = function() {
  */
 proto.auth.UpdateUserRequest.prototype.setEmail = function(value) {
   return jspb.Message.setProto3StringField(this, 3, value);
-};
-
-
-/**
- * optional string password = 4;
- * @return {string}
- */
-proto.auth.UpdateUserRequest.prototype.getPassword = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.auth.UpdateUserRequest} returns this
- */
-proto.auth.UpdateUserRequest.prototype.setPassword = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 

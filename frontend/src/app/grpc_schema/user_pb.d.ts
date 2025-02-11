@@ -9,9 +9,6 @@ export class RegisterUserRequest extends jspb.Message {
   getEmail(): string;
   setEmail(value: string): RegisterUserRequest;
 
-  getPassword(): string;
-  setPassword(value: string): RegisterUserRequest;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): RegisterUserRequest.AsObject;
   static toObject(includeInstance: boolean, msg: RegisterUserRequest): RegisterUserRequest.AsObject;
@@ -24,16 +21,12 @@ export namespace RegisterUserRequest {
   export type AsObject = {
     username: string,
     email: string,
-    password: string,
   }
 }
 
 export class LoginUserRequest extends jspb.Message {
   getEmail(): string;
   setEmail(value: string): LoginUserRequest;
-
-  getPassword(): string;
-  setPassword(value: string): LoginUserRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): LoginUserRequest.AsObject;
@@ -46,7 +39,6 @@ export class LoginUserRequest extends jspb.Message {
 export namespace LoginUserRequest {
   export type AsObject = {
     email: string,
-    password: string,
   }
 }
 
@@ -78,9 +70,6 @@ export class UpdateUserRequest extends jspb.Message {
   getEmail(): string;
   setEmail(value: string): UpdateUserRequest;
 
-  getPassword(): string;
-  setPassword(value: string): UpdateUserRequest;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): UpdateUserRequest.AsObject;
   static toObject(includeInstance: boolean, msg: UpdateUserRequest): UpdateUserRequest.AsObject;
@@ -94,7 +83,6 @@ export namespace UpdateUserRequest {
     userId: string,
     username: string,
     email: string,
-    password: string,
   }
 }
 

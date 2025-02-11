@@ -25,20 +25,17 @@ const RegisterUser = () => {
     setLoading(true);
 
     try {
-      // Register user using the gRPC service
-      const userToken = await registerUser(username, email, password);
-      if (!userToken) return; // If registration fails, exit
+      const userToken = await registerUser(username, email);
+      if (!userToken) return; 
 
-      // Generate a verification token (optional, depending on your flow)
       const verificationToken = await generateVerificationToken(username, email);
       console.log(verificationToken)
-      if (!verificationToken) return; // If verification token fails, exit
+      if (!verificationToken) return; 
 
       // Register the user with Firebase
       const userCredential = await signUpWithEmail(email, password);
       console.log(userCredential)
       if (userCredential.success) {
-        // Once registration and email verification are successful, redirect to verify email page
         router.push("/verify-email");
       }
     } catch (error) {
@@ -50,11 +47,10 @@ const RegisterUser = () => {
   };
 
   // ✅ Register user via gRPC and get a token
-  const registerUser = async (username: string, email: string, password: string): Promise<string | null> => {
+  const registerUser = async (username: string, email: string): Promise<string | null> => {
     const request = new RegisterUserRequest();
     request.setUsername(username);
     request.setEmail(email);
-    request.setPassword(password);
 
     return new Promise((resolve, reject) => {
       grpcClient.registerUser(request, {}, (err: any, response: UserResponse) => {

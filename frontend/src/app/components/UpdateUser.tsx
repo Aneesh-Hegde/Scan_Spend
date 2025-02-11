@@ -6,6 +6,7 @@ import grpcClient from "../utils/userClient";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 import "react-toastify/dist/ReactToastify.css";
+import { ResetPassword } from "../utils/resetPassword";
 
 const UpdateUserProfile: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -13,7 +14,7 @@ const UpdateUserProfile: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false); // Toggle password visibility
-
+  let currEmail: string = ""
   // Get user data
   useEffect(() => {
     const token: string | null = localStorage.getItem("token");
@@ -27,6 +28,7 @@ const UpdateUserProfile: React.FC = () => {
       } else {
         setUsername(response.getUsername());
         setEmail(response.getEmail());
+        currEmail = response.getEmail()
       }
     });
   }, []);
@@ -44,23 +46,38 @@ const UpdateUserProfile: React.FC = () => {
     request.setUserId(userId);
     request.setUsername(username);
     request.setEmail(email);
+    
 
-    if (isEditingPassword && password.trim() !== "") {
-      request.setPassword(password);
-    }
-
-    grpcClient.updateUser(request, {}, (err: Error | null, response: any) => {
+    grpcClient.updateUser(request, {}, async (err: Error | null, response: any) => {
       if (err) {
         console.error("Error:", err);
         toast.error("Failed to update profile");
       } else {
-        console.log(response)
         toast.success("Profile updated successfully!");
         setIsEditingPassword(false); // Reset password editing state
         setPassword(""); // Clear password field
+
+        // **Only send reset password email if user is changing their password**
+        if (isEditingPassword) {
+          const resetResponse = await ResetPassword(email);
+          if (resetResponse.message) {
+            toast.success("Password reset email sent! Check your inbox.");
+          } else {
+            toast.error("Failed to send password reset email.");
+          }
+        }
       }
     });
   };
+  const handlePasswordReset = async () => {
+
+    const resetResponse = await ResetPassword(email);
+    if (resetResponse.message) {
+      toast.success("Password reset email sent! Check your inbox.");
+    } else {
+      toast.error("Failed to send password reset email.");
+    }
+  }
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-md text-black">
@@ -97,7 +114,7 @@ const UpdateUserProfile: React.FC = () => {
         {!isEditingPassword && (
           <button
             type="button"
-            onClick={() => setIsEditingPassword(true)}
+            onClick={() => handlePasswordReset()}
             className="text-blue-500 hover:underline"
           >
             Change Password

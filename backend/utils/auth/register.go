@@ -10,15 +10,10 @@ import (
 )
 
 func Register(ctx context.Context, req *user.RegisterUserRequest) (*user.UserResponse, error) {
-	hashedPassword, err := jwt.HashPassword(req.GetPassword())
-	if err != nil {
-		log.Printf("error hashing password: %v", err)
-		return nil, err
-	}
 
-	query := `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING user_id`
+	query := `INSERT INTO users (username, email) VALUES ($1, $2) RETURNING user_id`
 	var userID int
-	err = db.DB.QueryRow(ctx, query, req.GetUsername(), req.GetEmail(), hashedPassword).Scan(&userID)
+  err := db.DB.QueryRow(ctx, query, req.GetUsername(), req.GetEmail()).Scan(&userID)
 	if err != nil {
 		log.Printf("error hashing password: %v", err)
 		return nil, err
