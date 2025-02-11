@@ -1,92 +1,117 @@
-
 "use client";
-import React, { useState, FormEvent, useEffect } from "react";
+import React, { useState, useEffect, useRef, FormEvent } from "react";
 import { GetUserProfileRequest, UpdateUserRequest } from "../grpc_schema/user_pb";
 import grpcClient from "../utils/userClient";
 import { toast } from "react-toastify";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
 import { ResetPassword } from "../utils/resetPassword";
+import { UpdateAndVerifyEmail } from "../utils/updateEmail";
 
 const UpdateUserProfile: React.FC = () => {
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState<boolean>(false); // Toggle password visibility
-  let currEmail: string = ""
-  // Get user data
-  useEffect(() => {
-    const token: string | null = localStorage.getItem("token");
-    const getUserDataRequest = new GetUserProfileRequest();
-    getUserDataRequest.setUserId(token ? token : "");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showEmailPasswordField, setShowEmailPasswordField] = useState<boolean>(false); // Show password field for email change
+  const currEmailRef = useRef<string>("");
 
-    grpcClient.getUserProfile(getUserDataRequest, {}, (err: Error | null, response: any) => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("User is not authenticated!");
+      return;
+    }
+
+    const getUserDataRequest = new GetUserProfileRequest();
+    getUserDataRequest.setUserId(token);
+
+    grpcClient.getUserProfile(getUserDataRequest, {}, (err, response) => {
       if (err) {
-        console.log(err);
-        toast.error("Some error occurred");
+        console.error(err);
+        toast.error("Failed to fetch user profile.");
       } else {
         setUsername(response.getUsername());
         setEmail(response.getEmail());
-        currEmail = response.getEmail()
+        currEmailRef.current = response.getEmail();
       }
     });
   }, []);
 
   const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
-    const request = new UpdateUserRequest();
-    const userId: string | null = localStorage.getItem("token");
+    const userId = localStorage.getItem("token");
 
     if (!userId) {
       toast.error("User is not authenticated!");
       return;
     }
 
-    request.setUserId(userId);
-    request.setUsername(username);
-    request.setEmail(email);
-    
-
-    grpcClient.updateUser(request, {}, async (err: Error | null, response: any) => {
-      if (err) {
-        console.error("Error:", err);
-        toast.error("Failed to update profile");
-      } else {
-        toast.success("Profile updated successfully!");
-        setIsEditingPassword(false); // Reset password editing state
-        setPassword(""); // Clear password field
-
-        // **Only send reset password email if user is changing their password**
-        if (isEditingPassword) {
-          const resetResponse = await ResetPassword(email);
-          if (resetResponse.message) {
-            toast.success("Password reset email sent! Check your inbox.");
-          } else {
-            toast.error("Failed to send password reset email.");
-          }
+    try {
+      // Handle email update
+      if (email !== currEmailRef.current) {
+        if (!password) {
+          toast.error("Please enter your password to update your email.");
+          setShowEmailPasswordField(true); // Show password field when trying to change email
+          return;
+        }
+        const emailUpdateResponse = await UpdateAndVerifyEmail(email, password);
+        if (!emailUpdateResponse.success) {
+          toast.error("Failed to update email.");
+          return;
         }
       }
-    });
-  };
-  const handlePasswordReset = async () => {
 
-    const resetResponse = await ResetPassword(email);
-    if (resetResponse.message) {
-      toast.success("Password reset email sent! Check your inbox.");
-    } else {
-      toast.error("Failed to send password reset email.");
+      // Handle profile update
+      const request = new UpdateUserRequest();
+      request.setUserId(userId);
+      request.setUsername(username);
+      request.setEmail(email);
+
+      grpcClient.updateUser(request, {}, async (err, response) => {
+        if (err) {
+          console.error("Error updating profile:", err);
+          toast.error("Failed to update profile.");
+          return;
+        }
+
+        toast.success("Profile updated successfully!");
+        setIsEditingPassword(false);
+        setPassword("");
+
+        if (isEditingPassword) {
+          await handlePasswordReset();
+        }
+      });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast.error("An unexpected error occurred.");
     }
-  }
+  };
+
+  const handlePasswordReset = async () => {
+    try {
+      const resetResponse = await ResetPassword(email);
+      if (resetResponse.message) {
+        toast.success("Password reset email sent! Check your inbox.");
+      } else {
+        toast.error("Failed to send password reset email.");
+      }
+    } catch (error) {
+      console.error("Password reset error:", error);
+      toast.error("An unexpected error occurred.");
+    }
+  };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-md text-black">
       <h2 className="text-2xl font-semibold text-center mb-4">Update Profile</h2>
       <form onSubmit={handleUpdate} className="space-y-4">
+
+        {/* Username Field */}
         <div>
-          <label htmlFor="username" className="block text-sm font-medium">
-            Username
-          </label>
+          <label htmlFor="username" className="block text-sm font-medium">Username</label>
           <input
             type="text"
             id="username"
@@ -97,35 +122,64 @@ const UpdateUserProfile: React.FC = () => {
           />
         </div>
 
+        {/* Email Field */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">
-            Email
-          </label>
+          <label htmlFor="email" className="block text-sm font-medium">Email</label>
           <input
             type="email"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (e.target.value !== currEmailRef.current) {
+                setShowEmailPasswordField(true); // Show password field only if email is changed
+              } else {
+                setShowEmailPasswordField(false);
+              }
+            }}
             className="w-full p-2 border rounded"
             required
           />
         </div>
 
+        {/* Password Field for Email Change */}
+        {showEmailPasswordField && (
+          <div>
+            <label htmlFor="email-password" className="block text-sm font-medium">Enter Password to Change Email</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="email-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 border rounded pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-2 flex items-center text-gray-600"
+              >
+                {showPassword ? <FaEye /> : <FaEyeSlash />}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Change Password Button */}
         {!isEditingPassword && (
           <button
             type="button"
-            onClick={() => handlePasswordReset()}
+            onClick={handlePasswordReset}
             className="text-blue-500 hover:underline"
           >
             Change Password
           </button>
         )}
 
+        {/* Password Input Field (if editing password) */}
         {isEditingPassword && (
           <div>
-            <label htmlFor="password" className="block text-sm font-medium">
-              New Password
-            </label>
+            <label htmlFor="password" className="block text-sm font-medium">New Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -145,6 +199,7 @@ const UpdateUserProfile: React.FC = () => {
           </div>
         )}
 
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
