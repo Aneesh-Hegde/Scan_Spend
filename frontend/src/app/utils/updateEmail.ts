@@ -11,15 +11,12 @@ export async function UpdateAndVerifyEmail(newEmail: string, password: string) {
   }
 
   try {
-    // Step 1: Reauthenticate the user
     const credential = EmailAuthProvider.credential(currUser.email!, password);
     await reauthenticateWithCredential(currUser, credential);
 
-    // Step 2: Update the email address in Firebase
     await updateEmail(currUser, newEmail);
     toast.success("Email updated successfully!");
 
-    // Step 3: Send the verification email to the new email address
     await sendEmailVerification(currUser);
     toast.info("A verification email has been sent to your new email address. Please verify it.");
 
