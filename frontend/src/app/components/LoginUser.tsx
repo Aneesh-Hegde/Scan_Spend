@@ -1,52 +1,67 @@
 "use client"
 import React, { useState, FormEvent } from 'react';
-import { LoginUserRequest, LoginResponse } from '../grpc_schema/user_pb'; // Path to generated Protobuf message
+import { LoginUserRequest, LoginResponse } from '../grpc_schema/user_pb';
 import grpcClient from '../utils/userClient';
-import { loginWithEmail } from '../utils/authService';
+import { loginWithEmail, loginWithGoogle } from '../utils/authService';
 import { toast } from "react-toastify";
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie'
-import { set } from 'mongoose';
+import Cookies from 'js-cookie';
 
 const LoginUser = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false)
-  const router = useRouter()
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true)
-    const loginResponse = await loginWithEmail(email, password)
+    setLoading(true);
+
     try {
+      const loginResponse = await loginWithEmail(email, password);
       if (loginResponse.success) {
-
-        const request = new LoginUserRequest();
-        request.setEmail(email);
-        // request.setPassword(password);
-
-        grpcClient.loginUser(request, {}, (err: any, response: LoginResponse) => {
-          console.log(response.getToken())
-          if (err) {
-            console.error('Error:', err);
-            toast.error('Failed to login');
-          } else {
-            localStorage.setItem("token", response.getToken())
-            Cookies.set("token", response.getToken())
-            toast.success('Login successful!');
-            router.push('/')
-
-          }
-        });
-      } else {
-        toast.error("User not registered.Please register")
+        getUserToken(email);
       }
-    }
-    catch (error: any) {
-      toast.error("Error:", error)
+    } catch (error: any) {
+      toast.error("Error:", error.message || error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  };
 
+  const getUserToken = async (email: string | null) => {
+    if (!email) return;
+    const request = new LoginUserRequest();
+    request.setEmail(email);
+
+    try {
+      const response = await new Promise<LoginResponse>((resolve, reject) => {
+        grpcClient.loginUser(request, {}, (err, response) => {
+          if (err) reject(err);
+          else resolve(response);
+        });
+      });
+
+      const token = response.getToken();
+      localStorage.setItem("token", token);
+      Cookies.set("token", token);
+      toast.success('Login successful!');
+      router.push('/');
+    } catch (error) {
+      toast.error("Failed to retrieve user token.");
+    }
+  };
+
+  const googleLogIn = async () => {
+    try {
+      const response = await loginWithGoogle();
+      if (response.response) {
+        const email: string | null = response.response.user.email
+        getUserToken(email);
+      }
+    } catch (error) {
+      toast.error("Google login failed.");
+    }
   };
 
   return (
@@ -91,6 +106,26 @@ const LoginUser = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <div className="flex items-center my-4">
+          <hr className="flex-grow border-gray-300" />
+          <span className="px-2 text-gray-500">or</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
+
+        {/* Google Sign-In Button */}
+        <button
+          onClick={googleLogIn}
+          className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition flex items-center justify-center"
+        >
+          <svg className="w-5 h-5 mr-2" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.9 0 7.3 1.4 9.9 3.7l7.3-7.3C36.6 2.2 30.7 0 24 0 14.7 0 6.6 5.4 2.3 13.3l8.4 6.5c2.1-5.9 7.6-10.3 13.3-10.3z"></path>
+            <path fill="#34A853" d="M46.5 24c0-1.4-.1-2.8-.4-4H24v8.1h12.8c-.6 3-2.4 5.5-4.9 7.1l7.4 5.8c4.3-4 6.7-9.8 6.7-16z"></path>
+            <path fill="#FBBC05" d="M9.8 28.7c-1.4-2-2.1-4.4-2.1-6.7s.7-4.7 2.1-6.7L2.3 13.3C.8 16.3 0 19.6 0 24s.8 7.7 2.3 10.7l7.5-6z"></path>
+            <path fill="#4285F4" d="M24 48c6.5 0 12-2.1 16.1-5.7l-7.4-5.8c-2.1 1.4-4.8 2.3-8.2 2.3-5.7 0-11.1-4.3-13.3-10.3l-8.4 6.5c4.3 7.8 12.3 13.3 21.2 13.3z"></path>
+          </svg>
+          Sign in with Google
+        </button>
 
         <p className="text-sm text-gray-500 text-center mt-4">
           Don't have an account?{" "}

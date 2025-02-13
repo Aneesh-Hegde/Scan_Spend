@@ -62,10 +62,10 @@ func (s *UserServiceServer) GenerateVerifyToken(ctx context.Context, req *user.T
 }
 
 func (s *UserServiceServer) VerifyUser(ctx context.Context, req *user.VerifyRequest) (*user.VerifyResponse, error) {
-	return &user.VerifyResponse{
-		Validation: true,
-	}, nil
-	// return auth.EmailToken(ctx, req)
+	// return &user.VerifyResponse{
+	// 	Validation: true,
+	// }, nil
+	return auth.VerifyEmail(ctx, req)
 }
 
 type FileService struct {

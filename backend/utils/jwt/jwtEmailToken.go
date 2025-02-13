@@ -15,7 +15,7 @@ type EmailClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(email, username string) (string, error) {
+func GenerateEmailToken(email, username string) (string, error) {
 	// err := godotenv.Load(".env")
 	secretkey := os.Getenv("JWT_SECRET_KEY")
 	if secretkey == "" {
@@ -39,7 +39,7 @@ func GenerateToken(email, username string) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateToken(tokenstr string) (string, error) {
+func ValidateEmailToken(tokenstr string) (string, error) {
 	secretkey := os.Getenv("JWT_SECRET_KEY")
 	if secretkey == "" {
 		log.Fatal("No secretkey found")

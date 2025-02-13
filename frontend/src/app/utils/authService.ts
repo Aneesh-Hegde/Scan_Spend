@@ -13,13 +13,17 @@ interface AuthResponse {
   success: boolean,
   message: string
 }
+interface GoogleAuthResponse {
+  success: boolean,
+  response: UserCredential | null
+}
 
-export async function signUpWithEmail(email: string, password: string): Promise<AuthResponse> {
+export async function signUpWithEmail(email: string, password: string, verifyToken:string): Promise<AuthResponse> {
   try {
     const UserCredential: UserCredential = await createUserWithEmailAndPassword(auth, email, password)
 
     await sendEmailVerification(UserCredential.user, {
-      url: "http://localhost:3000"
+      url: `http://localhost:3000/verify-email?token=${verifyToken}`
     })
     console.log("send")
     return { success: true, message: "Verification email send please check the inbox" }
@@ -50,15 +54,15 @@ export async function resendVerificationEmail(): Promise<AuthResponse> {
   return { success: false, message: "user not logged in" }
 }
 
-export async function loginWithGoogle(): Promise<AuthResponse> {
+export async function loginWithGoogle(): Promise<GoogleAuthResponse> {
   try {
     const provider = new GoogleAuthProvider()
     const UserCredential = await signInWithPopup(auth, provider)
     if (!UserCredential) {
-      return { success: false, message: "User does not exist" }
+      return { success: false, response: null }
     }
-    return { success: true, message: "Login successful" }
+    return { success: true, response: UserCredential }
   } catch (error: any) {
-    return { success: false, message: error.message }
+    return { success: false, response: error.message }
   }
 }
