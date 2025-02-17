@@ -45,18 +45,55 @@ Ensure you have the following installed:
    cd scan-spend
    ```  
 
-2. **Run locally**  
+2. **Set up environment files**  
+
+   - Create a `.env` file to be used when running Docker. Example:
+     ```env
+     # .env
+     API_KEY=your_api_key
+     JWT_SECRET_KEY=your_jwt_secret_key
+     REDIS_ADDR="redis:{PORT}"
+     REDIS_PASSWORD="redispassword"  # Keep same due to Docker set password
+     ```
+
+   - Create a `.env-dev` file for local development. Example:
+     ```env
+     # .env-dev
+     API_KEY=your_api_key
+     JWT_SECRET_KEY=your_jwt_secret_key
+     REDIS_ADDR="localhost:{PORT}"
+     REDIS_PASSWORD=""  # Local Redis password (leave empty for local development)
+     ```
+
+3. **Comment out the line that loads `.env-dev`**  
+   When running the project in **Docker**, make sure you comment out the line in your Go project that loads the `.env-dev` file, as Docker will use the `.env` file for configuration.
+
+   In your Go code, locate the line:
+
+   ```go
+   err := godotenv.Load(".env-dev")
+   ```
+
+   And comment it out like this:
+
+   ```go
+   // err := godotenv.Load(".env-dev")
+   ```
+
+   This ensures that the `.env` file is loaded properly when running the project in Docker.
+
+4. **Run locally**  
    ```sh
    chmod +x run.sh
    ./run.sh
    ```  
 
-3. **Run with Docker**  
+5. **Run with Docker**  
    ```sh
    docker-compose up --build
    ```  
 
-4. **Access the frontend**  
+6. **Access the frontend**  
    Open `http://localhost:3000` in your browser.  
 
 ---
@@ -73,6 +110,8 @@ backend/          # Handles business logic, OCR processing, and database storage
   ├── utils/      # Utility functions (Auth, OCR, JWT, AI-based text extraction)
   ├── uploads/    # Stores uploaded receipt images
   ├── main.go     # Backend entry point
+  ├── .env        # Environment file for Docker setup (loads during Docker run)
+  ├── .env-dev    # Local development environment file
 
 frontend/         # Next.js UI for tracking and managing expenses
   ├── app/        # Main application files
@@ -121,7 +160,7 @@ Pull requests are welcome! Feel free to improve functionality or enhance documen
    ```  
 4. **Push & create a pull request**
 
-(Any readme contribution is appreciated😊)
+   (Any readme contribution is appreciated😊)
 
 ---
 
