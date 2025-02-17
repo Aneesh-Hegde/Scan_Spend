@@ -2,12 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/Aneesh-Hegde/expenseManager/data"
 	"github.com/Aneesh-Hegde/expenseManager/db"
@@ -88,44 +85,7 @@ func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser)
 // 	}, nil
 // }
 
-func SetRefreshTokenHandler(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	fmt.Println("set token called", c.Request().Header)
-	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer") {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authentication header missing"})
 
-	}
-	refreshToken := strings.TrimPrefix(authHeader, "Bearer ")
-	fmt.Println(refreshToken)
-	cookies := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		HttpOnly: true,
-		Secure:   false,
-		Path:     "/",
-		Expires:  time.Now().Add(24 * 30 * time.Hour),
-		SameSite: http.SameSiteLaxMode,
-	}
-	c.SetCookie(cookies)
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Refresh token set successfully",
-	})
-
-}
-
-func GetRefreshTokenHandler(c echo.Context) error {
-	cookie, err := c.Cookie("refresh_token")
-	if err != nil {
-		// Handle error (e.g., cookie not found)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "refresh token cookie not found"})
-	}
-
-	// Use the cookie's value
-	refreshToken := cookie.Value
-	fmt.Println("Retrieved refresh token:", refreshToken)
-
-	return c.JSON(http.StatusOK, map[string]string{"refresh_token": refreshToken})
-}
 
 func main() {
 	err := godotenv.Load(".env-dev")
@@ -168,8 +128,8 @@ func main() {
 
 	// File upload endpoint using Echo
 	e.POST("/upload", utils.Upload)
-	e.POST("/refresh", SetRefreshTokenHandler)
-	e.GET("/get-refresh-token", GetRefreshTokenHandler)
+	e.POST("/refresh", utils.SetRefreshTokenHandler)
+	e.GET("/get-refresh-token", utils.GetRefreshTokenHandler)
 
 	// Enable HTTP2 for Echo server without TLS (non-secure)
 	e.Server.Addr = ":8081"
