@@ -27,7 +27,7 @@ const Page: React.FC = () => {
       try {
         //get the refresh_token of the user 
         const response = await api.get("/get-refresh-token", { withCredentials: true, })
-        let refresh_token: string = response.data.refresh_token
+        const refresh_token: string = response.data.refresh_token
 
         getAllFiles(refresh_token);
 
