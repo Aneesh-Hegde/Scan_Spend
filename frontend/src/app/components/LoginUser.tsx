@@ -6,6 +6,7 @@ import { loginWithEmail, loginWithGoogle } from '../utils/authService';
 import { toast } from "react-toastify";
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import api from '../utils/api';
 
 const LoginUser = () => {
   const [email, setEmail] = useState<string>('');
@@ -18,6 +19,7 @@ const LoginUser = () => {
     setLoading(true);
 
     try {
+      //firebase email login
       const loginResponse = await loginWithEmail(email, password);
       if (loginResponse.success) {
         getUserToken(email);
@@ -29,24 +31,46 @@ const LoginUser = () => {
     }
   };
 
+  //get access and refresh token and checks the credentials from db for login
   const getUserToken = async (email: string | null) => {
     if (!email) return;
     const request = new LoginUserRequest();
     request.setEmail(email);
 
     try {
-      const response = await new Promise<LoginResponse>((resolve, reject) => {
-        grpcClient.loginUser(request, {}, (err, response) => {
+      const response = await new Promise<LoginResponse>(async (resolve, reject) => {
+        let refresh_token: string | null = "";
+        let token: string | null = "";
+
+        //get the access token after login
+        const call = grpcClient.loginUser(request, {}, (err, response) => {
           if (err) reject(err);
-          else resolve(response);
+          else {
+            token = response.getToken();
+            localStorage.setItem("token", token)
+            Cookies.set("token", token)
+            resolve(response);
+          }
         });
+
+        // Listen for metadata i.e extract refresh_token
+        call.on("metadata", async (metadata) => {
+          refresh_token = metadata["refresh_token"] || null;
+          if (refresh_token) {
+            try {
+              const res = await api.post("/refresh", {}, {
+                headers: { Authorization: `Bearer ${refresh_token}` },
+                withCredentials: true
+              });
+            } catch (error) {
+              console.error("Failed to refresh token:", error);
+            }
+          }
+        });
+
+        router.push("/");
       });
 
-      const token = response.getToken();
-      localStorage.setItem("token", token);
-      Cookies.set("token", token);
-      toast.success('Login successful!');
-      router.push('/');
     } catch (error) {
       toast.error("Failed to retrieve user token.");
     }

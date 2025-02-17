@@ -10,7 +10,7 @@ sleep 5
 echo "Starting Next.js frontend..."
 cd frontend &&
   npm run dev &
-sleep 5
+sleep 8
 
 # Start Envoy proxy
 echo "Starting Envoy..."

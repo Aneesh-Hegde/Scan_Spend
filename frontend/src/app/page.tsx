@@ -13,6 +13,7 @@ import HandleUpdate from './utils/handleUpdate';
 import HandleProductSave from './utils/handleProductSave';
 import fileclient from './utils/fileClient';
 import { GetFileByUser, File, FileList } from './grpc_schema/file_pb'
+import { Metadata } from 'grpc-web';
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
@@ -24,25 +25,42 @@ const Page: React.FC = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const request = new GetFileByUser()
-        const token: string | null = localStorage.getItem("token")
-        request.setToken(token ? token : "")
-        fileclient.getAllFiles(request, {}, (error: any, response: FileList) => {
-          if (error) {
-            console.log(error)
-          }
-          const allFile: File[] = response.getAllfilesList()
-          const filenames: string[] = allFile.map(ele => ele.getFilename())
-          setFiles(filenames)
-          toast.success("Files extracted successfully")
-        })
+        //get the refresh_token of the user 
+        const response = await api.get("/get-refresh-token", { withCredentials: true, })
+        let refresh_token: string = response.data.refresh_token
+
+        getAllFiles(refresh_token);
+
       } catch (error) {
+        console.log(error)
         toast.error('Error fetching filenames');
       }
-    };
 
-    fetchFiles();
-  }, []); // This effect runs once when the component mounts
+      fetchFiles();
+    }
+  }, []);
+
+  const getAllFiles = async (refresh_token: string) => {
+    //grpc call to get all files of the users
+    const request = new GetFileByUser()
+    const token: string | null = localStorage.getItem("token")
+    request.setToken(token ? token : "")
+    try {
+      const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+      fileclient.getAllFiles(request, metadata, (error: any, response: FileList) => {
+        if (error) {
+          console.log(error)
+        }
+        const allFile: File[] = response.getAllfilesList()
+        const filenames: string[] = allFile.map(ele => ele.getFilename())
+        setFiles(filenames)
+        toast.success("Files extracted successfully")
+      })
+    } catch (error) {
+      console.log(error)
+      toast.error('Error fetching filenames');
+    }
+  }
 
   const handleUpdate = (updatedProduct: Product) => {
     HandleUpdate({ updatedProduct, setProducts, setEditingProduct })

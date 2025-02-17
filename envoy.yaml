@@ -20,6 +20,14 @@ static_resources:
                           route:
                             cluster: http_upload_backend
                             timeout: 300s
+                        - match: {prefix: "/refresh"}
+                          route:
+                            cluster: http_upload_backend
+                            timeout: 300s
+                        - match: {prefix: "/get-refresh-token"}
+                          route:
+                            cluster: http_upload_backend
+                            timeout: 300s
                         - match: { prefix: "/" }
                           route:
                             cluster: grpc_backend
@@ -28,9 +36,10 @@ static_resources:
                         allow_origin_string_match:
                           - prefix: "*"
                         allow_methods: GET, PUT, DELETE, POST, OPTIONS
-                        allow_headers: keep-alive, user-agent, cache-control, content-type, content-transfer-encoding, custom-header-1, x-accept-content-transfer-encoding, x-accept-response-streaming, x-user-agent, x-grpc-web, grpc-timeout
+                        allow_headers: keep-alive, user-agent, cache-control, content-type, content-transfer-encoding, custom-header-1, x-accept-content-transfer-encoding, x-accept-response-streaming, x-user-agent, x-grpc-web, grpc-timeout,authentication,Content-Type,authorization,refresh_token,set-cookie,Cookie
                         max_age: "1728000"
-                        expose_headers: custom-header-1, grpc-status, grpc-message,content-type, x-auth-token
+                        expose_headers: custom-header-1, grpc-status, grpc-message,content-type, x-auth-token, authentication,authorization,refresh_token,set-cookie,Cookie
+                        allow_credentials: true
                 http_filters:
                     - name: envoy.filters.http.grpc_web
                       typed_config:

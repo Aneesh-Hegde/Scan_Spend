@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.12.6",
     "axios": "^1.7.9",
     "firebase": "^11.3.0",
     "google-protobuf": "^3.21.4",
