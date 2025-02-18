@@ -21,7 +21,7 @@ func Register(ctx context.Context, req *user.RegisterUserRequest) (*user.UserRes
 
 	token, err := jwt.GenerateJWT(userID)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	return &user.UserResponse{

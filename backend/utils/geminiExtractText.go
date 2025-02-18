@@ -46,7 +46,7 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 
 	body, err := json.Marshal(requestBody)
 	if err != nil {
-		log.Fatalf("Error marshaling request body: %v", err)
+		log.Printf("Error marshaling request body: %v", err)
 	}
 
 	// Set the endpoint URL
@@ -55,7 +55,7 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 	// Create a POST request
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
-		log.Fatalf("Error creating request: %v", err)
+		log.Printf("Error creating request: %v", err)
 	}
 
 	// Set headers
@@ -65,19 +65,19 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("Error sending request: %v", err)
+		log.Printf("Error sending request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("Error reading response body: %v", err)
+		log.Printf("Error reading response body: %v", err)
 	}
 
 	// Check if the status code is OK (200)
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Error: received non-OK HTTP status: %d\nResponse: %s", resp.StatusCode, string(respBody))
+		log.Printf("Error: received non-OK HTTP status: %d\nResponse: %s", resp.StatusCode, string(respBody))
 	}
 
 	// Print the raw response body for debugging (optional)
@@ -87,7 +87,7 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 	var geminiResponse states.GeminiResponse
 	err = json.Unmarshal(respBody, &geminiResponse)
 	if err != nil {
-		log.Fatalf("Error unmarshalling response: %v", err)
+		log.Printf("Error unmarshalling response: %v", err)
 	}
 
 	// Output the generated content
@@ -105,7 +105,7 @@ func ExtractProductDataFromText(text string) ([]states.Product, error) {
 	var rawProducts []RawProduct
 	err = json.Unmarshal([]byte(cleanedJSON), &rawProducts)
 	if err != nil {
-		log.Fatalf("Error unmarshalling JSON: %v", err)
+		log.Printf("Error unmarshalling JSON: %v", err)
 	}
 	// Convert rawProducts to final products with numeric fields
 	var products []states.Product

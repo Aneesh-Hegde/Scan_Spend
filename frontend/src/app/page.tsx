@@ -14,6 +14,7 @@ import HandleProductSave from './utils/handleProductSave';
 import fileclient from './utils/fileClient';
 import { GetFileByUser, File, FileList } from './grpc_schema/file_pb'
 import { Metadata } from 'grpc-web';
+import Cookies from 'js-cookie';
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
@@ -36,18 +37,18 @@ const Page: React.FC = () => {
         toast.error('Error fetching filenames');
       }
 
-      fetchFiles();
     }
+    fetchFiles();
   }, []);
 
   const getAllFiles = async (refresh_token: string) => {
     //grpc call to get all files of the users
     const request = new GetFileByUser()
-    const token: string | null = localStorage.getItem("token")
+    let token: string | null = localStorage.getItem("token")
     request.setToken(token ? token : "")
     try {
-      const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
-      fileclient.getAllFiles(request, metadata, (error: any, response: FileList) => {
+      let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+      const call = fileclient.getAllFiles(request, requestmetadata, (error: any, response: FileList) => {
         if (error) {
           console.log(error)
         }
@@ -55,6 +56,26 @@ const Page: React.FC = () => {
         const filenames: string[] = allFile.map(ele => ele.getFilename())
         setFiles(filenames)
         toast.success("Files extracted successfully")
+      })
+      call.on("metadata", (metadata) => {
+        console.log(metadata)
+        if (metadata["token"]) {
+          token = metadata["token"]
+          localStorage.setItem("token", token)
+          Cookies.set("token",token)
+          request.setToken(token)
+          requestmetadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+          fileclient.getAllFiles(request, requestmetadata, (error: any, response: FileList) => {
+            if (error) {
+              console.log(error)
+            }
+            const allFile: File[] = response.getAllfilesList()
+            const filenames: string[] = allFile.map(ele => ele.getFilename())
+            setFiles(filenames)
+            toast.success("Files extracted successfully")
+          })
+        }
+
       })
     } catch (error) {
       console.log(error)

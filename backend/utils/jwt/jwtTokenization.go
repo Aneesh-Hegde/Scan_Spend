@@ -16,9 +16,9 @@ type Claims struct {
 func GenerateJWT(userID int) (string, error) {
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	if secretKey == "" {
-		log.Fatal("JWT secret key not set")
+		log.Print("JWT secret key not set")
 	}
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(30 * time.Minute)
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -37,7 +37,7 @@ func GenerateJWT(userID int) (string, error) {
 func ValidateJWT(tokenStr string) (int, error) {
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	if secretKey == "" {
-		log.Fatal("JWT secretKey not set")
+		log.Print("JWT secretKey not set")
 	}
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {

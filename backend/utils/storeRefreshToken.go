@@ -8,7 +8,6 @@ import(
 )
 func SetRefreshTokenHandler(c echo.Context) error {
 	authHeader := c.Request().Header.Get("Authorization")
-	fmt.Println("set token called", c.Request().Header)
 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer") {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authentication header missing"})
 

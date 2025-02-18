@@ -19,7 +19,7 @@ func InitDB() {
 
 	config, err := pgxpool.ParseConfig(dbURL)
 	if err != nil {
-		log.Fatalf("Unable to parse database URL: %v", err)
+		log.Printf("Unable to parse database URL: %v", err)
 	}
 
 	config.MaxConns = 10
@@ -27,24 +27,24 @@ func InitDB() {
 
 	DB, err = pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
-		log.Fatalf("Unable to connect to the database: %v", err)
+		log.Printf("Unable to connect to the database: %v", err)
 	}
 	log.Println("Successfully connected to the database.")
 
 	currDir, err := os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	filepath := fmt.Sprintf("%s/db/tables.sql", currDir)
 	sqlBytes, err := os.ReadFile(filepath)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 	sqlCommand := string(sqlBytes)
 	_, err = DB.Exec(context.Background(), sqlCommand)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 
 }

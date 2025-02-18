@@ -61,18 +61,18 @@ func GetCachedProductData(filename string) ([]states.Product, error) {
 
 }
 
-func CacheRefreshToken(token string,userId int)error{
-  err:=RedisClient.Set(context.Background(),"refreshToken"+token,userId,30*24*time.Hour).Err()
-  if err!=nil{
-    return err
-  }
-  return nil
+func CacheRefreshToken(token string, userId int) error {
+	err := RedisClient.Set(context.Background(), "refreshToken"+token, userId, 30*24*time.Hour).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func GetRefreshToken(token string)(string,error){
-  refreshToken,err:=RedisClient.Get(context.Background(),"refreshToken"+token).Result()
-  if err!=nil{
-    return "",err
-  }
-  return refreshToken,nil
+func GetRefreshToken(token string) (string, error) {
+	refreshToken, err := RedisClient.Get(context.Background(), "refreshToken"+token).Result()
+	if err != nil {
+		return "", err
+	}
+	return refreshToken, nil
 }

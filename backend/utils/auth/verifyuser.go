@@ -16,7 +16,7 @@ func EmailToken(ctx context.Context, req *user.TokenRequest) (*user.TokenRespons
 	token, err := jwt.GenerateEmailToken(email, username)
 	fmt.Println(token)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return &user.TokenResponse{
 			Token:   "",
 			Message: "Error in generating token",
@@ -32,7 +32,7 @@ func VerifyEmail(ctx context.Context, req *user.VerifyRequest) (*user.VerifyResp
 	token := req.GetToken()
 	email, err := jwt.ValidateEmailToken(token)
 	if err != nil {
-		log.Fatal("Token is expired for email verification")
+		log.Print("Token is expired for email verification")
 		return &user.VerifyResponse{
 			Validation: false,
 		}, nil
@@ -40,7 +40,7 @@ func VerifyEmail(ctx context.Context, req *user.VerifyRequest) (*user.VerifyResp
 	dbQuery := `UPDATE users SET is_verified=TRUE WHERE email=$1`
 	_, err = db.DB.Exec(ctx, dbQuery, email)
 	if err != nil {
-		log.Fatal("Error in making email verified")
+		log.Print("Error in making email verified")
 		return &user.VerifyResponse{
 			Validation: false,
 		}, nil

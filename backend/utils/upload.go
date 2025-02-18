@@ -38,7 +38,7 @@ func Upload(c echo.Context) error {
 	userIdStr := c.FormValue("userId")
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		log.Fatal("Error in parsing user Id")
+		log.Print("Error in parsing user Id")
 	}
 	fmt.Println(userId)
 	// Log chunk data
