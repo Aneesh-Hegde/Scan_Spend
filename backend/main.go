@@ -10,6 +10,7 @@ import (
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	files "github.com/Aneesh-Hegde/expenseManager/grpc_file"
+	grpcMiddlware "github.com/Aneesh-Hegde/expenseManager/middleware"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
@@ -85,7 +86,16 @@ func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser)
 // 	}, nil
 // }
 
+func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	newCtx, err := grpcMiddlware.AuthInterceptor(ctx)
+	if err != nil {
+		log.Println("Authentication failed:", err)
+		return nil, err
+	}
 
+	// 🔹 Proceed with the actual request handler
+	return handler(newCtx, req)
+}
 
 func main() {
 	err := godotenv.Load(".env-dev")
@@ -96,11 +106,11 @@ func main() {
 	// Create a TCP listener for gRPC
 	listener, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		log.Printf("Failed to listen: %v", err)
 	}
 
 	// Create gRPC server
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(authInterceptor))
 
 	// Register the gRPC service
 	server := &server{}
@@ -138,13 +148,13 @@ func main() {
 	go func() {
 		log.Println("Starting HTTP2 file upload server on http://localhost:8081")
 		if err := e.Start(":8081"); err != nil {
-			log.Fatalf("Failed to start Echo server: %v", err)
+			log.Printf("Failed to start Echo server: %v", err)
 		}
 	}()
 
 	// Start the gRPC server (this will block the main goroutine)
 	log.Println("Starting gRPC server on port 50051...")
 	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve gRPC server: %v", err)
+		log.Printf("Failed to serve gRPC server: %v", err)
 	}
 }
