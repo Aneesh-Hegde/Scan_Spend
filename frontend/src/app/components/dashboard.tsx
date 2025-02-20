@@ -3,33 +3,53 @@ import React, { useEffect, useState } from 'react';
 import { UserServiceClient } from '../grpc_schema/UserServiceClientPb';
 import { GetUserProfileRequest, UserProfile } from '../grpc_schema/user_pb';
 import { useRouter } from 'next/navigation';
+import { Metadata } from 'grpc-web';
+import api from '../utils/api';
 
 const Dashboard = () => {
   const [message, setMessage] = useState('');
   const [userID, setUserID] = useState<number | null>(0);
   const router = useRouter();
   useEffect(() => {
-    if (typeof window !== undefined) {
+    const getUserData = async () => {
+      if (typeof window !== undefined) {
+        const token: string | null = localStorage.getItem("token");
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+      }
+
+      const client = new UserServiceClient("http://localhost:8080");
+      const request = new GetUserProfileRequest();
       const token: string | null = localStorage.getItem("token");
-      if (!token) {
-        router.push('/login');
-        return;
-      }
+      const response = await api.get('get-refresh-token', { withCredentials: true })
+      const refreshToken: string = response.data.refresh_token
+      let metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+      request.setUserId(token ? token : '');
+
+      client.getUserProfile(request, metadata, (err, response: UserProfile) => {
+        if (err) {
+          alert(`Invalid session: ${err.message}`);
+          router.push('/login');
+        } else {
+          setUserID(response.getUserId());
+        }
+      }).on("metadata", (metadata) => {
+        const token = metadata['token']
+        localStorage.setItem("token", token)
+      metadata= { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+        client.getUserProfile(request, metadata, (err, response: UserProfile) => {
+          if (err) {
+            alert(`Invalid session: ${err.message}`);
+            router.push('/login');
+          } else {
+            setUserID(response.getUserId());
+          }
+        })
+      });
     }
-
-    const client = new UserServiceClient("http://localhost:8080");
-    const request = new GetUserProfileRequest();
-    const token: string | null = localStorage.getItem("token");
-    request.setUserId(token ? token : '');
-
-    client.getUserProfile(request, {}, (err, response: UserProfile) => {
-      if (err) {
-        alert(`Invalid session: ${err.message}`);
-        router.push('/login');
-      } else {
-        setUserID(response.getUserId());
-      }
-    });
+    getUserData()
   }, []);
 
   return (

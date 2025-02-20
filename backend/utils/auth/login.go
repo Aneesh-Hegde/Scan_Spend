@@ -40,6 +40,7 @@ func Login(ctx context.Context, req *user.LoginUserRequest) (*user.LoginResponse
 	if err := grpc.SendHeader(ctx, headers); err != nil {
 		return nil, err
 	}
+	fmt.Println("Response send")
 	return &user.LoginResponse{
 		Token: token,
 	}, nil

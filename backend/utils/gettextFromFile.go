@@ -12,10 +12,18 @@ import (
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/Aneesh-Hegde/expenseManager/states"
 	"github.com/otiai10/gosseract/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, error) {
 	filename := req.GetFilename()
+  md,_:=metadata.FromIncomingContext(ctx)
+  accessToken:=md.Get("accessToken")
+  if len(accessToken)>0{
+    header:=metadata.Pairs("accessToken",accessToken[0])
+    grpc.SendHeader(ctx,header)
+  }
 
 	// Check if product data is already cached in Redis
 	cachedProducts, err := redis.GetCachedProductData(filename)
@@ -37,7 +45,7 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 			Total:    strconv.FormatFloat(total, 'f', 2, 64),
 		}, nil
 	}
-
+fmt.Println(req.GetToken())
 	productFromDB, err := data.GetFileProduct(ctx, filename, req.GetToken())
 	if err == nil && productFromDB != nil {
 		fmt.Println("From db")

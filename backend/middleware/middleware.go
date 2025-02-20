@@ -27,21 +27,22 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 		return nil, fmt.Errorf("authentication or refresh token missing")
 	}
 
-	accessToken := strings.TrimPrefix(authHeaders[0], "Bearer ")
+	requestAccessToken := strings.TrimPrefix(authHeaders[0], "Bearer ")
 	refreshToken := refreshTokenHeaders[0]
 
 	var userId int
 	var err error
+    var accessToken string
 
-	userId, err = jwt.ValidateJWT(accessToken)
+	userId, err = jwt.ValidateJWT(requestAccessToken)
 	if err != nil {
 		log.Println("Invalid or expired access token:", err)
-		accessToken, userId, err = refreshAccessToken(refreshToken)
+    accessToken, userId, err = refreshAccessToken(refreshToken)
 		if err != nil {
 			return nil, fmt.Errorf("failed to refresh access token: %v", err)
 		}
 	}
-	headers := metadata.New(map[string]string{"user_id": strconv.Itoa(userId), "token": accessToken})
+  headers := metadata.New(map[string]string{"user_id": strconv.Itoa(userId), "token": accessToken,"prev_token":requestAccessToken})
   fmt.Println(headers)
 	newCtx := metadata.NewIncomingContext(ctx, headers)
 

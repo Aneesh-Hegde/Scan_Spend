@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import api from '../utils/api';
+import { Metadata } from 'grpc-web';
 
 const LoginUser = () => {
   const [email, setEmail] = useState<string>('');
@@ -41,20 +42,22 @@ const LoginUser = () => {
       const response = await new Promise<LoginResponse>(async (resolve, reject) => {
         let refresh_token: string | null = "";
         let token: string | null = "";
-
         //get the access token after login
         const call = grpcClient.loginUser(request, {}, (err, response) => {
           if (err) reject(err);
           else {
+            console.log("first")
             token = response.getToken();
             localStorage.setItem("token", token)
             Cookies.set("token", token)
+            router.push("/");
             resolve(response);
           }
         });
 
         // Listen for metadata i.e extract refresh_token
         call.on("metadata", async (metadata) => {
+          console.log("second")
           refresh_token = metadata["refresh_token"] || null;
           if (refresh_token) {
             try {
@@ -67,8 +70,7 @@ const LoginUser = () => {
             }
           }
         });
-
-        router.push("/");
+        console.log(response)
       });
 
     } catch (error) {

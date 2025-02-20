@@ -2,7 +2,9 @@ import toaster from "react-hot-toast"
 import { FileProcessingServiceClient } from "../grpc_schema/UploadServiceClientPb"
 import { GetProducts, DBMessage, Product } from "../grpc_schema/upload_pb"
 import { Product as type_product } from "../types/types"
-const HandleProductSave = (products: type_product[], filename: string) => {
+import api from "./api"
+import { Metadata } from "grpc-web"
+const HandleProductSave = async (products: type_product[], filename: string) => {
   const client = new FileProcessingServiceClient("http://localhost:8080")
 
   const grpc_products = products.map((product) => {
@@ -22,7 +24,11 @@ const HandleProductSave = (products: type_product[], filename: string) => {
   request.setProductsList(grpc_products)
   request.setFilename(filename)
   request.setUserid(userid ? userid : '')
-  client.saveToDB(request, {}, (err, res: DBMessage) => {
+  const token=localStorage.getItem("token")
+  const response=await api.get("get-refresh-token",{withCredentials:true})
+  const refreshToken=response.data.refresh_token
+      const metadata:Metadata= { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+  client.saveToDB(request,metadata ,(err, res: DBMessage) => {
     if (err) {
       toaster.error("Error in saving product")
       return

@@ -3,13 +3,15 @@ import { FileProcessingServiceClient } from '../grpc_schema/UploadServiceClientP
 import { Product } from '../types/types';
 import { toast } from 'react-toastify';
 import * as grpcWeb from 'grpc-web'
+import api from './api';
+import { Metadata } from 'grpc-web';
 interface FileClick {
   filename: string;
   filestate: (data: string) => void;
   productstate: (data: Product[]) => void;
 }
 
-const HandleFileClick = ({
+const HandleFileClick = async ({
   filename,
   filestate: setFilename,
   productstate: setProducts,
@@ -24,9 +26,11 @@ const HandleFileClick = ({
   request.setFilename(filename);
   const token: string | null = localStorage.getItem("token")
   request.setToken(token ? token : "")
-
+  const response = await api.get('get-refresh-token', { withCredentials: true })
+  const refresh_token: string = response.data.refresh_token
+  const metadata: Metadata = { 'authentication': `Bearear ${token}`, 'refresh_token': refresh_token }
   // Call gRPC method using the callback
-  client.getText(request, {}, (err: grpcWeb.RpcError, response: GetTextResponse) => {
+  client.getText(request, metadata, (err: grpcWeb.RpcError, response: GetTextResponse) => {
     if (err) {
       toast.error('Error fetching product data');
       console.error(err);
@@ -52,6 +56,11 @@ const HandleFileClick = ({
       toast.success('Products extracted successfully');
     } else {
       toast.error('Failed to extract products');
+    }
+  }).on("metadata", (metadata) => {
+    const accessToken = metadata['accessToken']
+    if (accessToken != null) {
+      localStorage.setItem("token", accessToken)
     }
   });
 };

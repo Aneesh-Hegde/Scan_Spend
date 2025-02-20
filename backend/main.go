@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -87,6 +88,10 @@ func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser)
 // }
 
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	fmt.Println(info.FullMethod)
+	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" {
+		return handler(ctx, req)
+	}
 	newCtx, err := grpcMiddlware.AuthInterceptor(ctx)
 	if err != nil {
 		log.Println("Authentication failed:", err)

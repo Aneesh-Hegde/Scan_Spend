@@ -4,16 +4,24 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
-	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 func UserProfile(ctx context.Context, req *user.GetUserProfileRequest) (*user.UserProfile, error) {
 	var userProfile user.UserProfile
+	md, _ := metadata.FromIncomingContext(ctx)
 	query := `SELECT user_id,username,email FROM users WHERE user_id=$1`
-	userId, _ := jwt.ValidateJWT(req.GetUserId())
+	userId, _ := strconv.Atoi(md["user_id"][0])
+	if len(md["token"][0]) > 0 {
+
+		headers := metadata.Pairs("token", md["token"][0])
+		grpc.SendHeader(ctx, headers)
+	}
 	var id int32
 	var username string
 	var email string
