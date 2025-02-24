@@ -16,7 +16,7 @@ const UserProfile = () => {
       request.setUserId(token ? token : '') // Assume userId is 1 for this example
       const response = await api.get('get-refresh-token', { withCredentials: true })
       const refreshToken: string = response.data.refresh_token
-      let metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+      const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
 
       grpcClient.getUserProfile(request, metadata, (err: any, response: any) => {
         if (err) {

@@ -25,7 +25,7 @@ const Dashboard = () => {
       const token: string | null = localStorage.getItem("token");
       const response = await api.get('get-refresh-token', { withCredentials: true })
       const refreshToken: string = response.data.refresh_token
-      let metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+      const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
       request.setUserId(token ? token : '');
 
       client.getUserProfile(request, metadata, (err, response: UserProfile) => {

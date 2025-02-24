@@ -36,7 +36,7 @@ const UpdateUserProfile: React.FC = () => {
     const response = await api.get("/get-refresh-token", { withCredentials: true, })
     const refresh_token: string = response.data.refresh_token
 
-    let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+    const requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
 
     grpcClient.getUserProfile(getUserDataRequest, requestmetadata, (err, response) => {
       if (err) {
@@ -90,7 +90,7 @@ const UpdateUserProfile: React.FC = () => {
     const response = await api.get("/get-refresh-token", { withCredentials: true, })
     const refresh_token: string = response.data.refresh_token
 
-    let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+    const requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
 
     grpcClient.updateUser(request, requestmetadata, async (err, response) => {
       if (err) {
