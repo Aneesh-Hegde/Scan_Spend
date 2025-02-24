@@ -18,12 +18,13 @@ import (
 
 func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, error) {
 	filename := req.GetFilename()
-  md,_:=metadata.FromIncomingContext(ctx)
-  accessToken:=md.Get("accessToken")
-  if len(accessToken)>0{
-    header:=metadata.Pairs("accessToken",accessToken[0])
-    grpc.SendHeader(ctx,header)
-  }
+	md, _ := metadata.FromIncomingContext(ctx)
+	fmt.Println(md)
+	accessToken := md.Get("token")
+	if len(accessToken) > 0 {
+		header := metadata.Pairs("accessToken", accessToken[0])
+		grpc.SendHeader(ctx, header)
+	}
 
 	// Check if product data is already cached in Redis
 	cachedProducts, err := redis.GetCachedProductData(filename)
@@ -45,8 +46,8 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 			Total:    strconv.FormatFloat(total, 'f', 2, 64),
 		}, nil
 	}
-fmt.Println(req.GetToken())
-	productFromDB, err := data.GetFileProduct(ctx, filename, req.GetToken())
+	fmt.Println(req.GetToken())
+	productFromDB, err := data.GetFileProduct(ctx, filename, md["user_id"][0])
 	if err == nil && productFromDB != nil {
 		fmt.Println("From db")
 		return productFromDB, nil

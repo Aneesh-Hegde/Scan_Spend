@@ -28,12 +28,16 @@ const HandleFileClick = async ({
   request.setToken(token ? token : "")
   const response = await api.get('get-refresh-token', { withCredentials: true })
   const refresh_token: string = response.data.refresh_token
-  const metadata: Metadata = { 'authentication': `Bearear ${token}`, 'refresh_token': refresh_token }
+  const metadata: Metadata = { 'authentication': `Bearer ${token}`, 'refresh_token': refresh_token }
   // Call gRPC method using the callback
   client.getText(request, metadata, (err: grpcWeb.RpcError, response: GetTextResponse) => {
     if (err) {
       toast.error('Error fetching product data');
       console.error(err);
+
+      if (err.code === 16) {
+        window.location.href = '/login'
+      }
       return;
     }
 

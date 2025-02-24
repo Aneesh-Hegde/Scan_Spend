@@ -21,6 +21,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type server struct {
@@ -89,13 +91,13 @@ func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser)
 
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	fmt.Println(info.FullMethod)
-	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" {
+	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" || info.FullMethod=="/auth.UserService/VerifyUser" {
 		return handler(ctx, req)
 	}
 	newCtx, err := grpcMiddlware.AuthInterceptor(ctx)
 	if err != nil {
 		log.Println("Authentication failed:", err)
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, "Authentication required")
 	}
 
 	// 🔹 Proceed with the actual request handler

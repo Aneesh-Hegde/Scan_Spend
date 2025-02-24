@@ -16,6 +16,7 @@ import (
 // middleware to validate refresh and access token
 func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
+	fmt.Println(md)
 	if !ok {
 		return nil, fmt.Errorf("Error in getting the metadata")
 	}
@@ -26,24 +27,27 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	if len(authHeaders) == 0 || len(refreshTokenHeaders) == 0 {
 		return nil, fmt.Errorf("authentication or refresh token missing")
 	}
-
 	requestAccessToken := strings.TrimPrefix(authHeaders[0], "Bearer ")
 	refreshToken := refreshTokenHeaders[0]
 
 	var userId int
 	var err error
-    var accessToken string
+	var accessToken string
 
 	userId, err = jwt.ValidateJWT(requestAccessToken)
+  fmt.Println(err)
+	if err != nil && err.Error() != "token expired" {
+		return nil, fmt.Errorf("Invalid tokens passed:%v", err)
+	}
 	if err != nil {
 		log.Println("Invalid or expired access token:", err)
-    accessToken, userId, err = refreshAccessToken(refreshToken)
+		accessToken, userId, err = refreshAccessToken(refreshToken)
 		if err != nil {
 			return nil, fmt.Errorf("failed to refresh access token: %v", err)
 		}
 	}
-  headers := metadata.New(map[string]string{"user_id": strconv.Itoa(userId), "token": accessToken,"prev_token":requestAccessToken})
-  fmt.Println(headers)
+	headers := metadata.New(map[string]string{"user_id": strconv.Itoa(userId), "token": accessToken, "prev_token": requestAccessToken})
+	fmt.Println(headers)
 	newCtx := metadata.NewIncomingContext(ctx, headers)
 
 	return newCtx, nil

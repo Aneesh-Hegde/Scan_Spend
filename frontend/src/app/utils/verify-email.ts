@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 export default function EmailVerification(token: string | null) {
   if (token) {
     const request = new VerifyRequest()
+    localStorage.setItem("token",token)
     request.setToken(token)
     client.verifyUser(request, {}, (err: any, response: VerifyResponse) => {
       if (err) {

@@ -17,6 +17,7 @@ func UserProfile(ctx context.Context, req *user.GetUserProfileRequest) (*user.Us
 	md, _ := metadata.FromIncomingContext(ctx)
 	query := `SELECT user_id,username,email FROM users WHERE user_id=$1`
 	userId, _ := strconv.Atoi(md["user_id"][0])
+  fmt.Println(md)
 	if len(md["token"][0]) > 0 {
 
 		headers := metadata.Pairs("token", md["token"][0])

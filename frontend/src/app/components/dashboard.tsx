@@ -12,13 +12,13 @@ const Dashboard = () => {
   const router = useRouter();
   useEffect(() => {
     const getUserData = async () => {
-      if (typeof window !== undefined) {
-        const token: string | null = localStorage.getItem("token");
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-      }
+      // if (typeof window !== undefined) {
+      //   const token: string | null = localStorage.getItem("token");
+      //   if (!token) {
+      //     router.push('/login');
+      //     return;
+      //   }
+      // }
 
       const client = new UserServiceClient("http://localhost:8080");
       const request = new GetUserProfileRequest();
@@ -37,16 +37,18 @@ const Dashboard = () => {
         }
       }).on("metadata", (metadata) => {
         const token = metadata['token']
-        localStorage.setItem("token", token)
-      metadata= { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
-        client.getUserProfile(request, metadata, (err, response: UserProfile) => {
-          if (err) {
-            alert(`Invalid session: ${err.message}`);
-            router.push('/login');
-          } else {
-            setUserID(response.getUserId());
-          }
-        })
+        if (token) {
+          localStorage.setItem("token", token)
+          metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+          client.getUserProfile(request, metadata, (err, response: UserProfile) => {
+            if (err) {
+              alert(`Invalid session: ${err.message}`);
+              router.push('/login');
+            } else {
+              setUserID(response.getUserId());
+            }
+          })
+        }
       });
     }
     getUserData()

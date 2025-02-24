@@ -8,8 +8,10 @@ const VerifyEmail = () => {
     const router = useRouter()
     const token: string | null = searchParams.get("token")
     useEffect(() => {
-      EmailVerification(token)
-      router.push('/')
+      if (token) {
+        EmailVerification(token)
+        router.push('/')
+      }
 
     }, [token, router])
     return (

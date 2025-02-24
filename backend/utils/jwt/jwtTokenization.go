@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -41,10 +43,27 @@ func ValidateJWT(tokenStr string) (int, error) {
 	}
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		return 0, err
+		var ve *jwt.ValidationError
+		if errors.As(err, &ve) {
+			switch {
+			case ve.Errors&jwt.ValidationErrorExpired != 0:
+				return 0, errors.New("token expired")
+			case ve.Errors&jwt.ValidationErrorSignatureInvalid != 0:
+				return 0, fmt.Errorf("invalid signature (tampered token)")
+			case ve.Errors&jwt.ValidationErrorMalformed != 0:
+				return 0, fmt.Errorf("malformed token (wrong format)")
+			case ve.Errors&jwt.ValidationErrorClaimsInvalid != 0:
+				return 0, fmt.Errorf("invalid token claims")
+			default:
+				return 0, fmt.Errorf("invalid token: %v", err)
+			}
+		}
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {

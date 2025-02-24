@@ -24,11 +24,11 @@ const HandleProductSave = async (products: type_product[], filename: string) => 
   request.setProductsList(grpc_products)
   request.setFilename(filename)
   request.setUserid(userid ? userid : '')
-  const token=localStorage.getItem("token")
-  const response=await api.get("get-refresh-token",{withCredentials:true})
-  const refreshToken=response.data.refresh_token
-      const metadata:Metadata= { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
-  client.saveToDB(request,metadata ,(err, res: DBMessage) => {
+  const token = localStorage.getItem("token")
+  const response = await api.get("get-refresh-token", { withCredentials: true })
+  const refreshToken = response.data.refresh_token
+  const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
+  client.saveToDB(request, metadata, (err, res: DBMessage) => {
     if (err) {
       toaster.error("Error in saving product")
       return
@@ -38,6 +38,11 @@ const HandleProductSave = async (products: type_product[], filename: string) => 
     toaster.success("Filed saved successfully")
     return
 
+  }).on("metadata", (metadata) => {
+    const token: string | null = metadata["token"]
+    if (token) {
+      localStorage.setItem("token", token)
+    }
   })
 }
 export default HandleProductSave

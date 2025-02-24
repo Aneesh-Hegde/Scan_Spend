@@ -13,6 +13,8 @@ import grpcClient from "../utils/userClient";
 import { loginWithGoogle, signUpWithEmail } from "../utils/authService";
 import Cookies from "js-cookie";
 import EmailVerification from "../utils/verify-email";
+import { metadata } from "../layout";
+import api from "../utils/api";
 
 const RegisterUser = () => {
   const [username, setUsername] = useState<string>("");
@@ -70,9 +72,15 @@ const RegisterUser = () => {
           return;
         }
 
-        localStorage.setItem("token", token);
-        Cookies.set("token", token);
+        // localStorage.setItem("token", token);
+        // Cookies.set("token", token);
         resolve(token);
+      }).on("metadata", async (metadata) => {
+        const refresh_token = metadata["refresh_token"]
+        await api.post("/refresh", {}, {
+          headers: { Authorization: `Bearer ${refresh_token}` },
+          withCredentials: true
+        });
       });
     });
   };

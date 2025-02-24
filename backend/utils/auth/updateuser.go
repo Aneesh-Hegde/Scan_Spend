@@ -3,25 +3,28 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
-	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
-	"log"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 func UpdateUser(ctx context.Context, req *user.UpdateUserRequest) (*user.UserResponse, error) {
-	userId, err := jwt.ValidateJWT(req.GetUserId())
-	if err != nil {
-		log.Printf("Error translating userId: %v", err)
-		return nil, fmt.Errorf("could not hash password: %v", err)
-	}
-		query := `UPDATE users SET username = $1, email = $2 WHERE user_id = $3`
-		_, err = db.DB.Exec(ctx, query, req.GetUsername(), req.GetEmail(), userId)
-		if err != nil {
-			log.Printf("Error updating user: %v", err)
-			return nil, fmt.Errorf("could not update user: %v", err)
-		}
+	md, _ := metadata.FromIncomingContext(ctx)
+	if len(md["token"][0]) > 0 {
+		headers := metadata.Pairs("token", md["token"][0])
+		grpc.SendHeader(ctx, headers)
 
+	}
+	userId := md["user_id"][0]
+	query := `UPDATE users SET username = $1, email = $2 WHERE user_id = $3`
+	_, err := db.DB.Exec(ctx, query, req.GetUsername(), req.GetEmail(), userId)
+	if err != nil {
+		log.Printf("Error updating user: %v", err)
+		return nil, fmt.Errorf("could not update user: %v", err)
+	}
 
 	// Update user information in the database
 

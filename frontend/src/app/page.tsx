@@ -15,13 +15,14 @@ import fileclient from './utils/fileClient';
 import { GetFileByUser, File, FileList } from './grpc_schema/file_pb'
 import { Metadata } from 'grpc-web';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
   const [products, setProducts] = useState<Product[]>([]); // To store the products data
   const [filename, setFilename] = useState<string>(''); // To store the selected filename
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-
+const router=useRouter()
   // Fetch list of all filenames from the backend when component mounts
   useEffect(() => {
     const fetchFiles = async () => {
@@ -35,6 +36,7 @@ const Page: React.FC = () => {
       } catch (error) {
         console.log(error)
         toast.error('Error fetching filenames');
+        router.push('/login')
       }
 
     }
@@ -45,12 +47,16 @@ const Page: React.FC = () => {
     //grpc call to get all files of the users
     const request = new GetFileByUser()
     let token: string | null = localStorage.getItem("token")
+    console.log(token)
     request.setToken(token ? token : "")
-    try {
+   try {
       let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
       const call = fileclient.getAllFiles(request, requestmetadata, (error: any, response: FileList) => {
         if (error) {
           console.log(error)
+          if(error.code===16){
+            router.push('/login')
+          }
         }
         const allFile: File[] = response.getAllfilesList()
         const filenames: string[] = allFile.map(ele => ele.getFilename())
@@ -105,7 +111,7 @@ const Page: React.FC = () => {
                 <button onClick={() => HandleFileClick({
                   filename: file,
                   filestate: setFilename,
-                  productstate: setProducts
+                  productstate: setProducts,
                 })}>
                   {file}
                 </button>

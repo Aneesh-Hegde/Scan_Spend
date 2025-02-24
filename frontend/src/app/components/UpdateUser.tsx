@@ -7,6 +7,8 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
 import { ResetPassword } from "../utils/resetPassword";
 import { UpdateAndVerifyEmail } from "../utils/updateEmail";
+import { Metadata } from 'grpc-web';
+import api from "../utils/api";
 
 const UpdateUserProfile: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -18,6 +20,11 @@ const UpdateUserProfile: React.FC = () => {
   const currEmailRef = useRef<string>("");
 
   useEffect(() => {
+    updateUserRequest()
+  }, []);
+
+  const updateUserRequest = async () => {
+
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("User is not authenticated!");
@@ -26,8 +33,12 @@ const UpdateUserProfile: React.FC = () => {
 
     const getUserDataRequest = new GetUserProfileRequest();
     getUserDataRequest.setUserId(token);
+    const response = await api.get("/get-refresh-token", { withCredentials: true, })
+    const refresh_token: string = response.data.refresh_token
 
-    grpcClient.getUserProfile(getUserDataRequest, {}, (err, response) => {
+    let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+
+    grpcClient.getUserProfile(getUserDataRequest, requestmetadata, (err, response) => {
       if (err) {
         console.error(err);
         toast.error("Failed to fetch user profile.");
@@ -37,7 +48,7 @@ const UpdateUserProfile: React.FC = () => {
         currEmailRef.current = response.getEmail();
       }
     });
-  }, []);
+  }
 
   const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
@@ -64,31 +75,45 @@ const UpdateUserProfile: React.FC = () => {
       }
 
       // Handle profile update
-      const request = new UpdateUserRequest();
-      request.setUserId(userId);
-      request.setUsername(username);
-      request.setEmail(email);
-
-      grpcClient.updateUser(request, {}, async (err, response) => {
-        if (err) {
-          console.error("Error updating profile:", err);
-          toast.error("Failed to update profile.");
-          return;
-        }
-
-        toast.success("Profile updated successfully!");
-        setIsEditingPassword(false);
-        setPassword("");
-
-        if (isEditingPassword) {
-          await handlePasswordReset();
-        }
-      });
+      updateUser(userId, email, username)
     } catch (error) {
       console.error("Profile update error:", error);
       toast.error("An unexpected error occurred.");
     }
   };
+  const updateUser = async (userId: string, email: string, username: string) => {
+    const request = new UpdateUserRequest()
+    const token = localStorage.getItem("token")
+    request.setUserId(userId);
+    request.setUsername(username);
+    request.setEmail(email);
+    const response = await api.get("/get-refresh-token", { withCredentials: true, })
+    const refresh_token: string = response.data.refresh_token
+
+    let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+
+    grpcClient.updateUser(request, requestmetadata, async (err, response) => {
+      if (err) {
+        console.error("Error updating profile:", err);
+        toast.error("Failed to update profile.");
+        return;
+      }
+
+      toast.success("Profile updated successfully!");
+      setIsEditingPassword(false);
+      setPassword("");
+
+      if (isEditingPassword) {
+        await handlePasswordReset();
+      }
+    }).on("metadata", async (metadata) => {
+      const token: string | null = metadata["token"]
+      console.log(token)
+      if (token) {
+        localStorage.setItem("token", token)
+      }
+    });
+  }
 
   const handlePasswordReset = async () => {
     try {

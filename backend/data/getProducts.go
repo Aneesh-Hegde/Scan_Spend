@@ -8,14 +8,9 @@ import (
 
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	"github.com/Aneesh-Hegde/expenseManager/grpc"
-	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
 )
 
-func GetFileProduct(ctx context.Context, filename string, token string) (*grpc.GetTextResponse, error) {
-	userId, err := jwt.ValidateJWT(token)
-	if err != nil {
-		return nil, err
-	}
+func GetFileProduct(ctx context.Context, filename string, userId string) (*grpc.GetTextResponse, error) {
 	fmt.Println("Data to db")
 	fmt.Println(userId, filename)
 	dbQuery := `SELECT p.product_id, p.name, p.quantity, p.price, p.file_name, p.date_added, p.category_id, c.name AS category_name 
