@@ -22,9 +22,9 @@ func GetFileProduct(ctx context.Context, filename string, userId string) (*grpc.
 	var products []*grpc.Product
 	var totalAmount float32 // To calculate total as quantity * price
 	if !rows.Next() {
-		return nil, fmt.Errorf("No data found")
+		return nil, fmt.Errorf("No data found") // No data case
 	}
-	for rows.Next() {
+	for {
 		var product grpc.Product
 		var categoryID, product_id, quantity int
 		var price float64
@@ -40,17 +40,21 @@ func GetFileProduct(ctx context.Context, filename string, userId string) (*grpc.
 		product.Quantity = float32(quantity)
 		product.Amount = float32(price)
 		// product.Category = fmt.Sprintf("%d", categoryID)
-		product.Date = date_added.Format("2006-01-02")
+		product.Date = date_added.Format("02/02/2006")
 
 		// Compute total amount (sum of quantity * price for all products)
 		totalAmount += float32(quantity) * float32(price)
 
 		products = append(products, &product)
+		if !rows.Next() {
+			break
+		}
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("row iteration error: %w", err)
 	}
+	fmt.Println(products)
 
 	// Create response
 	response := &grpc.GetTextResponse{
