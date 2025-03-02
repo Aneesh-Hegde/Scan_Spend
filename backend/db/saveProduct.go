@@ -25,5 +25,5 @@ func SaveProducts(ctx context.Context, req *pb.GetProducts) (*pb.DBMessage, erro
 	}
 	userId, _ := strconv.Atoi(md["user_id"][0])
 	fmt.Println(userId, products)
-	return StoreProductData(userId, req.GetFilename(), products)
+	return StoreProductData(ctx, userId, req.GetFilename(), products)
 }

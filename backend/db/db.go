@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	// "github.com/Aneesh-Hegde/expenseManager/states"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
+	"github.com/Aneesh-Hegde/expenseManager/redis"
+	"github.com/Aneesh-Hegde/expenseManager/states"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -53,7 +56,7 @@ func CloseDB() {
 	DB.Close()
 }
 
-func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.DBMessage, error) {
+func StoreProductData(ctx context.Context, userID int, filename string, products []*pb.Product) (*pb.DBMessage, error) {
 	// Step 1: Collect all unique categories from the products
 	categoryNames := make(map[string]bool)
 	for _, product := range products {
@@ -116,7 +119,7 @@ func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.
 	}
 
 	// Step 5: Begin transaction for inserting products
-	tx, err := DB.Begin(context.Background())
+	tx, err := DB.Begin(ctx)
 	if err != nil {
 		log.Printf("Error starting transaction: %v", err)
 		return nil, err
@@ -126,29 +129,67 @@ func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.
 	// Step 6: Insert products into the database
 	insertProductQuery := `
         INSERT INTO products (user_id, name, quantity, price, category_id, file_name, description,date_added)
-        VALUES ($1, $2, $3, $4, $5, $6, $7,TO_TIMESTAMP($8,'DD/MM/YYYY'))`
+        VALUES ($1, $2, $3, $4, $5, $6, $7,TO_TIMESTAMP($8,'DD/MM/YYYY')) RETURNING product_id`
 
+	UpdateProductQuery := `
+        UPDATE products SET name = $1, quantity = $2, price = $3, category_id = $4, file_name = $5, description = $6, date_added = TO_TIMESTAMP($7, 'DD/MM/YYYY')
+        WHERE user_id = $8 AND product_id = $9;`
+
+	existsQuery := `SELECT COUNT(*) FROM products WHERE user_id = $1 AND product_id = $2 AND file_name = $3`
+	var updatedProducts []states.Product
+	var message string
 	for _, product := range products {
 		categoryID := existingCategories[product.Category]
-
+		var count, productID int
+		// Check if product exists
+		id, _ := strconv.Atoi(product.Id)
+		fmt.Println(id)
+		err := tx.QueryRow(ctx, existsQuery, userID, id, filename).Scan(&count)
+		if err != nil {
+			return nil, fmt.Errorf("error checking product existence: %v", err)
+		}
+		fmt.Println(count)
+		//TODO:Duplicates in db on update also
+		if count > 0 {
+			// Product exists, update it
+			_, err = DB.Exec(ctx, UpdateProductQuery,
+				product.ProductName,
+				product.Quantity,
+				product.Amount,
+				categoryID,
+				filename,
+				"", // Description (if available)
+				product.Date,
+				userID,
+				id,
+			)
+			if err != nil {
+				return nil, fmt.Errorf("error updating product %s: %v", product.ProductName, err)
+			}
+			message = "Updated successfully"
+		} else {
+			err := tx.QueryRow(ctx, insertProductQuery,
+				userID,
+				product.ProductName,
+				product.Quantity,
+				product.Amount, // Map Amount to Price
+				categoryID,
+				filename, // File Name as per schema
+				"",       // Assuming we don't have description, set it to an empty string or NULL
+				product.Date,
+			).Scan(&productID)
+			if err != nil {
+				fmt.Printf("Error inserting product %s: %v", product.ProductName, err)
+				return nil, err // Return immediately upon error
+			}
+			product.Id = strconv.Itoa(productID)
+			message = "Uploaded first time successfully"
+		}
+		updatedProducts = append(updatedProducts, states.Product{ID: product.Id, ProductName: product.ProductName, Quantity: float64(product.Quantity), Amount: float64(product.Amount), Category: product.Category, Date: product.Date})
 		// Log the product details to ensure they are correct before insertion
 		log.Printf("Inserting product: %+v", product)
 
 		// Inserting product data into the database
-		_, err := tx.Exec(context.Background(), insertProductQuery,
-			userID,
-			product.ProductName,
-			product.Quantity,
-			product.Amount, // Map Amount to Price
-			categoryID,
-			filename, // File Name as per schema
-			"",       // Assuming we don't have description, set it to an empty string or NULL
-			product.Date,
-		)
-		if err != nil {
-			log.Printf("Error inserting product %s: %v", product.ProductName, err)
-			return nil, err // Return immediately upon error
-		}
 	}
 
 	// Step 7: Commit the transaction
@@ -157,6 +198,7 @@ func StoreProductData(userID int, filename string, products []*pb.Product) (*pb.
 		return nil, err
 	}
 	fmt.Println("Products updated successfully")
-
-	return &pb.DBMessage{Message: "Uploaded successfully"}, nil
+	fmt.Println(updatedProducts)
+	err = redis.CacheProductData(filename, updatedProducts)
+	return &pb.DBMessage{Message: message}, nil
 }
