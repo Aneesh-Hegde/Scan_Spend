@@ -46,7 +46,6 @@ func GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, 
 			Total:    strconv.FormatFloat(total, 'f', 2, 64),
 		}, nil
 	}
-	fmt.Println(req.GetToken())
 	productFromDB, err := data.GetFileProduct(ctx, filename, md["user_id"][0])
 	if err == nil && productFromDB != nil {
 		fmt.Println("From db")

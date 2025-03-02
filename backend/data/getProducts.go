@@ -40,7 +40,8 @@ func GetFileProduct(ctx context.Context, filename string, userId string) (*grpc.
 		product.Quantity = float32(quantity)
 		product.Amount = float32(price)
 		// product.Category = fmt.Sprintf("%d", categoryID)
-		product.Date = date_added.Format("02/02/2006")
+		formattedDate := date_added.Format("02/01/2006")
+		product.Date = formattedDate
 
 		// Compute total amount (sum of quantity * price for all products)
 		totalAmount += float32(quantity) * float32(price)

@@ -12,6 +12,8 @@ import (
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	files "github.com/Aneesh-Hegde/expenseManager/grpc_file"
 	grpcMiddlware "github.com/Aneesh-Hegde/expenseManager/middleware"
+	"github.com/Aneesh-Hegde/expenseManager/product"
+	"github.com/Aneesh-Hegde/expenseManager/products"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	user "github.com/Aneesh-Hegde/expenseManager/user_grpc"
 	"github.com/Aneesh-Hegde/expenseManager/utils"
@@ -20,8 +22,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
-"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -77,6 +79,14 @@ func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser)
 	return data.GetFiles(ctx, req)
 }
 
+type ProductService struct {
+	product.UnimplementedProductServiceServer
+}
+
+func (s *ProductService) GetProductsByUser(ctx context.Context, req *product.GetProductsByUserRequest) (*product.ProductsList, error) {
+	return products.GetUserProduct(ctx, req)
+}
+
 // Validate JWT token and extract user ID
 // func (s *UserServiceServer) ValidateToken(ctx context.Context, req *user.ValidateTokenRequest) (*user.userResponse, error) {
 // 	_, err := jwt.ValidateJWT(req.GetToken())
@@ -91,7 +101,7 @@ func (s *FileService) GetAllFiles(ctx context.Context, req *files.GetFileByUser)
 
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	fmt.Println(info.FullMethod)
-	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" || info.FullMethod=="/auth.UserService/VerifyUser" {
+	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" || info.FullMethod == "/auth.UserService/VerifyUser" {
 		return handler(ctx, req)
 	}
 	newCtx, err := grpcMiddlware.AuthInterceptor(ctx)
@@ -129,6 +139,9 @@ func main() {
 
 	FileService := &FileService{}
 	files.RegisterFileServiceServer(grpcServer, FileService)
+
+	ProductService := &ProductService{}
+	product.RegisterProductServiceServer(grpcServer, ProductService)
 	// Echo HTTP server setup (without TLS)
 	e := echo.New()
 	e.Use(middleware.Logger())
