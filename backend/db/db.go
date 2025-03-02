@@ -128,11 +128,11 @@ func StoreProductData(ctx context.Context, userID int, filename string, products
 
 	// Step 6: Insert products into the database
 	insertProductQuery := `
-        INSERT INTO products (user_id, name, quantity, price, category_id, file_name, description,date_added)
+        INSERT INTO products (user_id, product_name, quantity, price, category_id, file_name, description,date_added)
         VALUES ($1, $2, $3, $4, $5, $6, $7,TO_TIMESTAMP($8,'DD/MM/YYYY')) RETURNING product_id`
 
 	UpdateProductQuery := `
-        UPDATE products SET name = $1, quantity = $2, price = $3, category_id = $4, file_name = $5, description = $6, date_added = TO_TIMESTAMP($7, 'DD/MM/YYYY')
+        UPDATE products SET product_name = $1, quantity = $2, price = $3, category_id = $4, file_name = $5, description = $6, date_added = TO_TIMESTAMP($7, 'DD/MM/YYYY')
         WHERE user_id = $8 AND product_id = $9;`
 
 	existsQuery := `SELECT COUNT(*) FROM products WHERE user_id = $1 AND product_id = $2 AND file_name = $3`
