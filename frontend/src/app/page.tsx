@@ -50,7 +50,7 @@ const Page: React.FC = () => {
     let token: string | null = localStorage.getItem("token")
     console.log(token)
     try {
-      let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
+      const requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
       const call = fileclient.getAllFiles(request, requestmetadata, (error: any, response: FileList) => {
         if (error) {
           console.log(error)
