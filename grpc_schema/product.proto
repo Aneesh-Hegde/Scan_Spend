@@ -13,12 +13,11 @@ service ProductService {
 }
 
 message AddProductRequest {
-  int32 user_id = 1;
-  int32 category_id = 2;
-  string name = 3;
-  string description = 4;
-  float price = 5;
-  string date=6;
+  int32 category_id = 1;
+  string name = 2;
+  string description = 3;
+  float price = 4;
+  string date=5;
 
 }
 
@@ -34,7 +33,6 @@ message DeleteProductRequest {
 }
 
 message GetProductsByUserRequest {
-  string token = 1;
 }
 
 message ProductResponse {
@@ -43,13 +41,11 @@ message ProductResponse {
 
 
 message Product {
-  string id = 1;
-  string product_name = 2;
-  float quantity = 3;
-  float amount = 4;
-  string name = 5;
-  string date=6;
-  string category = 7;
+  string product_name = 1;
+  float quantity = 2;
+  float amount = 3;
+  string date=4;
+  string category = 5;
 }
 message ProductsList{
   repeated Product products=1;

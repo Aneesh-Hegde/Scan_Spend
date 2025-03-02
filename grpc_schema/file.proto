@@ -9,7 +9,6 @@ service FileService{
 }
 
 message GetFileByUser{
-  string token=1;
 }
 
 message File{

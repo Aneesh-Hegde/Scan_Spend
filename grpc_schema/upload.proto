@@ -12,7 +12,6 @@ rpc SaveToDB(GetProducts) returns (DBMessage);
 
 message GetTextRequest {
   string filename = 1;
-  string token=2;
 }
 
 message GetTextResponse {
@@ -33,7 +32,6 @@ message Product {
 message GetProducts{
   repeated Product products=1;
   string filename=2;
-  string userId=3;
 }
  
 message DBMessage{
