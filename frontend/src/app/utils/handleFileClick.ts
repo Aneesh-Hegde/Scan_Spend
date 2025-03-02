@@ -25,7 +25,6 @@ const HandleFileClick = async ({
   const request = new GetTextRequest();
   request.setFilename(filename);
   const token: string | null = localStorage.getItem("token")
-  request.setToken(token ? token : "")
   const response = await api.get('get-refresh-token', { withCredentials: true })
   const refresh_token: string = response.data.refresh_token
   const metadata: Metadata = { 'authentication': `Bearer ${token}`, 'refresh_token': refresh_token }

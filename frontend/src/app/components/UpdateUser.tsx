@@ -32,7 +32,6 @@ const UpdateUserProfile: React.FC = () => {
     }
 
     const getUserDataRequest = new GetUserProfileRequest();
-    getUserDataRequest.setUserId(token);
     const response = await api.get("/get-refresh-token", { withCredentials: true, })
     const refresh_token: string = response.data.refresh_token
 

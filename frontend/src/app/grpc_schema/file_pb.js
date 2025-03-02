@@ -119,7 +119,7 @@ proto.file.GetFileByUser.prototype.toObject = function(opt_includeInstance) {
  */
 proto.file.GetFileByUser.toObject = function(includeInstance, msg) {
   var f, obj = {
-token: jspb.Message.getFieldWithDefault(msg, 1, "")
+
   };
 
   if (includeInstance) {
@@ -156,10 +156,6 @@ proto.file.GetFileByUser.deserializeBinaryFromReader = function(msg, reader) {
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setToken(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -189,31 +185,6 @@ proto.file.GetFileByUser.prototype.serializeBinary = function() {
  */
 proto.file.GetFileByUser.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getToken();
-  if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
-  }
-};
-
-
-/**
- * optional string token = 1;
- * @return {string}
- */
-proto.file.GetFileByUser.prototype.getToken = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.file.GetFileByUser} returns this
- */
-proto.file.GetFileByUser.prototype.setToken = function(value) {
-  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 

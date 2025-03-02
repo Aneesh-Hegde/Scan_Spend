@@ -13,7 +13,6 @@ const UserProfile = () => {
     const fetchUserProfile = async () => {
       const request = new GetUserProfileRequest();
       const token: string | null = localStorage.getItem("token")
-      request.setUserId(token ? token : '') // Assume userId is 1 for this example
       const response = await api.get('get-refresh-token', { withCredentials: true })
       const refreshToken: string = response.data.refresh_token
       const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }

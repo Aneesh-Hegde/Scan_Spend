@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import api from "../utils/api";
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface UploadProps {
   onFileUpload: (filename: string) => void;
@@ -80,10 +82,10 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleFileUpload} disabled={loading}>
-        {loading ? "Uploading..." : "Upload"}
-      </button>
+      <div className="space-y-4">
+        <Input type="file" onChange={handleFileChange} />
+        <Button onClick={handleFileUpload}>Upload File</Button>
+      </div>
     </div>
   );
 };

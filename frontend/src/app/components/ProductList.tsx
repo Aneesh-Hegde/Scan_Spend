@@ -1,105 +1,70 @@
-"use client"
-import React, { useState } from "react";
-import { Product } from "../types/types";
-type ProductListProps = {
-  products: Product[];
-  onUpdate: (onUpdate: Product) => void;  // Update the type to receive the whole product for editing
-  saveProduct: () => void;
-};
 
-const ProductList: React.FC<ProductListProps> = ({ products, onUpdate, saveProduct }) => {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Product | null>(null);
+import { useEffect, useState } from "react"
+import type { Product } from "../types/types"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import EditProductForm from "./EditProductForm"
 
-  const handleEdit = (product: Product) => {
-    setEditingId(product.ID)
-    setFormData(product)
-  }
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!formData) return;
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+interface ProductListProps {
+  products: Product[]
+  onUpdate: (updatedProduct: Product) => void
+  onSave: () => void
+}
 
-  const handleSave = () => {
-    if (!formData) return
-    onUpdate(formData)
-    setEditingId(null)
-  }
+export default function ProductList({ products, onUpdate, onSave }: ProductListProps) {
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  useEffect(() => {
+    setEditingProduct(null)
+  }, [products])
+  console.log(products)
   return (
     <div>
-      <h2>Product List</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>Quantity</th>
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.ID}>
-              {editingId === product.ID ? (
-                <>
-                  <td>
-                    <input
-                      type="text"
-                      name="product_name"
-                      value={formData?.product_name || ""}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="quantity"
-                      value={formData?.quantity || ""}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="amount"
-                      value={formData?.amount || ""}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      name="category"
-                      value={formData?.category || ""}
-                      onChange={handleChange}
-                    />
-                  </td>
-                  <td>
-                    <button onClick={handleSave}>Save</button>
-                    <button onClick={() => setEditingId(null)}>Cancel</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{product.product_name}</td>
-                  <td>{product.quantity}</td>
-                  <td>{product.amount}</td>
-                  <td>{product.category}</td>
-                  <td>
-                    <button onClick={() => handleEdit(product)}>Edit</button>
-                  </td>
-                </>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={saveProduct}>Save</button>
+      <h2 className="text-2xl font-semibold mb-4">Uploaded Products</h2>
+      {products.length === 0 ? (
+        <p>No products to display</p>
+      ) : (
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Quantity</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.map((product) => (
+                <TableRow key={product.ID}>
+                  <TableCell>{product.product_name}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>{product.quantity}</TableCell>
+                  <TableCell>&#8377;{product.amount.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => setEditingProduct(product)}>Edit</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <Button className="mt-4" onClick={onSave}>
+            Save Products
+          </Button>
+        </>
+      )}
+      {editingProduct && (
+        <EditProductForm
+          product={editingProduct}
+          onUpdateAction={(updatedProduct) => {
+            onUpdate(updatedProduct)
+            setEditingProduct(null)
+          }}
+          onCancelAction={() => setEditingProduct(null)}
+        />
+      )}
     </div>
-  );
-};
+  )
+}
 
-export default ProductList;
 

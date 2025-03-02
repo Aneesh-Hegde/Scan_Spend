@@ -3,9 +3,6 @@ import * as jspb from 'google-protobuf'
 
 
 export class GetFileByUser extends jspb.Message {
-  getToken(): string;
-  setToken(value: string): GetFileByUser;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetFileByUser.AsObject;
   static toObject(includeInstance: boolean, msg: GetFileByUser): GetFileByUser.AsObject;
@@ -16,7 +13,6 @@ export class GetFileByUser extends jspb.Message {
 
 export namespace GetFileByUser {
   export type AsObject = {
-    token: string,
   }
 }
 

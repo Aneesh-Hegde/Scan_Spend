@@ -26,7 +26,6 @@ const Dashboard = () => {
       const response = await api.get('get-refresh-token', { withCredentials: true })
       const refreshToken: string = response.data.refresh_token
       const metadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refreshToken }
-      request.setUserId(token ? token : '');
 
       client.getUserProfile(request, metadata, (err, response: UserProfile) => {
         if (err) {

@@ -163,8 +163,7 @@ proto.fileprocessing.GetTextRequest.prototype.toObject = function(opt_includeIns
  */
 proto.fileprocessing.GetTextRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-filename: jspb.Message.getFieldWithDefault(msg, 1, ""),
-token: jspb.Message.getFieldWithDefault(msg, 2, "")
+filename: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
   if (includeInstance) {
@@ -205,10 +204,6 @@ proto.fileprocessing.GetTextRequest.deserializeBinaryFromReader = function(msg, 
       var value = /** @type {string} */ (reader.readString());
       msg.setFilename(value);
       break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setToken(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -245,13 +240,6 @@ proto.fileprocessing.GetTextRequest.serializeBinaryToWriter = function(message, 
       f
     );
   }
-  f = message.getToken();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
 };
 
 
@@ -270,24 +258,6 @@ proto.fileprocessing.GetTextRequest.prototype.getFilename = function() {
  */
 proto.fileprocessing.GetTextRequest.prototype.setFilename = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
-};
-
-
-/**
- * optional string token = 2;
- * @return {string}
- */
-proto.fileprocessing.GetTextRequest.prototype.getToken = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.fileprocessing.GetTextRequest} returns this
- */
-proto.fileprocessing.GetTextRequest.prototype.setToken = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -832,8 +802,7 @@ proto.fileprocessing.GetProducts.toObject = function(includeInstance, msg) {
   var f, obj = {
 productsList: jspb.Message.toObjectList(msg.getProductsList(),
     proto.fileprocessing.Product.toObject, includeInstance),
-filename: jspb.Message.getFieldWithDefault(msg, 2, ""),
-userid: jspb.Message.getFieldWithDefault(msg, 3, "")
+filename: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -879,10 +848,6 @@ proto.fileprocessing.GetProducts.deserializeBinaryFromReader = function(msg, rea
       var value = /** @type {string} */ (reader.readString());
       msg.setFilename(value);
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setUserid(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -924,13 +889,6 @@ proto.fileprocessing.GetProducts.serializeBinaryToWriter = function(message, wri
   if (f.length > 0) {
     writer.writeString(
       2,
-      f
-    );
-  }
-  f = message.getUserid();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
       f
     );
   }
@@ -990,24 +948,6 @@ proto.fileprocessing.GetProducts.prototype.getFilename = function() {
  */
 proto.fileprocessing.GetProducts.prototype.setFilename = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-/**
- * optional string userId = 3;
- * @return {string}
- */
-proto.fileprocessing.GetProducts.prototype.getUserid = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.fileprocessing.GetProducts} returns this
- */
-proto.fileprocessing.GetProducts.prototype.setUserid = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
