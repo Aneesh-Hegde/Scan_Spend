@@ -15,3 +15,11 @@ export interface ProductResponse {
   product: Product[]
   total: number
 }
+export type Expense = {
+  id: number,
+  date: string
+  category: string
+  name: string
+  quantity: number
+  amount: number
+}

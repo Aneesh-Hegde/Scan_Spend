@@ -16,13 +16,14 @@ import { GetFileByUser, File, FileList } from './grpc_schema/file_pb'
 import { Metadata } from 'grpc-web';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { default as FileLists } from './components/Filelist';
 
 const Page: React.FC = () => {
   const [files, setFiles] = useState<string[]>([]); // To store the list of filenames
   const [products, setProducts] = useState<Product[]>([]); // To store the products data
   const [filename, setFilename] = useState<string>(''); // To store the selected filename
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-const router=useRouter()
+  const router = useRouter()
   // Fetch list of all filenames from the backend when component mounts
   useEffect(() => {
     const fetchFiles = async () => {
@@ -48,13 +49,12 @@ const router=useRouter()
     const request = new GetFileByUser()
     let token: string | null = localStorage.getItem("token")
     console.log(token)
-    request.setToken(token ? token : "")
-   try {
+    try {
       let requestmetadata: Metadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
       const call = fileclient.getAllFiles(request, requestmetadata, (error: any, response: FileList) => {
         if (error) {
           console.log(error)
-          if(error.code===16){
+          if (error.code === 16) {
             router.push('/login')
           }
         }
@@ -68,18 +68,7 @@ const router=useRouter()
         if (metadata["token"]) {
           token = metadata["token"]
           localStorage.setItem("token", token)
-          Cookies.set("token",token)
-          request.setToken(token)
-          requestmetadata = { 'authentication': `Bearer ${token}`, "refresh_token": refresh_token }
-          fileclient.getAllFiles(request, requestmetadata, (error: any, response: FileList) => {
-            if (error) {
-              console.log(error)
-            }
-            const allFile: File[] = response.getAllfilesList()
-            const filenames: string[] = allFile.map(ele => ele.getFilename())
-            setFiles(filenames)
-            toast.success("Files extracted successfully")
-          })
+          Cookies.set("token", token)
         }
 
       })
@@ -93,46 +82,24 @@ const router=useRouter()
     HandleUpdate({ updatedProduct, setProducts, setEditingProduct })
   }
   const handleSave = () => {
-    HandleProductSave(products, filename)
+    HandleProductSave(products, filename,setProducts)
   }
 
   return (
-    <div>
-      <Upload onFileUpload={(filename) => HandleFileUpload(filename, setFiles)} /> {/* Passing file upload handler to Upload component */}
-
-      <div>
-        <h3>Available Files</h3>
-        <ul>
-          {files.length === 0 ? (
-            <p>No files available</p>
-          ) : (
-            files.map((file, index) => (
-              <li key={index}>
-                <button onClick={() => HandleFileClick({
-                  filename: file,
-                  filestate: setFilename,
-                  productstate: setProducts,
-                })}>
-                  {file}
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
-      </div>
-
-      <div>
-        <h3>Uploaded Products</h3>
-        {products.length === 0 ? (
-          <p>No products to display</p>
-        ) : (
-          <ProductList products={products} onUpdate={handleUpdate} saveProduct={handleSave} />
-
-        )}
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Upload Files & Manage Products</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <Upload onFileUpload={(filename) => HandleFileUpload(filename, setFiles)} />
+          <FileLists files={files} onFileClick={(clickedfile) => HandleFileClick({ filename: clickedfile, filestate: setFilename, productstate: setProducts })} />
+        </div>
+        <div>
+          <ProductList products={products} onUpdate={handleUpdate} onSave={handleSave} />
+        </div>
       </div>
       <ToastContainer />
     </div>
-  );
+  )
 };
 
 export default Page;
