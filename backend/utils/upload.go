@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-
+  "gocv.io/x/gocv"
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	"github.com/labstack/echo/v4"
 )
@@ -72,6 +72,23 @@ func Upload(c echo.Context) error {
 		return c.String(500, fmt.Sprintf("Error saving file: %v", err))
 	}
 
+//use opencv(gocv) for high image quality
+filenameForOpencv:=fmt.Sprintf("./uploads/%s",filename)
+img:=gocv.IMRead(filenameForOpencv,gocv.IMReadColor)
+if img.Empty(){
+		log.Print("File path is undefined")
+}
+defer img.Close()
+
+//convert to gray scale
+gray:=gocv.NewMat()
+defer gray.Close()
+gocv.CvtColor(img,&gray,gocv.ColorBGRToGray)
+
+outputPath:=fmt.Sprintf("./uploads/%s",filename)
+if ok := gocv.IMWrite(outputPath, gray); !ok {
+	log.Fatal("Error: Could not save image")
+	}
 	// Log that the upload is successful
 	fmt.Println("File uploaded successfully:", file.Filename)
 
