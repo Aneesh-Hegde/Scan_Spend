@@ -1,6 +1,5 @@
 import * as jspb from 'google-protobuf'
 
-/* eslint-disable */
 
 
 export class GetFileByUser extends jspb.Message {

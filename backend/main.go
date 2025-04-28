@@ -25,6 +25,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+  balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
+	balanceHandler "github.com/Aneesh-Hegde/expenseManager/balance"
 )
 
 type server struct {
@@ -99,6 +101,22 @@ func (s *ProductService) GetProductsByUser(ctx context.Context, req *product.Get
 // 	}, nil
 // }
 
+type BalanceService struct{
+  balance.UnimplementedBalanceServiceServer
+}
+
+func (s *BalanceService) GetBalances(ctx context.Context,req *balance.GetBalanceRequest)(*balance.GetBalanceResponse,error){
+ return balanceHandler.GetBalance(ctx,req)
+}
+
+func (s *BalanceService) AddBalanceSource(ctx context.Context,req *balance.AddBalanceSourceRequest)(*balance.AddBalanceSourceResponse,error){
+ return balanceHandler.AddBalance(ctx,req)
+}
+
+func (s *BalanceService) UpdateBalance(ctx context.Context,req *balance.UpdateBalanceRequest)(*balance.UpdateBalanceResponse,error){
+ return balanceHandler.UpdateBalance(ctx,req)
+}
+
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	fmt.Println(info.FullMethod)
 	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" || info.FullMethod == "/auth.UserService/VerifyUser" {
@@ -142,6 +160,9 @@ func main() {
 
 	ProductService := &ProductService{}
 	product.RegisterProductServiceServer(grpcServer, ProductService)
+
+  BalanceService := &BalanceService{}
+  balance.RegisterBalanceServiceServer(grpcServer, BalanceService)
 	// Echo HTTP server setup (without TLS)
 	e := echo.New()
 	e.Use(middleware.Logger())

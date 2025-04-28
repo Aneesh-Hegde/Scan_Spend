@@ -1,0 +1,46 @@
+syntax="proto3";
+
+package balance;
+
+option go_package="/grpc_balance";
+
+service BalanceService{
+  rpc GetBalances(GetBalanceRequest) returns ( GetBalanceResponse );
+  rpc AddBalanceSource(AddBalanceSourceRequest) returns ( AddBalanceSourceResponse );
+  rpc UpdateBalance(UpdateBalanceRequest) returns ( UpdateBalanceResponse );
+}
+
+message GetBalanceRequest{
+  string user_id=1;
+}
+
+message Balance{
+  int32 balance_id=1;
+  string user_id=2;
+  string balance_source = 3;
+  string balance_amount=4;
+  double balance=5;
+}
+
+message GetBalanceResponse{
+  repeated Balance balance=1;
+}
+
+message AddBalanceSourceRequest {
+  int32 user_id = 1;
+  string balance_source = 2;
+  double initial_amount = 3;
+}
+
+message AddBalanceSourceResponse {
+  Balance balance = 1;
+}
+
+message UpdateBalanceRequest {
+  int32 balance_id = 1;
+  double amount = 2;
+}
+
+message UpdateBalanceResponse { 
+  Balance balance = 1; 
+}
