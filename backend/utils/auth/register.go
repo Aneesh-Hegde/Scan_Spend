@@ -13,7 +13,7 @@ import (
 )
 
 func Register(ctx context.Context, req *user.RegisterUserRequest) (*user.UserResponse, error) {
-
+  fmt.Println(req.GetUsername(), req.GetEmail())
 	query := `INSERT INTO users (username, email) VALUES ($1, $2) RETURNING user_id`
 	var userID int
 	err := db.DB.QueryRow(ctx, query, req.GetUsername(), req.GetEmail()).Scan(&userID)

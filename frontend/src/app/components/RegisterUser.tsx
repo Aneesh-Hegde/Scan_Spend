@@ -50,6 +50,7 @@ const RegisterUser = () => {
 
   const registerUser = async (username: string, email: string): Promise<string | null> => {
     const request = new RegisterUserRequest();
+    console.log(username,email)
     request.setUsername(username);
     request.setEmail(email);
 

@@ -43,7 +43,7 @@ const LoginUser = () => {
         let refresh_token: string | null = "";
         let token: string | null = "";
         //get the access token after login
-        const call = grpcClient.loginUser(request, {}, (err, response) => {
+        grpcClient.loginUser(request, {}, (err, response) => {
           if (err) reject(err);
           else {
             console.log("first")
@@ -53,10 +53,8 @@ const LoginUser = () => {
             router.push("/");
             resolve(response);
           }
-        });
-
+        }).on("metadata", async (metadata) => {
         // Listen for metadata i.e extract refresh_token
-        call.on("metadata", async (metadata) => {
           console.log("second")
           refresh_token = metadata["refresh_token"] || null;
           if (refresh_token) {
