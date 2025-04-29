@@ -23,6 +23,16 @@ const Page: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]); // To store the products data
   const [filename, setFilename] = useState<string>(''); // To store the selected filename
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
+  // Manual product form states
+  const [productName, setProductName] = useState<string>("");
+  const [quantity, setQuantity] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [fileName, setFileName] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter()
   // Fetch list of all filenames from the backend when component mounts
   useEffect(() => {
@@ -81,9 +91,141 @@ const Page: React.FC = () => {
   const handleUpdate = (updatedProduct: Product) => {
     HandleUpdate({ updatedProduct, setProducts, setEditingProduct })
   }
-  const handleSave = () => {
-    HandleProductSave(products, filename,setProducts)
+const handleSave = async () => {
+    if (products.length === 0) {
+      toast.warning("No products to save");
+      return;
+    }
+    
+    if (!filename) {
+      toast.error("Please select or enter a file name");
+      return;
+    }
+    
+    try {
+      await HandleProductSave(products, filename, setProducts);
+      toast.success("Products saved successfully");
+      return true;
+    } catch (error) {
+      console.error("Error saving products:", error);
+      toast.error("Failed to save products");
+      return false;
+    }
+  };
+ const handleManualSubmit =  async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("No authentication token found");
+      setLoading(false);
+      router.push('/login');
+      return;
+    }
+
+    // Validate form inputs
+    if (!productName || !quantity || !price || !category || !date ) {
+      toast.error("All fields are required");
+      setLoading(false);
+      return;
+    }
+
+    // Validate quantity
+    const quantityValue = parseInt(quantity);
+    if (isNaN(quantityValue) || quantityValue <= 0) {
+      toast.error("Quantity must be a valid positive integer");
+      setLoading(false);
+      return;
+    }
+
+    // Validate price
+    const amountValue = parseFloat(price);
+    if (isNaN(amountValue) || amountValue <= 0) {
+      toast.error("Price must be a valid positive number");
+      setLoading(false);
+      return;
+    }
+
+    // Validate category
+    const categoryValue = parseInt(category);
+    if (isNaN(categoryValue) || categoryValue <= 0) {
+      toast.error("Category must be a valid positive integer");
+      setLoading(false);
+      return;
+    }
+const formatDateForDatabase = (dateString: string): string => {
+  try {
+    // Create a Date object from the input
+    const date = new Date(dateString);
+
+    // Ensure it's a valid date
+    if (isNaN(date.getTime())) {
+      return ""; // Invalid date
+    }
+
+    // Extract components
+    const day = String(date.getDate()).padStart(2, '0'); // Day of the month
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = String(date.getFullYear()); // Last two digits of the year
+
+    // Format as DD/MM/YY
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return "";
   }
+};
+const formattedDate = formatDateForDatabase(date);
+if (!formattedDate) {
+  toast.error("Invalid date format");
+  setLoading(false);
+  return;
+}
+    try {
+      // Create new product object
+      const newProduct: Product = {
+        ID: "1", // Will be assigned by backend
+        product_name: productName,
+        quantity: quantityValue,
+        amount: amountValue,
+        Name: "manual-entry",
+        category: categoryValue.toString(),
+        Date: formattedDate,
+      };
+
+      // IMPORTANT: Direct save approach instead of updating state first
+      const updatedProducts = [...products, newProduct];
+      
+      // Save directly with the updated products array
+      await HandleProductSave(updatedProducts, "manual-entry", setProducts);
+      
+        toast.success("Product saved successfully");
+        
+        // Reset form fields on success
+        setProductName("");
+        setQuantity("");
+        setPrice("");
+        setCategory("");
+        setFileName("");
+        setDate(new Date().toISOString().split("T")[0]);
+    } catch (error) {
+      console.error("Error in manual submit:", error);
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset form handler
+  const handleReset = () => {
+    setProductName("");
+    setQuantity("");
+    setPrice("");
+    setCategory("");
+    setFileName("");
+    setDate(new Date().toISOString().split("T")[0]);
+  };;
 
   return (
     <div className="container mx-auto p-4">
@@ -96,6 +238,87 @@ const Page: React.FC = () => {
         <div>
           <ProductList products={products} onUpdate={handleUpdate} onSave={handleSave} />
         </div>
+      </div>
+      {/* Manual Product Adding Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Add Product Manually</h2>
+        <form onSubmit={handleManualSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Product Name:
+              <input
+                type="text"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                placeholder="Product Name"
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Quantity:
+              <input
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="Quantity"
+                required
+                min="1"
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Price:
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="Price"
+                step="0.01"
+                min="0"
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Category:
+              <input
+                type="number"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="Category ID"
+                required
+                min="1"
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Date:
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+            </label>
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full p-2 text-white rounded-md ${loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
+          >
+            {loading ? "Saving..." : "Save Product"}
+          </button>
+        </form>
       </div>
       <ToastContainer />
     </div>

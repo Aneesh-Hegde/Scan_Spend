@@ -16,7 +16,7 @@ import (
 
 // Retrieve files from DB for a given user
 func getFilesFromDB(ctx context.Context, userId int) (*files.FileList, error) {
-	query := `SELECT DISTINCT file_name FROM products WHERE user_id = $1`
+	query := `SELECT DISTINCT file_name FROM products WHERE user_id = $1 and file_name != 'manual-entry'`
 	rows, err := db.DB.Query(ctx, query, userId) // 🔹 Use ctx from request
 	if err != nil {
 		log.Println("Error fetching files from DB:", err)
