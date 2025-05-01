@@ -11,7 +11,6 @@ service BalanceService{
 }
 
 message GetBalanceRequest{
-  string user_id=1;
 }
 
 message Balance{

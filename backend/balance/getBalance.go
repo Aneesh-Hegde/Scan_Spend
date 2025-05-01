@@ -20,7 +20,7 @@ func GetBalance(ctx context.Context, req *balance.GetBalanceRequest) ( *balance.
 	}
 
   userId:=md["user_id"][0]
-  query:=`SELECT balance_id, user_id,balance_source, amount FROM balances WHERE user_id = $1`
+  query:=`SELECT * FROM get_user_balances($1)`
 rows, err := db.DB.Query(ctx,query , userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query balances: %v", err)
@@ -52,6 +52,7 @@ rows, err := db.DB.Query(ctx,query , userId)
 		}
 		balances = append(balances, b)
 	}
+  fmt.Println(balances)
 
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf( "error iterating balances: %v", err)

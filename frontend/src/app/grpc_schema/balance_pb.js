@@ -207,7 +207,7 @@ proto.balance.GetBalanceRequest.prototype.toObject = function(opt_includeInstanc
  */
 proto.balance.GetBalanceRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-userId: jspb.Message.getFieldWithDefault(msg, 1, "")
+
   };
 
   if (includeInstance) {
@@ -244,10 +244,6 @@ proto.balance.GetBalanceRequest.deserializeBinaryFromReader = function(msg, read
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setUserId(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -277,31 +273,6 @@ proto.balance.GetBalanceRequest.prototype.serializeBinary = function() {
  */
 proto.balance.GetBalanceRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getUserId();
-  if (f.length > 0) {
-    writer.writeString(
-      1,
-      f
-    );
-  }
-};
-
-
-/**
- * optional string user_id = 1;
- * @return {string}
- */
-proto.balance.GetBalanceRequest.prototype.getUserId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.balance.GetBalanceRequest} returns this
- */
-proto.balance.GetBalanceRequest.prototype.setUserId = function(value) {
-  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 

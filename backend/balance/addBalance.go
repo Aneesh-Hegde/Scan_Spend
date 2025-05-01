@@ -25,8 +25,8 @@ func AddBalance(ctx context.Context, req *balance.AddBalanceSourceRequest) (*bal
 	// Insert new balance
 	var balanceID int32
 	err := db.DB.QueryRow(ctx,
-		"INSERT INTO balances (user_id, balance_source, amount) VALUES ($1, $2, $3) RETURNING balance_id",
-		userId, req.GetBalanceSource(), req.GetInitialAmount(),
+		"Select create_account_with_income($1, $2, $3, $4)",
+		userId, "Default Cash Account", req.GetBalanceSource(), req.GetInitialAmount(),
 	).Scan(&balanceID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add balance: %v", err)

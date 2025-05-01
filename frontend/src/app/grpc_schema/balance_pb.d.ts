@@ -3,9 +3,6 @@ import * as jspb from 'google-protobuf'
 
 
 export class GetBalanceRequest extends jspb.Message {
-  getUserId(): string;
-  setUserId(value: string): GetBalanceRequest;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetBalanceRequest.AsObject;
   static toObject(includeInstance: boolean, msg: GetBalanceRequest): GetBalanceRequest.AsObject;
@@ -16,7 +13,6 @@ export class GetBalanceRequest extends jspb.Message {
 
 export namespace GetBalanceRequest {
   export type AsObject = {
-    userId: string,
   }
 }
 
