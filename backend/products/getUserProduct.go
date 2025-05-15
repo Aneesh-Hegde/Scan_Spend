@@ -19,7 +19,7 @@ func GetUserProduct(ctx context.Context, req *product.GetProductsByUserRequest) 
 		grpc.SendHeader(ctx, headers)
 	}
 	userId := md["user_id"][0]
-	query := `SELECT p.name AS product_name, p.quantity, p.date_added, p.price, c.name AS category_name FROM products p INNER JOIN categories c ON p.category_id = c.category_id WHERE p.user_id = $1`
+	query := `SELECT p.product_name AS product_name, p.quantity, p.date_added, p.price, c.name AS category_name FROM products p INNER JOIN categories c ON p.category_id = c.category_id WHERE p.user_id = $1`
 	rows, err := db.DB.Query(ctx, query, userId)
 	if err != nil {
 		return nil, fmt.Errorf("No data found:%s", err)

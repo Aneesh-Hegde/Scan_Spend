@@ -117,6 +117,24 @@ func (s *BalanceService) UpdateBalance(ctx context.Context,req *balance.UpdateBa
  return balanceHandler.UpdateBalance(ctx,req)
 }
 
+
+func (s *BalanceService) GetTransfer(ctx context.Context,req *balance.GetTransferRequest)(*balance.GetTransferResponse,error){
+ return balanceHandler.GetTransfer(ctx,req)
+}
+
+
+func (s *BalanceService) GetIncomes(ctx context.Context,req *balance.GetIncomeRequest)(*balance.GetIncomeResponse,error){
+ return balanceHandler.GetIncome(ctx,req)
+}
+
+func (s *BalanceService) AddIncomeSource(ctx context.Context,req *balance.AddIncomeSourceRequest)(*balance.AddIncomeSourceResponse,error){
+ return balanceHandler.AddIncome(ctx,req)
+}
+
+func (s *BalanceService) UpdateIncome(ctx context.Context,req *balance.UpdateIncomeRequest)(*balance.UpdateIncomeResponse,error){
+ return balanceHandler.UpdateIncome(ctx,req)
+}
+
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	fmt.Println(info.FullMethod)
 	if info.FullMethod == "/auth.UserService/LoginUser" || info.FullMethod == "/auth.UserService/RegisterUser" || info.FullMethod == "/auth.UserService/GenerateVerifyToken" || info.FullMethod == "/auth.UserService/VerifyUser" {

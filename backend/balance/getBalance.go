@@ -3,7 +3,6 @@ package balance
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
@@ -40,12 +39,10 @@ rows, err := db.DB.Query(ctx,query , userId)
 
 		// Format balance_amount as a string (e.g., "$100.00")
 		balanceAmount := fmt.Sprintf("$%.2f", amount)
-    userId:=strconv.Itoa(dbUserId)
 
 		// Create Balance message
 		b := &balance.Balance{
 			BalanceId:    balanceID,
-			UserId:       userId,
       BalanceSource: balance_source,
 			BalanceAmount: balanceAmount,
 			Balance:      amount,

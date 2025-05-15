@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func UpdateBalance(ctx context.Context, req *balance.UpdateBalanceRequest) (*balance.UpdateBalanceResponse, error) {
+func UpdateIncome(ctx context.Context, req *balance.UpdateIncomeRequest) (*balance.UpdateIncomeResponse, error) {
 	// Extract metadata from context
 	md, _ := metadata.FromIncomingContext(ctx)
 	fmt.Println(md)
@@ -26,13 +26,13 @@ func UpdateBalance(ctx context.Context, req *balance.UpdateBalanceRequest) (*bal
 
   fmt.Println(req.GetAmount())
 	// Update balance
-	var balanceID int32
+	var incomeID int32
 	var dbUserId int
 	var amount float64
 err := db.DB.QueryRow(ctx,
-	"SELECT * FROM update_account_balance($1, $2, $3)",
-	req.GetBalanceId(), userId, req.GetAmount(),
-).Scan(&balanceID, &dbUserId, &amount)
+	"SELECT * FROM update_income($1, $2, $3)",
+	req.GetIncomeId(), userId, req.GetAmount(),
+).Scan(&incomeID, &dbUserId, &amount)
 if err != nil {
 	return nil, fmt.Errorf("failed to update balance: %v", err)
 }
@@ -41,13 +41,13 @@ if err != nil {
 	balanceAmount := fmt.Sprintf("$%.2f", amount)
 
 	// Create Balance message
-	b := &balance.Balance{
-		BalanceId:     balanceID,
-		BalanceAmount: balanceAmount,
-		Balance:       amount,
+	b := &balance.Income{
+		IncomeId:     incomeID,
+		IncomeAmount: balanceAmount,
+		Income:       amount,
 	}
 
-	return &balance.UpdateBalanceResponse{
-		Balance: b,
+	return &balance.UpdateIncomeResponse{
+		Income: b,
 	}, nil
 }

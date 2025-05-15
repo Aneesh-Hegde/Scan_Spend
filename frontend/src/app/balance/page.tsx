@@ -51,10 +51,10 @@ export default function Balances() {
           setLoading(false);
           return;
         }
+        console.log(balanceResponse)
 
         const balanceList = balanceResponse.getBalanceList().map((b: Balance) => ({
           balanceId: b.getBalanceId(),
-          userId: b.getUserId(),
           balanceSource: b.getBalanceSource(),
           amount: b.getBalance(),
         }));
@@ -153,7 +153,6 @@ export default function Balances() {
               ...prev,
               {
                 balanceId: newBalance.getBalanceId(),
-                userId: newBalance.getUserId(),
                 balanceSource: sourceName,
                 amount: newBalance.getBalance(),
               },

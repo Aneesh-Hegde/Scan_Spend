@@ -8,6 +8,11 @@ service BalanceService{
   rpc GetBalances(GetBalanceRequest) returns ( GetBalanceResponse );
   rpc AddBalanceSource(AddBalanceSourceRequest) returns ( AddBalanceSourceResponse );
   rpc UpdateBalance(UpdateBalanceRequest) returns ( UpdateBalanceResponse );
+  rpc InternalTransfer(TransferFunds) returns (TransferFundsResponse);
+  rpc GetTransfer(GetTransferRequest) returns (GetTransferResponse);
+  rpc GetIncomes(GetIncomeRequest) returns ( GetIncomeResponse );
+  rpc AddIncomeSource(AddIncomeSourceRequest) returns ( AddIncomeSourceResponse );
+  rpc UpdateIncome(UpdateIncomeRequest) returns ( UpdateIncomeResponse );
 }
 
 message GetBalanceRequest{
@@ -15,10 +20,9 @@ message GetBalanceRequest{
 
 message Balance{
   int32 balance_id=1;
-  string user_id=2;
-  string balance_source = 3;
-  string balance_amount=4;
-  double balance=5;
+  string balance_source = 2;
+  string balance_amount=3;
+  double balance=4;
 }
 
 message GetBalanceResponse{
@@ -26,9 +30,8 @@ message GetBalanceResponse{
 }
 
 message AddBalanceSourceRequest {
-  int32 user_id = 1;
-  string balance_source = 2;
-  double initial_amount = 3;
+  string balance_source = 1;
+  double initial_amount = 2;
 }
 
 message AddBalanceSourceResponse {
@@ -42,4 +45,59 @@ message UpdateBalanceRequest {
 
 message UpdateBalanceResponse { 
   Balance balance = 1; 
+}
+
+
+message GetTransferRequest{
+}
+
+
+message GetTransferResponse{
+  repeated TransferFunds transfers=1;
+}
+
+message TransferFunds{
+  int32 transfer_id=1;
+  string from_source=2;
+  string to_source=3;
+  double amount=4;
+  string date=5;
+}
+
+message TransferFundsResponse{
+  int32 transaction_id=1;
+}
+
+
+message GetIncomeRequest{
+}
+
+message Income{
+  int32 income_id=1;
+  string income_source = 2;
+  string income_amount=3;
+  double income=4;
+  string date=5;
+}
+
+message GetIncomeResponse{
+  repeated Income income=1;
+}
+
+message AddIncomeSourceRequest {
+  string income_source = 1;
+  double initial_amount = 2;
+}
+
+message AddIncomeSourceResponse {
+  Income Income = 1;
+}
+
+message UpdateIncomeRequest {
+  int32 income_id = 1;
+  double amount = 2;
+}
+
+message UpdateIncomeResponse { 
+  Income income = 1; 
 }

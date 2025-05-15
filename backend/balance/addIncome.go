@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func AddBalance(ctx context.Context, req *balance.AddBalanceSourceRequest) (*balance.AddBalanceSourceResponse, error) {
+func AddIncome(ctx context.Context, req *balance.AddIncomeSourceRequest) (*balance.AddIncomeSourceResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	fmt.Println(md)
 
@@ -23,11 +23,11 @@ func AddBalance(ctx context.Context, req *balance.AddBalanceSourceRequest) (*bal
 	userId := md["user_id"][0]
 
 	// Insert new balance
-	var balanceID int32
+	var incomeID int32
 	err := db.DB.QueryRow(ctx,
-		"Select create_account_with_income($1, $2, $3, $4)",
-		userId, "Default Cash Account", req.GetBalanceSource(), req.GetInitialAmount(),
-	).Scan(&balanceID)
+		"Select * insert_income($1, $2, $3, $4)",
+		userId, req.GetIncomeSource(), req.GetInitialAmount(),"Default Cash Account",
+	).Scan(&incomeID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add balance: %v", err)
 	}
@@ -36,13 +36,13 @@ func AddBalance(ctx context.Context, req *balance.AddBalanceSourceRequest) (*bal
 	balanceAmount := fmt.Sprintf("$%.2f", req.GetInitialAmount())
 
 	// Create Balance message
-	b := &balance.Balance{
-		BalanceId:     balanceID,
-		BalanceAmount: balanceAmount,
-		Balance:       req.GetInitialAmount(),
+	b := &balance.Income{
+		IncomeId:     incomeID,
+		IncomeAmount: balanceAmount,
+		Income:       req.GetInitialAmount(),
 	}
 
-	return &balance.AddBalanceSourceResponse{
-		Balance: b,
+	return &balance.AddIncomeSourceResponse{
+		Income: b,
 	}, nil
 }

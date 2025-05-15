@@ -22,6 +22,11 @@ const (
 	BalanceService_GetBalances_FullMethodName      = "/balance.BalanceService/GetBalances"
 	BalanceService_AddBalanceSource_FullMethodName = "/balance.BalanceService/AddBalanceSource"
 	BalanceService_UpdateBalance_FullMethodName    = "/balance.BalanceService/UpdateBalance"
+	BalanceService_InternalTransfer_FullMethodName = "/balance.BalanceService/InternalTransfer"
+	BalanceService_GetTransfer_FullMethodName      = "/balance.BalanceService/GetTransfer"
+	BalanceService_GetIncomes_FullMethodName       = "/balance.BalanceService/GetIncomes"
+	BalanceService_AddIncomeSource_FullMethodName  = "/balance.BalanceService/AddIncomeSource"
+	BalanceService_UpdateIncome_FullMethodName     = "/balance.BalanceService/UpdateIncome"
 )
 
 // BalanceServiceClient is the client API for BalanceService service.
@@ -31,6 +36,11 @@ type BalanceServiceClient interface {
 	GetBalances(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 	AddBalanceSource(ctx context.Context, in *AddBalanceSourceRequest, opts ...grpc.CallOption) (*AddBalanceSourceResponse, error)
 	UpdateBalance(ctx context.Context, in *UpdateBalanceRequest, opts ...grpc.CallOption) (*UpdateBalanceResponse, error)
+	InternalTransfer(ctx context.Context, in *TransferFunds, opts ...grpc.CallOption) (*TransferFundsResponse, error)
+	GetTransfer(ctx context.Context, in *GetTransferRequest, opts ...grpc.CallOption) (*GetTransferResponse, error)
+	GetIncomes(ctx context.Context, in *GetIncomeRequest, opts ...grpc.CallOption) (*GetIncomeResponse, error)
+	AddIncomeSource(ctx context.Context, in *AddIncomeSourceRequest, opts ...grpc.CallOption) (*AddIncomeSourceResponse, error)
+	UpdateIncome(ctx context.Context, in *UpdateIncomeRequest, opts ...grpc.CallOption) (*UpdateIncomeResponse, error)
 }
 
 type balanceServiceClient struct {
@@ -71,6 +81,56 @@ func (c *balanceServiceClient) UpdateBalance(ctx context.Context, in *UpdateBala
 	return out, nil
 }
 
+func (c *balanceServiceClient) InternalTransfer(ctx context.Context, in *TransferFunds, opts ...grpc.CallOption) (*TransferFundsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TransferFundsResponse)
+	err := c.cc.Invoke(ctx, BalanceService_InternalTransfer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *balanceServiceClient) GetTransfer(ctx context.Context, in *GetTransferRequest, opts ...grpc.CallOption) (*GetTransferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTransferResponse)
+	err := c.cc.Invoke(ctx, BalanceService_GetTransfer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *balanceServiceClient) GetIncomes(ctx context.Context, in *GetIncomeRequest, opts ...grpc.CallOption) (*GetIncomeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetIncomeResponse)
+	err := c.cc.Invoke(ctx, BalanceService_GetIncomes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *balanceServiceClient) AddIncomeSource(ctx context.Context, in *AddIncomeSourceRequest, opts ...grpc.CallOption) (*AddIncomeSourceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddIncomeSourceResponse)
+	err := c.cc.Invoke(ctx, BalanceService_AddIncomeSource_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *balanceServiceClient) UpdateIncome(ctx context.Context, in *UpdateIncomeRequest, opts ...grpc.CallOption) (*UpdateIncomeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateIncomeResponse)
+	err := c.cc.Invoke(ctx, BalanceService_UpdateIncome_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BalanceServiceServer is the server API for BalanceService service.
 // All implementations must embed UnimplementedBalanceServiceServer
 // for forward compatibility.
@@ -78,6 +138,11 @@ type BalanceServiceServer interface {
 	GetBalances(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error)
 	AddBalanceSource(context.Context, *AddBalanceSourceRequest) (*AddBalanceSourceResponse, error)
 	UpdateBalance(context.Context, *UpdateBalanceRequest) (*UpdateBalanceResponse, error)
+	InternalTransfer(context.Context, *TransferFunds) (*TransferFundsResponse, error)
+	GetTransfer(context.Context, *GetTransferRequest) (*GetTransferResponse, error)
+	GetIncomes(context.Context, *GetIncomeRequest) (*GetIncomeResponse, error)
+	AddIncomeSource(context.Context, *AddIncomeSourceRequest) (*AddIncomeSourceResponse, error)
+	UpdateIncome(context.Context, *UpdateIncomeRequest) (*UpdateIncomeResponse, error)
 	mustEmbedUnimplementedBalanceServiceServer()
 }
 
@@ -96,6 +161,21 @@ func (UnimplementedBalanceServiceServer) AddBalanceSource(context.Context, *AddB
 }
 func (UnimplementedBalanceServiceServer) UpdateBalance(context.Context, *UpdateBalanceRequest) (*UpdateBalanceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBalance not implemented")
+}
+func (UnimplementedBalanceServiceServer) InternalTransfer(context.Context, *TransferFunds) (*TransferFundsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InternalTransfer not implemented")
+}
+func (UnimplementedBalanceServiceServer) GetTransfer(context.Context, *GetTransferRequest) (*GetTransferResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTransfer not implemented")
+}
+func (UnimplementedBalanceServiceServer) GetIncomes(context.Context, *GetIncomeRequest) (*GetIncomeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIncomes not implemented")
+}
+func (UnimplementedBalanceServiceServer) AddIncomeSource(context.Context, *AddIncomeSourceRequest) (*AddIncomeSourceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddIncomeSource not implemented")
+}
+func (UnimplementedBalanceServiceServer) UpdateIncome(context.Context, *UpdateIncomeRequest) (*UpdateIncomeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateIncome not implemented")
 }
 func (UnimplementedBalanceServiceServer) mustEmbedUnimplementedBalanceServiceServer() {}
 func (UnimplementedBalanceServiceServer) testEmbeddedByValue()                        {}
@@ -172,6 +252,96 @@ func _BalanceService_UpdateBalance_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BalanceService_InternalTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransferFunds)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BalanceServiceServer).InternalTransfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BalanceService_InternalTransfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BalanceServiceServer).InternalTransfer(ctx, req.(*TransferFunds))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BalanceService_GetTransfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BalanceServiceServer).GetTransfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BalanceService_GetTransfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BalanceServiceServer).GetTransfer(ctx, req.(*GetTransferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BalanceService_GetIncomes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIncomeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BalanceServiceServer).GetIncomes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BalanceService_GetIncomes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BalanceServiceServer).GetIncomes(ctx, req.(*GetIncomeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BalanceService_AddIncomeSource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddIncomeSourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BalanceServiceServer).AddIncomeSource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BalanceService_AddIncomeSource_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BalanceServiceServer).AddIncomeSource(ctx, req.(*AddIncomeSourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BalanceService_UpdateIncome_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateIncomeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BalanceServiceServer).UpdateIncome(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BalanceService_UpdateIncome_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BalanceServiceServer).UpdateIncome(ctx, req.(*UpdateIncomeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BalanceService_ServiceDesc is the grpc.ServiceDesc for BalanceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +360,26 @@ var BalanceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateBalance",
 			Handler:    _BalanceService_UpdateBalance_Handler,
+		},
+		{
+			MethodName: "InternalTransfer",
+			Handler:    _BalanceService_InternalTransfer_Handler,
+		},
+		{
+			MethodName: "GetTransfer",
+			Handler:    _BalanceService_GetTransfer_Handler,
+		},
+		{
+			MethodName: "GetIncomes",
+			Handler:    _BalanceService_GetIncomes_Handler,
+		},
+		{
+			MethodName: "AddIncomeSource",
+			Handler:    _BalanceService_AddIncomeSource_Handler,
+		},
+		{
+			MethodName: "UpdateIncome",
+			Handler:    _BalanceService_UpdateIncome_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

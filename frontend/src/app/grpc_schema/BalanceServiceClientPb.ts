@@ -168,5 +168,220 @@ export class BalanceServiceClient {
     this.methodDescriptorUpdateBalance);
   }
 
+  methodDescriptorInternalTransfer = new grpcWeb.MethodDescriptor(
+    '/balance.BalanceService/InternalTransfer',
+    grpcWeb.MethodType.UNARY,
+    balance_pb.TransferFunds,
+    balance_pb.TransferFundsResponse,
+    (request: balance_pb.TransferFunds) => {
+      return request.serializeBinary();
+    },
+    balance_pb.TransferFundsResponse.deserializeBinary
+  );
+
+  internalTransfer(
+    request: balance_pb.TransferFunds,
+    metadata?: grpcWeb.Metadata | null): Promise<balance_pb.TransferFundsResponse>;
+
+  internalTransfer(
+    request: balance_pb.TransferFunds,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: balance_pb.TransferFundsResponse) => void): grpcWeb.ClientReadableStream<balance_pb.TransferFundsResponse>;
+
+  internalTransfer(
+    request: balance_pb.TransferFunds,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: balance_pb.TransferFundsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/balance.BalanceService/InternalTransfer',
+        request,
+        metadata || {},
+        this.methodDescriptorInternalTransfer,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/balance.BalanceService/InternalTransfer',
+    request,
+    metadata || {},
+    this.methodDescriptorInternalTransfer);
+  }
+
+  methodDescriptorGetTransfer = new grpcWeb.MethodDescriptor(
+    '/balance.BalanceService/GetTransfer',
+    grpcWeb.MethodType.UNARY,
+    balance_pb.GetTransferRequest,
+    balance_pb.GetTransferResponse,
+    (request: balance_pb.GetTransferRequest) => {
+      return request.serializeBinary();
+    },
+    balance_pb.GetTransferResponse.deserializeBinary
+  );
+
+  getTransfer(
+    request: balance_pb.GetTransferRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<balance_pb.GetTransferResponse>;
+
+  getTransfer(
+    request: balance_pb.GetTransferRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: balance_pb.GetTransferResponse) => void): grpcWeb.ClientReadableStream<balance_pb.GetTransferResponse>;
+
+  getTransfer(
+    request: balance_pb.GetTransferRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: balance_pb.GetTransferResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/balance.BalanceService/GetTransfer',
+        request,
+        metadata || {},
+        this.methodDescriptorGetTransfer,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/balance.BalanceService/GetTransfer',
+    request,
+    metadata || {},
+    this.methodDescriptorGetTransfer);
+  }
+
+  methodDescriptorGetIncomes = new grpcWeb.MethodDescriptor(
+    '/balance.BalanceService/GetIncomes',
+    grpcWeb.MethodType.UNARY,
+    balance_pb.GetIncomeRequest,
+    balance_pb.GetIncomeResponse,
+    (request: balance_pb.GetIncomeRequest) => {
+      return request.serializeBinary();
+    },
+    balance_pb.GetIncomeResponse.deserializeBinary
+  );
+
+  getIncomes(
+    request: balance_pb.GetIncomeRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<balance_pb.GetIncomeResponse>;
+
+  getIncomes(
+    request: balance_pb.GetIncomeRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: balance_pb.GetIncomeResponse) => void): grpcWeb.ClientReadableStream<balance_pb.GetIncomeResponse>;
+
+  getIncomes(
+    request: balance_pb.GetIncomeRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: balance_pb.GetIncomeResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/balance.BalanceService/GetIncomes',
+        request,
+        metadata || {},
+        this.methodDescriptorGetIncomes,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/balance.BalanceService/GetIncomes',
+    request,
+    metadata || {},
+    this.methodDescriptorGetIncomes);
+  }
+
+  methodDescriptorAddIncomeSource = new grpcWeb.MethodDescriptor(
+    '/balance.BalanceService/AddIncomeSource',
+    grpcWeb.MethodType.UNARY,
+    balance_pb.AddIncomeSourceRequest,
+    balance_pb.AddIncomeSourceResponse,
+    (request: balance_pb.AddIncomeSourceRequest) => {
+      return request.serializeBinary();
+    },
+    balance_pb.AddIncomeSourceResponse.deserializeBinary
+  );
+
+  addIncomeSource(
+    request: balance_pb.AddIncomeSourceRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<balance_pb.AddIncomeSourceResponse>;
+
+  addIncomeSource(
+    request: balance_pb.AddIncomeSourceRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: balance_pb.AddIncomeSourceResponse) => void): grpcWeb.ClientReadableStream<balance_pb.AddIncomeSourceResponse>;
+
+  addIncomeSource(
+    request: balance_pb.AddIncomeSourceRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: balance_pb.AddIncomeSourceResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/balance.BalanceService/AddIncomeSource',
+        request,
+        metadata || {},
+        this.methodDescriptorAddIncomeSource,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/balance.BalanceService/AddIncomeSource',
+    request,
+    metadata || {},
+    this.methodDescriptorAddIncomeSource);
+  }
+
+  methodDescriptorUpdateIncome = new grpcWeb.MethodDescriptor(
+    '/balance.BalanceService/UpdateIncome',
+    grpcWeb.MethodType.UNARY,
+    balance_pb.UpdateIncomeRequest,
+    balance_pb.UpdateIncomeResponse,
+    (request: balance_pb.UpdateIncomeRequest) => {
+      return request.serializeBinary();
+    },
+    balance_pb.UpdateIncomeResponse.deserializeBinary
+  );
+
+  updateIncome(
+    request: balance_pb.UpdateIncomeRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<balance_pb.UpdateIncomeResponse>;
+
+  updateIncome(
+    request: balance_pb.UpdateIncomeRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: balance_pb.UpdateIncomeResponse) => void): grpcWeb.ClientReadableStream<balance_pb.UpdateIncomeResponse>;
+
+  updateIncome(
+    request: balance_pb.UpdateIncomeRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: balance_pb.UpdateIncomeResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/balance.BalanceService/UpdateIncome',
+        request,
+        metadata || {},
+        this.methodDescriptorUpdateIncome,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/balance.BalanceService/UpdateIncome',
+    request,
+    metadata || {},
+    this.methodDescriptorUpdateIncome);
+  }
+
 }
 
