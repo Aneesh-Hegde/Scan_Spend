@@ -29,6 +29,7 @@ func UpdateBalance(ctx context.Context, req *balance.UpdateBalanceRequest) (*bal
 	var balanceID int32
 	var dbUserId int
 	var amount float64
+  fmt.Println(req.GetBalanceId())
 err := db.DB.QueryRow(ctx,
 	"SELECT * FROM update_account_balance($1, $2, $3)",
 	req.GetBalanceId(), userId, req.GetAmount(),

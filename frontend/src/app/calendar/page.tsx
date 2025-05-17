@@ -860,7 +860,6 @@ const CalendarContent: React.FC = () => {
   );
 };
 
-// Main component wrapped with Suspense
 const FinancialCalendar: React.FC = () => {
   return (
     <Suspense fallback={<LuxuryCurrencyLoader />}>
