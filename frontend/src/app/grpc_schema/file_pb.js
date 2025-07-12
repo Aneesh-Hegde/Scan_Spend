@@ -220,7 +220,8 @@ proto.file.File.prototype.toObject = function(opt_includeInstance) {
  */
 proto.file.File.toObject = function(includeInstance, msg) {
   var f, obj = {
-filename: jspb.Message.getFieldWithDefault(msg, 1, "")
+filename: jspb.Message.getFieldWithDefault(msg, 1, ""),
+imageUrl: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -261,6 +262,10 @@ proto.file.File.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setFilename(value);
       break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setImageUrl(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -297,6 +302,13 @@ proto.file.File.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getImageUrl();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
 };
 
 
@@ -315,6 +327,24 @@ proto.file.File.prototype.getFilename = function() {
  */
 proto.file.File.prototype.setFilename = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string image_url = 2;
+ * @return {string}
+ */
+proto.file.File.prototype.getImageUrl = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.file.File} returns this
+ */
+proto.file.File.prototype.setImageUrl = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
