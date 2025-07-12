@@ -46,13 +46,20 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
 
         // Get the next chunk of the file
         const chunk = file.slice(offset, offset + chunkSize);
-
+        const user_token: string | null = localStorage.getItem("token")
         const formData = new FormData();
         formData.append("file", chunk, file.name); // Append the chunk as a Blob
         formData.append("chunk_number", (Math.floor(offset / chunkSize) + 1).toString()); // Chunk number (1-based)
         formData.append("total_chunks", totalChunks.toString()); // Total number of chunks
         formData.append("filename", file.name); // Send the original filename
-        formData.append("userId", "1");
+        if (user_token) {
+          formData.append("userId", user_token);
+        } else {
+          const response = await api.get("/get-refresh-token", { withCredentials: true })
+          const refresh_token: string = response.data.refresh_token
+          formData.append("refresh_token", refresh_token);
+          console.warn("No token found in localStorage. Cannot append userId.");
+        }
         try {
           // Send the chunk to the server using Axios
           const response = await api.post("/upload", formData, {
