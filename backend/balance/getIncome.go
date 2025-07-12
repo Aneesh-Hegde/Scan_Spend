@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
 	"github.com/Aneesh-Hegde/expenseManager/db"
 	balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
 	"google.golang.org/grpc"
@@ -19,54 +18,65 @@ func GetIncome(ctx context.Context, req *balance.GetIncomeRequest) (*balance.Get
 		headers := metadata.Pairs("token", md["token"][0])
 		grpc.SendHeader(ctx, headers)
 	}
-
 	userId := md["user_id"][0]
+	
 	query := `SELECT * FROM get_user_incomes($1)`
 	rows, err := db.DB.Query(ctx, query, userId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query balances: %v", err)
+		return nil, fmt.Errorf("failed to query incomes: %v", err)
 	}
 	defer rows.Close()
 
-	// Build response with all balances
-	var balances []*balance.Income
+	// Build response with all incomes
+	var incomes []*balance.Income
 	for rows.Next() {
 		var incomeId int32
 		var dbUserId int32
 		var accountId int32
+		var balanceSource string
 		var amount float64
 		var description sql.NullString
 		var dateAdded time.Time
 		var lastUpdated time.Time
-		var balanceSource string
 
-		if err := rows.Scan(&incomeId, &dbUserId, &accountId, &amount, &description, &dateAdded, &lastUpdated, &balanceSource); err != nil {
+		// Update Scan order to match the SQL function return columns:
+		// income_id, user_id, account_id, balance_source, amount, description, date_added, last_updated
+		if err := rows.Scan(
+			&incomeId,
+			&dbUserId,
+			&accountId,
+			&description,
+			&amount,
+			&balanceSource,
+			&dateAdded,
+			&lastUpdated,
+		); err != nil {
 			fmt.Println(err)
 			return nil, fmt.Errorf("failed to scan income: %v", err)
 		}
 
-		// Format balance_amount as a string (e.g., "$100.00")
-		balanceAmount := fmt.Sprintf("$%.2f", amount)
+		// Format income_amount as a string (e.g., "$100.00")
+		incomeAmount := fmt.Sprintf("$%.2f", amount)
 
-		// Create Balance message
-		b := &balance.Income{
+		// Create Income message
+		income := &balance.Income{
 			IncomeId:     incomeId,
-			IncomeSource: balanceSource,
-			IncomeAmount: balanceAmount,
+			IncomeSource: balanceSource,  // Now properly using the scanned value
+			IncomeAmount: incomeAmount,
 			Income:       amount,
 			Date:         dateAdded.String(),
 		}
-		balances = append(balances, b)
+		incomes = append(incomes, income)
 	}
-	fmt.Println("Balances")
-	fmt.Print(balances)
+
+	fmt.Println("Incomes")
+	fmt.Print(incomes)
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating balances: %v", err)
+		return nil, fmt.Errorf("error iterating incomes: %v", err)
 	}
 
 	return &balance.GetIncomeResponse{
-		Income: balances,
+		Income: incomes,
 	}, nil
-
 }
