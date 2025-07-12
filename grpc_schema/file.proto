@@ -13,6 +13,7 @@ message GetFileByUser{
 
 message File{
   string filename=1;
+  string image_url = 2;
 }
 
 message FileList {
