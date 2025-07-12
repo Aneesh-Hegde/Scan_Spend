@@ -1,23 +1,26 @@
-import api from "./api"; // Assuming you have an axios instance set up
 import { toast } from "react-toastify";
-interface FileUpload {
-  state: (data: string[]) => void
+
+// Define the FileData interface to match your main component
+interface FileData {
+  filename: string;
+  imageUrl: string;
 }
-// const HandleFileUpload = async (setFiles: FileUpload["state"]): Promise<void> => {
-//   try {
-//     // Triggering the file list refresh after upload
-//     const response = await api.get('http://localhost:1323/');
-//     const data = response.data;
-//     setFiles(data.files); // Updating the files list with the latest data from the backend
-//     toast.success('File uploaded successfully');
-//   } catch (error) {
-//     toast.error('Error updating file list');
-//   }
-// };
+
+// Since you already have getAllFiles function in your main component,
+// the best approach is to use a callback pattern
 const HandleFileUpload = (
-  filename: string,
-  setFiles: React.Dispatch<React.SetStateAction<string[]>>
-) => {
-  setFiles((prevFiles) => [...prevFiles, filename]); // Add the new filename to the list
+  uploadedFilename: string,
+  refreshFilesCallback: () => Promise<void>
+): void => {
+  // After successful upload, refresh the file list from server
+  refreshFilesCallback()
+    .then(() => {
+      toast.success(`File '${uploadedFilename}' uploaded successfully`);
+    })
+    .catch((error) => {
+      console.error('Error refreshing file list:', error);
+      toast.error('Error updating file list after upload');
+    });
 };
-export default HandleFileUpload
+
+export default HandleFileUpload;
