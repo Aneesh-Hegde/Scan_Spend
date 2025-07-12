@@ -20,6 +20,9 @@ export class File extends jspb.Message {
   getFilename(): string;
   setFilename(value: string): File;
 
+  getImageUrl(): string;
+  setImageUrl(value: string): File;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): File.AsObject;
   static toObject(includeInstance: boolean, msg: File): File.AsObject;
@@ -31,6 +34,7 @@ export class File extends jspb.Message {
 export namespace File {
   export type AsObject = {
     filename: string,
+    imageUrl: string,
   }
 }
 
