@@ -7,10 +7,14 @@ import (
 	"net"
 	"net/http"
 
+	balanceHandler "github.com/Aneesh-Hegde/expenseManager/balance"
 	"github.com/Aneesh-Hegde/expenseManager/data"
 	"github.com/Aneesh-Hegde/expenseManager/db"
+	goalsHandler "github.com/Aneesh-Hegde/expenseManager/goals"
 	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
+	balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
 	files "github.com/Aneesh-Hegde/expenseManager/grpc_file"
+	goals "github.com/Aneesh-Hegde/expenseManager/grpc_goal"
 	grpcMiddlware "github.com/Aneesh-Hegde/expenseManager/middleware"
 	"github.com/Aneesh-Hegde/expenseManager/product"
 	"github.com/Aneesh-Hegde/expenseManager/products"
@@ -25,8 +29,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
-  balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
-	balanceHandler "github.com/Aneesh-Hegde/expenseManager/balance"
 )
 
 type server struct {
@@ -101,38 +103,64 @@ func (s *ProductService) GetProductsByUser(ctx context.Context, req *product.Get
 // 	}, nil
 // }
 
-type BalanceService struct{
-  balance.UnimplementedBalanceServiceServer
+type BalanceService struct {
+	balance.UnimplementedBalanceServiceServer
 }
 
-func (s *BalanceService) GetBalances(ctx context.Context,req *balance.GetBalanceRequest)(*balance.GetBalanceResponse,error){
- return balanceHandler.GetBalance(ctx,req)
+func (s *BalanceService) GetBalances(ctx context.Context, req *balance.GetBalanceRequest) (*balance.GetBalanceResponse, error) {
+	return balanceHandler.GetBalance(ctx, req)
 }
 
-func (s *BalanceService) AddBalanceSource(ctx context.Context,req *balance.AddBalanceSourceRequest)(*balance.AddBalanceSourceResponse,error){
- return balanceHandler.AddBalance(ctx,req)
+func (s *BalanceService) AddBalanceSource(ctx context.Context, req *balance.AddBalanceSourceRequest) (*balance.AddBalanceSourceResponse, error) {
+	return balanceHandler.AddBalance(ctx, req)
 }
 
-func (s *BalanceService) UpdateBalance(ctx context.Context,req *balance.UpdateBalanceRequest)(*balance.UpdateBalanceResponse,error){
- return balanceHandler.UpdateBalance(ctx,req)
+func (s *BalanceService) UpdateBalance(ctx context.Context, req *balance.UpdateBalanceRequest) (*balance.UpdateBalanceResponse, error) {
+	return balanceHandler.UpdateBalance(ctx, req)
 }
 
-
-func (s *BalanceService) GetTransfer(ctx context.Context,req *balance.GetTransferRequest)(*balance.GetTransferResponse,error){
- return balanceHandler.GetTransfer(ctx,req)
+func (s *BalanceService) GetTransfer(ctx context.Context, req *balance.GetTransferRequest) (*balance.GetTransferResponse, error) {
+	return balanceHandler.GetTransfer(ctx, req)
 }
 
-
-func (s *BalanceService) GetIncomes(ctx context.Context,req *balance.GetIncomeRequest)(*balance.GetIncomeResponse,error){
- return balanceHandler.GetIncome(ctx,req)
+func (s *BalanceService) GetIncomes(ctx context.Context, req *balance.GetIncomeRequest) (*balance.GetIncomeResponse, error) {
+	return balanceHandler.GetIncome(ctx, req)
 }
 
-func (s *BalanceService) AddIncomeSource(ctx context.Context,req *balance.AddIncomeSourceRequest)(*balance.AddIncomeSourceResponse,error){
- return balanceHandler.AddIncome(ctx,req)
+func (s *BalanceService) AddIncomeSource(ctx context.Context, req *balance.AddIncomeSourceRequest) (*balance.AddIncomeSourceResponse, error) {
+	return balanceHandler.AddIncome(ctx, req)
 }
 
-func (s *BalanceService) UpdateIncome(ctx context.Context,req *balance.UpdateIncomeRequest)(*balance.UpdateIncomeResponse,error){
- return balanceHandler.UpdateIncome(ctx,req)
+func (s *BalanceService) UpdateIncome(ctx context.Context, req *balance.UpdateIncomeRequest) (*balance.UpdateIncomeResponse, error) {
+	return balanceHandler.UpdateIncome(ctx, req)
+}
+
+type GoalService struct {
+	goals.UnimplementedGoalServiceServer
+}
+
+func (s *GoalService) GetGoals(ctx context.Context, req *goals.GetGoalRequest) (*goals.GetGoalResponse, error) {
+	return goalsHandler.GetGoals(ctx, req)
+}
+
+func (s *GoalService) CreateGoals(ctx context.Context, req *goals.CreateGoalRequest) (*goals.CreateGoalResponse, error) {
+	return goalsHandler.CreateGoals(ctx, req)
+}
+
+func (s *GoalService) UpdateGoals(ctx context.Context, req *goals.UpdateGoalRequest) (*goals.UpdateResponse, error) {
+	return goalsHandler.UpdateGoals(ctx, req)
+}
+
+func (s *GoalService) EditGoals(ctx context.Context, req *goals.EditGoalRequest) (*goals.EditResponse, error) {
+	return goalsHandler.EditGoals(ctx, req)
+}
+
+func (s *GoalService) GetGoalTransactions(ctx context.Context, req *goals.GetGoalTransactionsRequest) (*goals.GetGoalTransactionsResponse, error) {
+	return goalsHandler.GoalTransactions(ctx, req)
+}
+
+func (s *GoalService) DeleteGoals(ctx context.Context, req *goals.DeleteGoalRequest) (*goals.DeleteResponse, error) {
+	return goalsHandler.DeleteGoals(ctx, req)
 }
 
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
@@ -151,6 +179,12 @@ func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServe
 }
 
 func main() {
+	// Initialize MinIO client before starting server
+	log.Print("Initializing MinIO...")
+	if err := utils.InitMinIO(); err != nil {
+		log.Fatalf("Failed to initialize MinIO: %v", err)
+	}
+	log.Print("MinIO initialized successfully")
 	err := godotenv.Load(".env-dev")
 	db.InitDB()
 	redis.InitRedis()
@@ -179,8 +213,11 @@ func main() {
 	ProductService := &ProductService{}
 	product.RegisterProductServiceServer(grpcServer, ProductService)
 
-  BalanceService := &BalanceService{}
-  balance.RegisterBalanceServiceServer(grpcServer, BalanceService)
+	BalanceService := &BalanceService{}
+	balance.RegisterBalanceServiceServer(grpcServer, BalanceService)
+
+	GoalsService := &GoalService{}
+	goals.RegisterGoalServiceServer(grpcServer, GoalsService)
 	// Echo HTTP server setup (without TLS)
 	e := echo.New()
 	e.Use(middleware.Logger())
