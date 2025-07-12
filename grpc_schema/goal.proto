@@ -1,0 +1,101 @@
+syntax="proto3";
+package goals;
+
+option go_package="/grpc_goal";
+
+service GoalService{
+  rpc GetGoals(GetGoalRequest)returns(GetGoalResponse);
+  rpc CreateGoals(CreateGoalRequest)returns(CreateGoalResponse);
+  rpc UpdateGoals(UpdateGoalRequest)returns(UpdateResponse);
+  rpc EditGoals(EditGoalRequest)returns(EditResponse);
+  rpc DeleteGoals(DeleteGoalRequest)returns(DeleteResponse);
+  rpc GetGoalTransactions(GetGoalTransactionsRequest)returns(GetGoalTransactionsResponse);
+}
+
+message Goals{
+  string id = 1;
+  string name = 2;
+  double targetAmount = 3;
+  double currentAmount = 4;
+  string deadline = 5;
+  string description= 6;
+  string createdAt = 7;
+  string category_id = 8;
+  string category_name = 9;
+  string hexcode = 10;
+}
+
+
+message GetGoalRequest{
+
+}
+
+message GetGoalResponse{
+  repeated Goals goals=1;
+}
+
+
+message CreateGoalRequest{
+  string name = 1;
+  double targetAmount = 2;
+  double currentAmount = 3;
+  string deadline = 4;
+  string description= 5;
+  string createdAt = 6;
+  string category_id = 7;
+  string category_name = 8;
+  string hexacode = 9;
+}
+
+
+message CreateGoalResponse {
+  string id = 1;
+  string message = 2;
+}
+
+
+message UpdateGoalRequest{
+  string id = 1;
+  double amount = 2;
+  int32 balance_id = 3;        // Add this
+  string transaction_type = 4;  // Add this ("deposit" or "withdrawal")
+  string notes = 5;            // Add this
+}
+
+message UpdateResponse{
+  string message = 1;
+}
+
+message EditGoalRequest{
+ Goals goal = 1;
+}
+
+message EditResponse{
+  string message = 1;
+}
+
+message DeleteGoalRequest{
+  string id = 1;
+}
+
+message DeleteResponse{
+  string message = 1;
+}
+
+message GoalTransaction {
+  int32 id = 1;
+  string goal_id = 2;
+  int32 balance_id = 3;
+  double amount = 4;
+  string transaction_type = 5;
+  string created_at = 6;
+  string notes = 7;
+}
+
+message GetGoalTransactionsRequest {
+  string goal_id = 1;
+}
+
+message GetGoalTransactionsResponse {
+  repeated GoalTransaction transactions = 1;
+}
