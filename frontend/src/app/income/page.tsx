@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Edit, Save, Trash2, X, Plus } from 'lucide-react';
+import { DollarSign, Edit, Save, Trash2, X, Plus, TrendingUp, Calendar, Wallet, PieChart } from 'lucide-react';
 import { Metadata } from 'grpc-web';
 import api from '../utils/api';
 import { BalanceServiceClient } from '../grpc_schema/BalanceServiceClientPb';
@@ -25,6 +25,27 @@ const IncomePage: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [newIncome, setNewIncome] = useState<Income>({ id: 0, source: '', amountDescription: '', amount: 0, date: new Date().toISOString().split('T')[0] });
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
+
+  // Calculate total balance (can be negative)
+  const totalBalance = incomes.reduce((sum, income) => sum + income.amount, 0);
+
+  // Get recent transactions (last 30 days)
+  const recentTransactions = incomes.filter(income => {
+    const incomeDate = new Date(income.date);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return incomeDate >= thirtyDaysAgo;
+  });
+
+  // Calculate monthly net change
+  const monthlyChange = recentTransactions.reduce((sum, income) => sum + income.amount, 0);
+
+  // Separate gains and losses
+  const totalGains = incomes.filter(income => income.amount > 0).reduce((sum, income) => sum + income.amount, 0);
+  const totalLosses = Math.abs(incomes.filter(income => income.amount < 0).reduce((sum, income) => sum + income.amount, 0));
+
+  // Get unique income sources count
+  const uniqueSources = new Set(incomes.map(income => income.source)).size;
 
   // Fetch incomes on component mount
   useEffect(() => {
@@ -177,236 +198,367 @@ const IncomePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold flex items-center">
-            <DollarSign className="mr-2" />
-            Manage Income
-          </h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 flex items-center rounded-md bg-blue-600 text-white hover:bg-blue-700"
-          >
-            <Plus size={16} className="mr-1" /> Add Income
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 flex items-center mb-2">
+                <div className="p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-xl mr-4">
+                  <DollarSign className="text-white" size={32} />
+                </div>
+                Portfolio Dashboard
+              </h1>
+              <p className="text-gray-600">Track your investments, income, and financial portfolio</p>
+            </div>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-6 py-3 flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            >
+              <Plus size={20} className="mr-2" /> Add Transaction
+            </button>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Total Balance</p>
+                  <p className={`text-2xl font-bold ${totalBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {totalBalance >= 0 ? '+' : ''}{formatCurrency(totalBalance)}
+                  </p>
+                </div>
+                <div className={`p-3 rounded-xl ${totalBalance >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <Wallet className={totalBalance >= 0 ? 'text-green-600' : 'text-red-600'} size={24} />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Monthly Change</p>
+                  <p className={`text-2xl font-bold ${monthlyChange >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                    {monthlyChange >= 0 ? '+' : ''}{formatCurrency(monthlyChange)}
+                  </p>
+                </div>
+                <div className={`p-3 rounded-xl ${monthlyChange >= 0 ? 'bg-blue-100' : 'bg-red-100'}`}>
+                  <TrendingUp className={monthlyChange >= 0 ? 'text-blue-600' : 'text-red-600'} size={24} />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Total Gains</p>
+                  <p className="text-2xl font-bold text-green-600">+{formatCurrency(totalGains)}</p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <TrendingUp className="text-green-600" size={24} />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">Total Losses</p>
+                  <p className="text-2xl font-bold text-red-600">-{formatCurrency(totalLosses)}</p>
+                </div>
+                <div className="p-3 bg-red-100 rounded-xl">
+                  <Calendar className="text-red-600" size={24} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Display Loading/Error States */}
-        {loading && <p className="text-gray-500">Loading incomes...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading incomes...</span>
+          </div>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <p className="text-red-700 flex items-center">
+              <X className="mr-2" size={16} />
+              {error}
+            </p>
+          </div>
+        )}
 
         {/* Income List */}
-        <div className={`space-y-4 ${showAddModal || showEditModal ? 'blur-sm' : ''}`}>
-          {incomes.length === 0 && !loading && (
-            <p className="text-gray-500">No income entries found.</p>
-          )}
-          {incomes.map(income => (
-            <div
-              key={income.id}
-              className="flex items-center p-3 border border-green-100 rounded-lg bg-green-50 text-sm"
-            >
-              <div className="flex-1">
-                <div className="font-medium">{income.source}</div>
-                <div className="text-xs text-gray-500">{income.amountDescription}</div>
-                <div className="text-xs text-gray-500">
-                  {new Date(income.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+        <div className={`${showAddModal || showEditModal ? 'blur-sm' : ''}`}>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Transaction History</h3>
+            </div>
+            
+            <div className="divide-y divide-gray-100">
+              {incomes.length === 0 && !loading ? (
+                <div className="text-center py-12">
+                  <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <DollarSign className="text-gray-400" size={24} />
+                  </div>
+                  <p className="text-gray-500 text-lg mb-2">No income entries found</p>
+                  <p className="text-gray-400">Start by adding your first income source</p>
+                </div>
+              ) : (
+                incomes.map((income, index) => (
+                  <div
+                    key={income.id}
+                    className="flex items-center p-6 hover:bg-gray-50 transition-colors duration-200 group"
+                  >
+                    <div className="flex-shrink-0 mr-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        income.amount >= 0 
+                          ? 'bg-gradient-to-r from-green-400 to-green-500' 
+                          : 'bg-gradient-to-r from-red-400 to-red-500'
+                      }`}>
+                        <span className="text-white font-bold text-lg">
+                          {income.source.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 truncate">
+                            {income.source}
+                          </h4>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {income.amountDescription}
+                          </p>
+                          <div className="flex items-center mt-2 text-xs text-gray-500">
+                            <Calendar size={12} className="mr-1" />
+                            {new Date(income.date).toLocaleDateString(undefined, { 
+                              weekday: 'short',
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            })}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <div className={`text-2xl font-bold ${
+                              income.amount >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {income.amount >= 0 ? '+' : ''}{formatCurrency(income.amount)}
+                            </div>
+                            <div className={`text-xs ${
+                              income.amount >= 0 ? 'text-green-500' : 'text-red-500'
+                            }`}>
+                              {income.amount >= 0 ? 'Gain' : 'Loss'}
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleEditIncome(income)}
+                            className="p-2 rounded-lg hover:bg-blue-100 text-gray-400 hover:text-blue-600 transition-colors duration-200 opacity-0 group-hover:opacity-100"
+                          >
+                            <Edit size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Add Income Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowAddModal(false)}></div>
+            <div className="bg-white rounded-2xl shadow-2xl z-10 w-full max-w-2xl overflow-hidden">
+              <div className="flex justify-between items-center border-b p-6 bg-gradient-to-r from-blue-50 to-blue-100">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Add New Transaction
+                </h3>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="p-2 rounded-full hover:bg-white/50 transition-colors duration-200"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Source/Investment</label>
+                    <input
+                      type="text"
+                      name="source"
+                      value={newIncome.source}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="e.g., Salary, Tesla Stock, Bitcoin, Freelance"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                    <input
+                      type="text"
+                      name="amountDescription"
+                      value={newIncome.amountDescription}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Brief description (e.g., Monthly salary, Crypto loss, Stock gain)"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.01"
+                        name="amount"
+                        value={newIncome.amount}
+                        onChange={handleInputChange}
+                        className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Enter positive for gains, negative for losses"
+                      />
+                      <div className="absolute right-4 top-4 text-sm text-gray-500">
+                        {newIncome.amount >= 0 ? '📈 Gain' : '📉 Loss'}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Use positive numbers for gains/income, negative numbers for losses
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={newIncome.date}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="font-medium text-green-500 mr-3">
-                +{formatCurrency(income.amount)}
+
+              <div className="flex justify-end items-center gap-4 border-t p-6 bg-gray-50">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddIncome}
+                  className="px-6 py-3 flex items-center rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Save size={16} className="mr-2" /> Add Transaction
+                </button>
               </div>
-              <button
-                onClick={() => handleEditIncome(income)}
-                className="p-2 rounded-full hover:bg-green-100"
-              >
-                <Edit size={14} />
-              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {/* Edit Income Modal */}
+        {showEditModal && editingIncome && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
+            <div className="bg-white rounded-2xl shadow-2xl z-10 w-full max-w-2xl overflow-hidden">
+              <div className="flex justify-between items-center border-b p-6 bg-gradient-to-r from-green-50 to-green-100">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Edit Income Source
+                </h3>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="p-2 rounded-full hover:bg-white/50 transition-colors duration-200"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Income Source</label>
+                    <input
+                      type="text"
+                      name="source"
+                      value={editingIncome.source}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                      placeholder="e.g., Salary, Freelance, Investment"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                    <input
+                      type="text"
+                      name="amountDescription"
+                      value={editingIncome.amountDescription}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Brief description of this income"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Amount</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="amount"
+                      value={editingIncome.amount}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={editingIncome.date}
+                      onChange={handleInputChange}
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end items-center gap-4 border-t p-6 bg-gray-50">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-6 py-3 rounded-xl border border-gray-300 hover:bg-gray-100 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveIncome}
+                  className="px-6 py-3 flex items-center rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Save size={16} className="mr-2" /> Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Add Income Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowAddModal(false)}></div>
-          <div className="bg-white rounded-lg shadow-xl z-10 w-4/5 max-w-3xl overflow-hidden">
-            <div className="flex justify-between items-center border-b p-4">
-              <h3 className="text-xl font-medium">
-                Add New Income
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
-                  <input
-                    type="text"
-                    name="source"
-                    value={newIncome.source}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Income source"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount Description</label>
-                  <input
-                    type="text"
-                    name="amountDescription"
-                    value={newIncome.amountDescription}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Amount description"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="amount"
-                    value={newIncome.amount}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={newIncome.date}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end items-center gap-3 border-t p-4 bg-gray-50">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddIncome}
-                className="px-4 py-2 flex items-center rounded-md bg-blue-600 text-white hover:bg-blue-700"
-              >
-                <Save size={16} className="mr-1" /> Add Income
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Income Modal */}
-      {showEditModal && editingIncome && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowEditModal(false)}></div>
-          <div className="bg-white rounded-lg shadow-xl z-10 w-4/5 max-w-3xl overflow-hidden">
-            <div className="flex justify-between items-center border-b p-4">
-              <h3 className="text-xl font-medium">
-                Edit Income
-              </h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
-                  <input
-                    type="text"
-                    name="source"
-                    value={editingIncome.source}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Income source"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount Description</label>
-                  <input
-                    type="text"
-                    name="amountDescription"
-                    value={editingIncome.amountDescription}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Amount description"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="amount"
-                    value={editingIncome.amount}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={editingIncome.date}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end items-center gap-3 border-t p-4 bg-gray-50">
-              {/* Uncomment if delete functionality is added back */}
-              {/* <button
-                onClick={handleDeleteIncome}
-                className="px-4 py-2 flex items-center rounded-md bg-red-100 text-red-500 hover:bg-red-200"
-              >
-                <Trash2 size={16} className="mr-1" /> Delete
-              </button> */}
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveIncome}
-                className="px-4 py-2 flex items-center rounded-md bg-blue-600 text-white hover:bg-blue-700"
-              >
-                <Save size={16} className="mr-1" /> Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
