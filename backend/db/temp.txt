@@ -1,0 +1,119 @@
+
+CREATE TABLE goals (
+  id UUID PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  target_amount NUMERIC NOT NULL,
+  current_amount NUMERIC NOT NULL DEFAULT 0,
+  deadline TIMESTAMP NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_user
+    FOREIGN KEY(user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE
+);
+
+
+CREATE OR REPLACE FUNCTION public.get_goals_by_user(p_user_id integer)
+RETURNS TABLE (
+  id uuid,
+  name character varying,
+  target_amount numeric,
+  current_amount numeric,
+  deadline timestamp without time zone,
+  description text,
+  created_at timestamp without time zone,
+  category_id uuid,
+  category_name character varying,
+  hexcode character varying
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    g.id,
+    g.name,
+    g.target_amount,
+    g.current_amount,
+    g.deadline,
+    g.description,
+    g.created_at,
+    g.category_id,
+    gc.name AS category_name,
+    gc.color AS hexcode
+  FROM goals g
+  JOIN goal_categories gc ON g.category_id = gc.id
+  WHERE g.user_id = p_user_id
+  ORDER BY g.created_at DESC;
+END;
+$$;
+
+
+ CREATE TABLE goal_transactions (
+  id SERIAL PRIMARY KEY,
+  goal_id UUID REFERENCES goals(id),
+  balance_id INTEGER REFERENCES incomes(income_id),  -- References incomes table
+  amount DECIMAL(12,2) NOT NULL,
+  transaction_type VARCHAR(20) NOT NULL, -- 'deposit', 'withdrawal'
+  created_at TIMESTAMP DEFAULT NOW(),
+  notes TEXT
+);
+
+CREATE TABLE goal_categories (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    color VARCHAR(7) NOT NULL,
+    user_id INTEGER,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+*/
+
+-- Goals Table (now with category_id)
+/*
+CREATE TABLE goals (
+  id UUID PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  target_amount NUMERIC NOT NULL,
+  current_amount NUMERIC NOT NULL DEFAULT 0,
+  deadline TIMESTAMP NOT NULL,
+  description TEXT,
+  category_id UUID,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_user
+    FOREIGN KEY(user_id)
+    REFERENCES users(user_id)
+    ON DELETE CASCADE,
+  CONSTRAINT fk_goal_category
+    FOREIGN KEY(category_id)
+    REFERENCES goal_categories(id)
+    ON DELETE SET NULL
+);
+*/
+
+-- Goal Transactions Table (already created)
+/*
+CREATE TABLE goal_transactions (
+  id SERIAL PRIMARY KEY,
+  goal_id UUID REFERENCES goals(id),
+  balance_id INTEGER REFERENCES incomes(income_id),
+  amount DECIMAL(12,2) NOT NULL,
+  transaction_type VARCHAR(20) NOT NULL, -- 'deposit', 'withdrawal'
+  created_at TIMESTAMP DEFAULT NOW(),
+  notes TEXT
+);
+*/
+
+-- Sample data for goal_categories (your original categories data)
+INSERT INTO goal_categories (id, name, color, user_id, is_default, created_at) VALUES
+('8a7d8fb5-7b84-4549-8327-a33bdaeeec7d', 'Savings', '#3b82f6', NULL, TRUE, '2025-05-30 01:23:34.547585'),
+('e66ae3e7-7e58-45ec-9b81-f01f57d4a3e4', 'Debt', '#ef4444', NULL, TRUE, '2025-05-30 01:23:34.547585'),
+('449f2c18-637e-4d78-bfd6-6d43364ab281', 'Investment', '#10b981', NULL, TRUE, '2025-05-30 01:23:34.547585'),
+('ba9c1582-e301-40cd-af16-4401e44803e1', 'Emergency', '#f97316', NULL, TRUE, '2025-05-30 01:23:34.547585'),
+('18cc74fa-2f0b-4561-a6ba-85e329251df8', 'Vacation', '#8b5cf6', NULL, TRUE, '2025-05-30 01:23:34.547585'),
+('8b6070b7-a0ed-40ba-9440-09f1844bdd05', 'Other', '#6b7280', NULL, TRUE, '2025-05-30 01:23:34.547585'),
+('a4f99611-f08a-421d-b0a2-93d37467de29', 'Productivity', '#ff0000', 1, FALSE, '2025-05-30 23:38:33.898978')
+ON CONFLICT (id) DO NOTHING;
