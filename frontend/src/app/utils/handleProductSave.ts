@@ -93,5 +93,6 @@ const HandleProductSave = async (products: type_product[], filename: string,
       localStorage.setItem("token", token)
     }
   })
+  console.log("item send to backend")
 }
 export default HandleProductSave
