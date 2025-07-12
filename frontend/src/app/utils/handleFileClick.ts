@@ -15,6 +15,7 @@ const HandleFileClick = async ({
   filename,
   filestate: setFilename,
   productstate: setProducts,
+
 }: FileClick) => {
   setFilename(filename);
 
