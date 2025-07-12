@@ -41,7 +41,7 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	}
 	if err != nil {
 		log.Println("Invalid or expired access token:", err)
-		accessToken, userId, err = refreshAccessToken(refreshToken)
+		accessToken, userId, err = RefreshAccessToken(refreshToken)
 		if err != nil {
 			return nil, fmt.Errorf("failed to refresh access token: %v", err)
 		}
@@ -54,7 +54,7 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 }
 
 // Refreshes a access token using the refresh token
-func refreshAccessToken(refreshToken string) (string, int, error) {
+func RefreshAccessToken(refreshToken string) (string, int, error) {
 	userIdStr, err := redis.GetRefreshToken(refreshToken)
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to get user ID from refresh token: %v", err)
