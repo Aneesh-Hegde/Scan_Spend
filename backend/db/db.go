@@ -199,6 +199,6 @@ func StoreProductData(ctx context.Context, userID int, filename string, products
 	}
 	fmt.Println("Products updated successfully")
 	fmt.Println(updatedProducts)
-	err = redis.CacheProductData(filename, updatedProducts)
+	err = redis.CacheProductData(userID,filename, updatedProducts)
 	return &pb.DBMessage{Message: message}, nil
 }
