@@ -4,14 +4,16 @@ import type { Product } from "../types/types"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import EditProductForm from "./EditProductForm"
+import { Edit2 } from 'lucide-react';
 
 interface ProductListProps {
   products: Product[]
   onUpdate: (updatedProduct: Product) => void
   onSave: () => void
+  onEdit?: (product: Product) => void;
 }
 
-export default function ProductList({ products, onUpdate, onSave }: ProductListProps) {
+export default function ProductList({ products, onUpdate, onSave, onEdit }: ProductListProps) {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   useEffect(() => {
     setEditingProduct(null)
@@ -42,7 +44,12 @@ export default function ProductList({ products, onUpdate, onSave }: ProductListP
                   <TableCell>{product.quantity}</TableCell>
                   <TableCell>&#8377;{product.amount.toFixed(2)}</TableCell>
                   <TableCell>
-                    <Button onClick={() => setEditingProduct(product)}>Edit</Button>
+                    <button
+                      onClick={() => onEdit?.(product)}
+                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                    >
+                      <Edit2 size={16} />
+                    </button>
                   </TableCell>
                 </TableRow>
               ))}
