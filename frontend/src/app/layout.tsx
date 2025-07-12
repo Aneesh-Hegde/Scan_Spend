@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import LuxuryCurrencyLoader from "./components/loading";
-
+import './styles/shepherd.css';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
