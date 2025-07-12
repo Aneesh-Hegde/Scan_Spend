@@ -1,0 +1,426 @@
+/* Import Shepherd.js base styles first */
+@import 'shepherd.js/dist/css/shepherd.css';
+
+/* Custom Shepherd Tour Styles */
+.shepherd-modal-overlay-container {
+  z-index: 9999;
+}
+
+
+/* Reset and base styles */
+.shepherd-element {
+  max-width: 400px;
+  border-radius: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 2px solid #333;
+  background: #fff;
+  z-index: 9999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Content container */
+.shepherd-content {
+  padding: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* Header - if you want to hide it for this clean look */
+.shepherd-header {
+  display: none;
+}
+
+/* Main text content */
+.shepherd-text {
+  padding: 30px 30px 20px 30px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background: #fff;
+  position: relative;
+}
+
+.shepherd-text p {
+  margin: 0 0 16px 0;
+  color: #333;
+}
+
+.shepherd-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* Close button with proper icon */
+.shepherd-cancel-icon {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 2px;
+}
+
+.shepherd-cancel-icon:hover {
+  color: #333;
+  background: #f5f5f5;
+}
+
+.shepherd-cancel-icon:active {
+  background: #e5e5e5;
+}
+
+/* Close icon using CSS */
+.shepherd-cancel-icon::before,
+.shepherd-cancel-icon::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.shepherd-cancel-icon::before {
+  transform: rotate(45deg);
+}
+
+.shepherd-cancel-icon::after {
+  transform: rotate(-45deg);
+}
+
+/* Remove the old close icon content */
+.shepherd-cancel-icon {
+  font-size: 0; /* Hide any text content */
+}
+
+/* Footer with buttons */
+.shepherd-footer {
+  padding: 0;
+  display: flex;
+  background: #fff;
+  border-top: 2px solid #333;
+}
+
+/* Button styling to match the demo */
+.shepherd-button {
+  flex: 1;
+  padding: 15px 20px;
+  border: none;
+  background: #fff;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+}
+
+/* Button separator */
+.shepherd-button + .shepherd-button {
+  border-left: 2px solid #333;
+}
+
+/* Button hover states */
+.shepherd-button:hover {
+  background: #f5f5f5;
+  color: #000;
+}
+
+.shepherd-button:active {
+  background: #e5e5e5;
+}
+
+/* Primary button (Next) - no special styling in this theme */
+.shepherd-button-primary {
+  background: #fff;
+  color: #333;
+}
+
+.shepherd-button-primary:hover {
+  background: #f5f5f5;
+  color: #000;
+}
+
+/* Secondary button (Exit/Back) */
+.shepherd-button-secondary {
+  background: #fff;
+  color: #333;
+}
+
+.shepherd-button-secondary:hover {
+  background: #f5f5f5;
+  color: #000;
+}
+
+/* Custom arrow styling */
+.shepherd-arrow {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  z-index: -1;
+}
+
+.shepherd-arrow::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 2px solid #333;
+  transform: rotate(45deg);
+  top: 50%;
+  left: 50%;
+  margin-top: -7px;
+  margin-left: -7px;
+}
+
+/* Arrow positioning with better alignment */
+.shepherd-element[data-popper-placement^="top"] .shepherd-arrow {
+  bottom: -10px;
+}
+
+.shepherd-element[data-popper-placement^="bottom"] .shepherd-arrow {
+  top: -10px;
+}
+
+.shepherd-element[data-popper-placement^="left"] .shepherd-arrow {
+  right: -10px;
+}
+
+.shepherd-element[data-popper-placement^="right"] .shepherd-arrow {
+  left: -10px;
+}
+
+/* Arrow border adjustments for different positions */
+.shepherd-element[data-popper-placement^="top"] .shepherd-arrow::before {
+  border-top: none;
+  border-left: none;
+}
+
+.shepherd-element[data-popper-placement^="bottom"] .shepherd-arrow::before {
+  border-bottom: none;
+  border-right: none;
+}
+
+.shepherd-element[data-popper-placement^="left"] .shepherd-arrow::before {
+  border-left: none;
+  border-bottom: none;
+}
+
+.shepherd-element[data-popper-placement^="right"] .shepherd-arrow::before {
+  border-right: none;
+  border-top: none;
+}
+
+/* Enhanced arrow with shadow */
+.shepherd-arrow::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  transform: rotate(45deg);
+  top: 50%;
+  left: 50%;
+  margin-top: -7px;
+  margin-left: -7px;
+  z-index: 1;
+}
+
+/* Arrow shadow for depth */
+.shepherd-element[data-popper-placement^="top"] .shepherd-arrow::after,
+.shepherd-element[data-popper-placement^="bottom"] .shepherd-arrow::after,
+.shepherd-element[data-popper-placement^="left"] .shepherd-arrow::after,
+.shepherd-element[data-popper-placement^="right"] .shepherd-arrow::after {
+  box-shadow: -1px -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Modal overlay */
+.shepherd-modal-overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+.shepherd-modal-mask {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+/* Target element highlighting */
+.shepherd-target-highlighted {
+  position: relative;
+  z-index: 9999;
+  box-shadow: 0 0 0 4px rgba(51, 51, 51, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* Animation classes */
+.shepherd-element.shepherd-fade-in {
+  opacity: 0;
+  transform: scale(0.98);
+  animation: shepherdFadeIn 0.2s ease forwards;
+}
+
+.shepherd-element.shepherd-fade-out {
+  animation: shepherdFadeOut 0.15s ease forwards;
+}
+
+@keyframes shepherdFadeIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shepherdFadeOut {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .shepherd-element {
+    max-width: calc(100vw - 40px);
+    margin: 20px;
+  }
+  
+  .shepherd-text {
+    padding: 25px 20px 15px 20px;
+    font-size: 15px;
+  }
+  
+  .shepherd-footer {
+    flex-direction: column;
+  }
+  
+  .shepherd-button + .shepherd-button {
+    border-left: none;
+    border-top: 2px solid #333;
+  }
+  
+  .shepherd-button {
+    padding: 12px 20px;
+    min-height: 45px;
+  }
+}
+
+/* Focus states for accessibility */
+.shepherd-element:focus {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+
+.shepherd-button:focus {
+  outline: 2px solid #333;
+  outline-offset: -2px;
+  background: #f0f0f0;
+}
+
+.shepherd-cancel-icon:focus {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .shepherd-element {
+    border: 3px solid #000;
+  }
+  
+  .shepherd-footer {
+    border-top: 3px solid #000;
+  }
+  
+  .shepherd-button + .shepherd-button {
+    border-left: 3px solid #000;
+  }
+  
+  .shepherd-text {
+    color: #000;
+  }
+  
+  .shepherd-button {
+    color: #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .shepherd-element,
+  .shepherd-button,
+  .shepherd-target-highlighted,
+  .shepherd-cancel-icon {
+    transition: none;
+  }
+  
+  .shepherd-element.shepherd-fade-in,
+  .shepherd-element.shepherd-fade-out {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Custom step counter (if needed) */
+.shepherd-step-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 15px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Optional: Hide default shepherd styles that might conflict */
+.shepherd-element .shepherd-content .shepherd-header {
+  display: none !important;
+}
+
+/* Make sure text is properly spaced like in the demo */
+.shepherd-text strong {
+  font-weight: 600;
+  color: #000;
+}
+
+.shepherd-text em {
+  font-style: italic;
+  color: #555;
+}
+
+/* Link styling within shepherd text */
+.shepherd-text a {
+  color: #333;
+  text-decoration: underline;
+}
+
+.shepherd-text a:hover {
+  color: #000;
+  text-decoration: none;
+}
