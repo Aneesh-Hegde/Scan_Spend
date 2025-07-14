@@ -16,6 +16,7 @@ static_resources:
                     - name: backend
                       domains: ["*"]
                       routes:
+                        # HTTP routes (non-gRPC)
                         - match: {prefix: "/upload"}
                           route:
                             cluster: http_upload_backend
@@ -28,9 +29,41 @@ static_resources:
                           route:
                             cluster: http_upload_backend
                             timeout: 300s
+                        
+                        # gRPC User Service routes
+                        - match: {prefix: "/user_grpc.UserService/"}
+                          route:
+                            cluster: user_grpc_backend
+                            timeout: 300s
+                        
+                        # gRPC Product Service routes
+                        - match: {prefix: "/product.ProductService/"}
+                          route:
+                            cluster: product_grpc_backend
+                            timeout: 300s
+                        
+                        # gRPC File Service routes
+                        - match: {prefix: "/grpc_file.FileService/"}
+                          route:
+                            cluster: file_grpc_backend
+                            timeout: 300s
+                        
+                        # gRPC Balance Service routes
+                        - match: {prefix: "/grpc_balance.BalanceService/"}
+                          route:
+                            cluster: balance_grpc_backend
+                            timeout: 300s
+                        
+                        # gRPC Goals Service routes
+                        - match: {prefix: "/grpc_goal.GoalService/"}
+                          route:
+                            cluster: goals_grpc_backend
+                            timeout: 300s
+                        
+                        # Default fallback route
                         - match: { prefix: "/" }
                           route:
-                            cluster: grpc_backend
+                            cluster: user_grpc_backend
                             timeout: 300s
                       cors:
                         allow_origin_string_match:
@@ -44,31 +77,101 @@ static_resources:
                     - name: envoy.filters.http.grpc_web
                       typed_config:
                         "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_web.v3.GrpcWeb
-                    - name: envoy.filters.http.cors  # CORS filter should be listed here
+                    - name: envoy.filters.http.cors
                       typed_config:
                         "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
-                    - name: envoy.filters.http.router  # Router filter is applied last
+                    - name: envoy.filters.http.router
                       typed_config:
                         "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
       per_connection_buffer_limit_bytes: 10485760
-  # Backend cluster definition
+
   clusters:
-    - name: grpc_backend
+    # User Service Cluster (port 50052)
+    - name: user_grpc_backend
       connect_timeout: 300s
       type: logical_dns
       per_connection_buffer_limit_bytes: 10485760
       http2_protocol_options: {}
       lb_policy: round_robin
       load_assignment:
-        cluster_name: grpc_backend
+        cluster_name: user_grpc_backend
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
                       address: localhost
-                      port_value: 50051  # Your gRPC service running on port 50051
+                      port_value: 50052
 
+    # File Service Cluster (port 50053)
+    - name: file_grpc_backend
+      connect_timeout: 300s
+      type: logical_dns
+      per_connection_buffer_limit_bytes: 10485760
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: file_grpc_backend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 50053
+
+    # Product Service Cluster (port 50054)
+    - name: product_grpc_backend
+      connect_timeout: 300s
+      type: logical_dns
+      per_connection_buffer_limit_bytes: 10485760
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: product_grpc_backend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 50054
+
+    # Balance Service Cluster (port 50055)
+    - name: balance_grpc_backend
+      connect_timeout: 300s
+      type: logical_dns
+      per_connection_buffer_limit_bytes: 10485760
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: balance_grpc_backend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 50055
+
+    # Goals Service Cluster (port 50056)
+    - name: goals_grpc_backend
+      connect_timeout: 300s
+      type: logical_dns
+      per_connection_buffer_limit_bytes: 10485760
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: goals_grpc_backend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 50056
+
+    # HTTP Upload Service Cluster (port 8081)
     - name: http_upload_backend
       connect_timeout: 300s
       per_connection_buffer_limit_bytes: 10485760
@@ -82,4 +185,4 @@ static_resources:
                   address:
                     socket_address:
                       address: localhost
-                      port_value: 8081  # Your HTTP file upload service running on port 8081
+                      port_value: 8081
