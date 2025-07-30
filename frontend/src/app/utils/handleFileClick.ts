@@ -36,7 +36,8 @@ const HandleFileClick = async ({
       console.error(err);
 
       if (err.code === 16) {
-        window.location.href = '/login'
+        // window.location.href = '/login'
+        alert("Login page")
       }
       return;
     }

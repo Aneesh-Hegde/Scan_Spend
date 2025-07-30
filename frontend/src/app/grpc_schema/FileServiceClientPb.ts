@@ -82,5 +82,48 @@ export class FileServiceClient {
     this.methodDescriptorGetAllFiles);
   }
 
+  methodDescriptorUploadFile = new grpcWeb.MethodDescriptor(
+    '/file.FileService/UploadFile',
+    grpcWeb.MethodType.UNARY,
+    file_pb.UploadFileRequest,
+    file_pb.UploadFileResponse,
+    (request: file_pb.UploadFileRequest) => {
+      return request.serializeBinary();
+    },
+    file_pb.UploadFileResponse.deserializeBinary
+  );
+
+  uploadFile(
+    request: file_pb.UploadFileRequest,
+    metadata?: grpcWeb.Metadata | null): Promise<file_pb.UploadFileResponse>;
+
+  uploadFile(
+    request: file_pb.UploadFileRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: file_pb.UploadFileResponse) => void): grpcWeb.ClientReadableStream<file_pb.UploadFileResponse>;
+
+  uploadFile(
+    request: file_pb.UploadFileRequest,
+    metadata?: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: file_pb.UploadFileResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/file.FileService/UploadFile',
+        request,
+        metadata || {},
+        this.methodDescriptorUploadFile,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/file.FileService/UploadFile',
+    request,
+    metadata || {},
+    this.methodDescriptorUploadFile);
+  }
+
 }
 

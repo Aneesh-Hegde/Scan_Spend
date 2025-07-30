@@ -220,7 +220,6 @@ const DataFetcher: React.FC<{
           return;
         }
 
-        console.log(res);
 
         const incomes: typed_income[] = res.getIncomeList().map((income: Income) => {
           const amount = Number(income.getIncome());
@@ -232,7 +231,7 @@ const DataFetcher: React.FC<{
             source: income.getIncomeSource() || 'Unknown',
             amountDescription: income.getIncomeSource() || 'Unknown',
             amount,
-            date: income.getDate() || new Date().toISOString(),
+            date: new Date(income.getDate()).toISOString().split('T')[0] || new Date().toISOString(),
           };
         });
 

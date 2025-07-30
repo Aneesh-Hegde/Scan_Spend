@@ -30,6 +30,12 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
     try {
       setLoading(true);
 
+      const token = localStorage.getItem("token");
+      const refreshToken = localStorage.getItem("refresh_token");
+      console.log("Token from localStorage:", token);
+      console.log("Refresh token from localStorage:", refreshToken);
+      console.log("Token is null/undefined:", !token);
+      console.log("Refresh token is null/undefined:", !refreshToken);
       const chunkSize = 1024 * 1024; // 1MB chunks
       const totalChunks = Math.ceil(file.size / chunkSize);
 
@@ -66,6 +72,7 @@ const Upload: React.FC<UploadProps> = ({ onFileUpload }) => {
             headers: {
               "Content-Type": "multipart/form-data", // This will ensure that the server understands the request is file data
             },
+            withCredentials:true,
           });
 
           console.log(response)
