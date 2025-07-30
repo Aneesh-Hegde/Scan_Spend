@@ -10,8 +10,10 @@ echo "Starting Go microservices..."
 (cd "$SERVICES_BASE_PATH/user" && go run .) &
 (cd "$SERVICES_BASE_PATH/balance" && go run .) &
 (cd "$SERVICES_BASE_PATH/file" && go run .) &
+(cd "$SERVICES_BASE_PATH/upload" && go run .) &
 (cd "$SERVICES_BASE_PATH/goals" && go run .) &
 (cd "$SERVICES_BASE_PATH/product" && go run .) &
+(cd "backend/api_gateway" && go run .) &
 sleep 10 # Give services time to start
 
 # Start Next.js frontend
