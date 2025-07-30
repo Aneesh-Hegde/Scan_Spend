@@ -31,7 +31,7 @@ static_resources:
                             timeout: 300s
                         
                         # gRPC User Service routes
-                        - match: {prefix: "/user_grpc.UserService/"}
+                        - match: {prefix: "/auth.UserService/"}
                           route:
                             cluster: user_grpc_backend
                             timeout: 300s
@@ -43,19 +43,25 @@ static_resources:
                             timeout: 300s
                         
                         # gRPC File Service routes
-                        - match: {prefix: "/grpc_file.FileService/"}
+                        - match: {prefix: "/file.FileService/"}
                           route:
                             cluster: file_grpc_backend
                             timeout: 300s
-                        
+
+                        # gRPC File Processing routes
+                        - match: {prefix: "/fileprocessing.FileProcessingService/"}
+                          route:
+                            cluster: file_processing_grpc_backend
+                            timeout: 300s
+
                         # gRPC Balance Service routes
-                        - match: {prefix: "/grpc_balance.BalanceService/"}
+                        - match: {prefix: "/balance.BalanceService/"}
                           route:
                             cluster: balance_grpc_backend
                             timeout: 300s
                         
                         # gRPC Goals Service routes
-                        - match: {prefix: "/grpc_goal.GoalService/"}
+                        - match: {prefix: "/goals.GoalService/"}
                           route:
                             cluster: goals_grpc_backend
                             timeout: 300s
@@ -63,15 +69,15 @@ static_resources:
                         # Default fallback route
                         - match: { prefix: "/" }
                           route:
-                            cluster: user_grpc_backend
+                            cluster: http_upload_backend
                             timeout: 300s
                       cors:
                         allow_origin_string_match:
                           - prefix: "*"
                         allow_methods: GET, PUT, DELETE, POST, OPTIONS
-                        allow_headers: keep-alive, user-agent, cache-control, content-type, content-transfer-encoding, custom-header-1, x-accept-content-transfer-encoding, x-accept-response-streaming, x-user-agent, x-grpc-web, grpc-timeout,authentication,Content-Type,authorization,refresh_token,set-cookie,Cookie,token
+                        allow_headers: keep-alive, user-agent, cache-control, content-type, content-transfer-encoding, custom-header-1, x-accept-content-transfer-encoding, x-accept-response-streaming, x-user-agent, x-grpc-web, grpc-timeout,authentication,Content-Type,Authorization,refresh_token,set-cookie,Cookie,token
                         max_age: "1728000"
-                        expose_headers: custom-header-1, grpc-status, grpc-message,content-type, x-auth-token, authentication,authorization,refresh_token,set-cookie,Cookie,token
+                        expose_headers: custom-header-1, grpc-status, grpc-message,content-type, x-auth-token, authentication,Authorization,refresh_token,set-cookie,Cookie,token
                         allow_credentials: true
                 http_filters:
                     - name: envoy.filters.http.grpc_web
@@ -170,6 +176,23 @@ static_resources:
                     socket_address:
                       address: localhost
                       port_value: 50056
+
+    # File processing Service Cluster (port 50057)
+    - name: file_processing_grpc_backend
+      connect_timeout: 300s
+      type: logical_dns
+      per_connection_buffer_limit_bytes: 10485760
+      http2_protocol_options: {}
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: file_processing_grpc_backend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: localhost
+                      port_value: 50057
 
     # HTTP Upload Service Cluster (port 8081)
     - name: http_upload_backend
