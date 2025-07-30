@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	sharedDB "github.com/Aneesh-Hegde/expenseManager/shared/db"
+	balanceDB "github.com/Aneesh-Hegde/expenseManager/services/balance/db"
 	balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -23,14 +23,10 @@ func AddIncome(ctx context.Context, req *balance.AddIncomeSourceRequest) (*balan
 	userId := md["user_id"][0]
 
 	// Insert new balance
-	var incomeID int32
-	err := sharedDB.GetDB().QueryRow(ctx,
-		"Select * insert_income($1, $2, $3, $4)",
-		userId, req.GetIncomeSource(), req.GetInitialAmount(),"Default Cash Account",
-	).Scan(&incomeID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to add balance: %v", err)
-	}
+incomeID, err := balanceDB.InsertIncome(ctx, userId, req.GetIncomeSource(), req.GetInitialAmount(), "Default Cash Account")
+    if err != nil {
+        return nil, err
+    }
 
 	// Format balance_amount as a string
 	balanceAmount := fmt.Sprintf("$%.2f", req.GetInitialAmount())

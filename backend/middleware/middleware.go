@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/Aneesh-Hegde/expenseManager/redis"
-	"github.com/Aneesh-Hegde/expenseManager/utils/jwt"
-	// "google.golang.org/grpc"
+	"github.com/Aneesh-Hegde/expenseManager/services/user/jwt"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -33,7 +32,6 @@ func AuthInterceptor(ctx context.Context) (context.Context, error) {
 	var userId int
 	var err error
 	var accessToken string
-
 	userId, err = jwt.ValidateJWT(requestAccessToken)
   fmt.Println(err)
 	if err != nil && err.Error() != "token expired" {

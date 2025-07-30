@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	balanceHandler "github.com/Aneesh-Hegde/expenseManager/balance"
-	"github.com/Aneesh-Hegde/expenseManager/db"
+	balanceHandler "github.com/Aneesh-Hegde/expenseManager/services/balance/balance"
+	sharedDB "github.com/Aneesh-Hegde/expenseManager/shared/db"
 	balance "github.com/Aneesh-Hegde/expenseManager/grpc_balance"
-	grpcMiddlware "github.com/Aneesh-Hegde/expenseManager/middleware"
+	grpcMiddleware "github.com/Aneesh-Hegde/expenseManager/middleware"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
@@ -50,19 +54,49 @@ func (s *BalanceService) UpdateIncome(ctx context.Context, req *balance.UpdateIn
 	return balanceHandler.UpdateIncome(ctx, req)
 }
 
-// Authentication interceptor - all endpoints require authentication
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	fmt.Println(info.FullMethod)
-
-	// Apply authentication for all endpoints
-	newCtx, err := grpcMiddlware.AuthInterceptor(ctx)
+	newCtx, err := grpcMiddleware.AuthInterceptor(ctx)
 	if err != nil {
 		log.Println("Authentication failed:", err)
 		return nil, status.Error(codes.Unauthenticated, "Authentication required")
 	}
-
-	// Proceed with the actual request handler
 	return handler(newCtx, req)
+}
+
+// Background health monitoring for database
+func startDBHealthMonitor() {
+	ticker := time.NewTicker(time.Minute * 2)
+	go func() {
+		defer ticker.Stop()
+		for range ticker.C {
+			// Force health check by calling GetDB - it will auto-reconnect if needed
+			db := sharedDB.GetDB()
+			if db != nil {
+				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+				if err := db.Ping(ctx); err != nil {
+					log.Printf("Health check failed: %v", err)
+				}
+				cancel()
+			}
+		}
+	}()
+}
+
+// Graceful shutdown handler
+func setupGracefulShutdown(grpcServer *grpc.Server) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		log.Println("Received shutdown signal, gracefully stopping...")
+		grpcServer.GracefulStop()
+		sharedDB.CloseDB()
+		redis.CloseRedis()
+		log.Println("Balance service shutdown complete")
+		os.Exit(0)
+	}()
 }
 
 func main() {
@@ -70,21 +104,24 @@ func main() {
 		log.Printf("Error loading .env-dev file: %v", err)
 	}
 
-	db.InitDB()
+	// Initialize database - will auto-reconnect when needed
+	sharedDB.InitDB()
 	redis.InitRedis()
-	defer db.CloseDB()
-	defer redis.CloseRedis()
+
+	// Start background health monitoring
+	startDBHealthMonitor()
 
 	listener, err := net.Listen("tcp", ":50055")
 	if err != nil {
 		log.Fatalf("Failed to listen on port 50055: %v", err)
 	}
 
-	// Create gRPC server with authentication interceptor
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(authInterceptor))
-
 	balance.RegisterBalanceServiceServer(grpcServer, &BalanceService{})
 	reflection.Register(grpcServer)
+
+	// Setup graceful shutdown
+	setupGracefulShutdown(grpcServer)
 
 	log.Println("🚀 Starting Balance gRPC server on port 50055...")
 	if err := grpcServer.Serve(listener); err != nil {

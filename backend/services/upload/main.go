@@ -11,10 +11,11 @@ import (
 	"time"
 
 	sharedDB "github.com/Aneesh-Hegde/expenseManager/shared/db"
-	goalsHandler "github.com/Aneesh-Hegde/expenseManager/services/goals/goals"
-	goals "github.com/Aneesh-Hegde/expenseManager/grpc_goal"
+	uploadDB "github.com/Aneesh-Hegde/expenseManager/services/upload/db"
+	pb "github.com/Aneesh-Hegde/expenseManager/grpc"
 	grpcMiddlware "github.com/Aneesh-Hegde/expenseManager/middleware"
 	"github.com/Aneesh-Hegde/expenseManager/redis"
+	"github.com/Aneesh-Hegde/expenseManager/services/upload/utils"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -22,39 +23,30 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type GoalService struct {
-	goals.UnimplementedGoalServiceServer
+type FileProcessingServer struct {
+	pb.UnimplementedFileProcessingServiceServer
 }
 
-func (s *GoalService) GetGoals(ctx context.Context, req *goals.GetGoalRequest) (*goals.GetGoalResponse, error) {
-	return goalsHandler.GetGoals(ctx, req)
+func (s *FileProcessingServer) GetText(ctx context.Context, req *pb.GetTextRequest) (*pb.GetTextResponse, error) {
+	return utils.GetText(ctx, req)
+}
+func (s *FileProcessingServer) SaveToDB(ctx context.Context, req *pb.GetProducts) (*pb.DBMessage, error) {
+	return uploadDB.SaveProducts(ctx, req)
 }
 
-func (s *GoalService) CreateGoals(ctx context.Context, req *goals.CreateGoalRequest) (*goals.CreateGoalResponse, error) {
-	return goalsHandler.CreateGoals(ctx, req)
-}
-
-func (s *GoalService) UpdateGoals(ctx context.Context, req *goals.UpdateGoalRequest) (*goals.UpdateResponse, error) {
-	return goalsHandler.UpdateGoals(ctx, req)
-}
-
-func (s *GoalService) EditGoals(ctx context.Context, req *goals.EditGoalRequest) (*goals.EditResponse, error) {
-	return goalsHandler.EditGoals(ctx, req)
-}
-
-func (s *GoalService) GetGoalTransactions(ctx context.Context, req *goals.GetGoalTransactionsRequest) (*goals.GetGoalTransactionsResponse, error) {
-	return goalsHandler.GoalTransactions(ctx, req)
-}
-
-func (s *GoalService) DeleteGoals(ctx context.Context, req *goals.DeleteGoalRequest) (*goals.DeleteResponse, error) {
-	return goalsHandler.DeleteGoals(ctx, req)
-}
-
-// Authentication interceptor - all endpoints require authentication
+// Authentication interceptor - same as in your old implementation
 func authInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	fmt.Println(info.FullMethod)
 
-	// Apply authentication for all endpoints
+	// Skip authentication for public endpoints
+	if info.FullMethod == "/auth.UserService/LoginUser" ||
+		info.FullMethod == "/auth.UserService/RegisterUser" ||
+		info.FullMethod == "/auth.UserService/GenerateVerifyToken" ||
+		info.FullMethod == "/auth.UserService/VerifyUser" {
+		return handler(ctx, req)
+	}
+
+	// Apply authentication for protected endpoints
 	newCtx, err := grpcMiddlware.AuthInterceptor(ctx)
 	if err != nil {
 		log.Println("Authentication failed:", err)
@@ -99,35 +91,34 @@ func setupGracefulShutdown(grpcServer *grpc.Server) {
 		os.Exit(0)
 	}()
 }
-
 func main() {
 	if err := godotenv.Load(".env-dev"); err != nil {
 		log.Printf("Error loading .env-dev file: %v", err)
 	}
 
+	// Initialize database - will auto-reconnect when needed
 	sharedDB.InitDB()
 	redis.InitRedis()
 
 	// Start background health monitoring
 	startDBHealthMonitor()
 
-	listener, err := net.Listen("tcp", ":50056")
+	listener, err := net.Listen("tcp", ":50057")
 	if err != nil {
-		log.Fatalf("Failed to listen on port 50056: %v", err)
+		log.Fatalf("Failed to listen on port 50057: %v", err)
 	}
 
 	// Create gRPC server with authentication interceptor
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(authInterceptor))
 
-	goals.RegisterGoalServiceServer(grpcServer, &GoalService{})
+	pb.RegisterFileProcessingServiceServer(grpcServer, &FileProcessingServer{})
 	reflection.Register(grpcServer)
 
 	// Setup graceful shutdown
 	setupGracefulShutdown(grpcServer)
 
-	log.Println("🚀 Starting Goals gRPC server on port 50056...")
+	log.Println("🚀 Starting User gRPC server on port 50057...")
 	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve Goals gRPC server: %v", err)
+		log.Fatalf("Failed to serve User gRPC server: %v", err)
 	}
 }
-

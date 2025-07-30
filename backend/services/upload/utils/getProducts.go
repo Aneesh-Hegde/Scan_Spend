@@ -1,4 +1,4 @@
-package data
+package utils
 
 import (
 	"context"
@@ -6,14 +6,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Aneesh-Hegde/expenseManager/db"
+	sharedDB "github.com/Aneesh-Hegde/expenseManager/shared/db"
 	"github.com/Aneesh-Hegde/expenseManager/grpc"
 )
 
 func GetFileProduct(ctx context.Context, filename string, userId string) (*grpc.GetTextResponse, error) {
 	fmt.Println(userId, filename)
 	dbQuery := `SELECT p.product_id, p.product_name, p.quantity, p.price, p.file_name, p.date_added, p.category_id, c.name AS category_name FROM product_category_service.products p JOIN product_category_service.categories c ON p.category_id=c.category_id WHERE user_id=$1 AND file_name=$2`
-	rows, err := db.DB.Query(ctx, dbQuery, userId, filename)
+	rows, err := sharedDB.GetDB().Query(ctx, dbQuery, userId, filename)
 	if err != nil {
 		return nil, err
 	}

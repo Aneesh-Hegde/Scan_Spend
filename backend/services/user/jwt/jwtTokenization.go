@@ -16,8 +16,8 @@ type Claims struct {
 }
 
 func GenerateJWT(userID int) (string, error) {
-	fmt.Println("from middleware to generate")
 	secretKey := os.Getenv("JWT_SECRET_KEY")
+	fmt.Println(secretKey)
 	if secretKey == "" {
 		log.Print("JWT secret key not set")
 	}
@@ -38,8 +38,8 @@ func GenerateJWT(userID int) (string, error) {
 }
 
 func ValidateJWT(tokenStr string) (int, error) {
-	fmt.Println("from middleware")
 	secretKey := os.Getenv("JWT_SECRET_KEY")
+	fmt.Println(secretKey)
 	if secretKey == "" {
 		log.Print("JWT secretKey not set")
 	}
