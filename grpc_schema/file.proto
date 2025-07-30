@@ -6,6 +6,7 @@ option go_package ="/grpc_file";
 
 service FileService{
   rpc GetAllFiles(GetFileByUser) returns (FileList);
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse);
 }
 
 message GetFileByUser{
@@ -18,4 +19,21 @@ message File{
 
 message FileList {
   repeated File allfiles = 1;
+}
+
+message UploadFileRequest {
+  int64 user_id = 1;
+  string filename = 2;
+  bytes chunk_data = 3;
+  int32 chunk_number = 4;
+  int32 total_chunks = 5;
+  string refresh_token = 6;
+}
+
+message UploadFileResponse {
+  bool success = 1;
+  string message = 2;
+  string image_url = 3;
+  int64 user_id = 4;
+  string chunk_status = 5;
 }
