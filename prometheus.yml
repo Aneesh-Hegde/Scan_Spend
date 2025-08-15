@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 4s
+  evaluation_interval: 4s
+
+scrape_configs:
+  # Envoy Proxy Metrics
+  - job_name: 'envoy'
+    static_configs:
+      - targets: ['host.docker.internal:9901']
+    metrics_path: '/stats/prometheus'
+    scrape_interval: 5s
+
+  # Go Services Metrics (add these ports as you implement metrics in each service)
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['host.docker.internal:2112'] # We'll add this metrics port to your services
+    scrape_interval: 10s
+
+  - job_name: 'product-service'  
+    static_configs:
+      - targets: ['host.docker.internal:2113']
+    scrape_interval: 10s
+
+  - job_name: 'file-service'
+    static_configs:
+      - targets: ['host.docker.internal:2114']
+    scrape_interval: 10s
+
+  - job_name: 'file-processing-service'
+    static_configs:
+      - targets: ['host.docker.internal:2115']  
+    scrape_interval: 10s
+
+  - job_name: 'balance-service'
+    static_configs:
+      - targets: ['host.docker.internal:2116']
+    scrape_interval: 10s
+
+  - job_name: 'goals-service'
+    static_configs:
+      - targets: ['host.docker.internal:2117']
+    scrape_interval: 10s
