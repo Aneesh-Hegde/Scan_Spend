@@ -35,6 +35,7 @@ const LoginUser = () => {
   //get access and refresh token and checks the credentials from db for login
   const getUserToken = async (email: string | null) => {
     if (!email) return;
+  console.log(email)
     const request = new LoginUserRequest();
     request.setEmail(email);
 
@@ -68,7 +69,7 @@ const LoginUser = () => {
             }
           }
         });
-        console.log(response)
+        // console.log(response)
       });
 
     } catch (error) {
@@ -80,6 +81,7 @@ const LoginUser = () => {
     try {
       const response = await loginWithGoogle();
       if (response.response) {
+        console.log(response.response)
         const email: string | null = response.response.user.email
         getUserToken(email);
       }
