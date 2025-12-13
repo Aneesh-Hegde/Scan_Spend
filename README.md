@@ -2,31 +2,51 @@
 **An AI-powered expense tracker that extracts text from receipts and organizes your spending automatically.**  
 
 ## 🚀 Overview  
-Scan Spend takes an image of a bill as input, extracts text using **Tesseract OCR**, and categorizes expenses for easy tracking. It provides a seamless way to manage finances without manual data entry.  
+Scan Spend takes an image of a bill as input, extracts text using **Tesseract OCR**, and categorizes expenses for easy tracking. It provides a seamless way to manage finances without manual data entry, with advanced features including **goals management**, **income tracking**, and **financial planning tools**.
 
 ## 🛠 Tech Stack  
-- **Backend:** Go  
-- **Frontend:** Next.js (TypeScript)  
-- **OCR Engine:** Tesseract (C++)  
-- **Proxy:** Envoy  
-- **Database:** PostgreSQL / Redis (for caching)  
-- **gRPC:** For efficient service communication  
-- **Containerization:** Docker  
+- **Backend:** Go (with microservices architecture)
+- **Frontend:** Next.js (TypeScript) with modern UI components
+- **OCR Engine:** Tesseract (C++) + Gemini AI for enhanced text recognition
+- **Proxy:** Envoy with advanced routing
+- **Database:** PostgreSQL / Redis (for caching)
+- **gRPC:** For efficient service communication
+- **Containerization:** Docker with Docker Compose
+- **Monitoring:** Prometheus + Grafana for observability
+- **Orchestration:** Kubernetes support
+- **Authentication:** JWT-based secure authentication
 
 ## 📌 Features  
+### Core Features
 ✔ Upload receipt images  
 ✔ Extract text using **Tesseract OCR** & **Gemini AI**  
 ✔ Store and manage expenses  
 ✔ Secure user authentication (JWT)  
 ✔ gRPC-based communication for efficiency  
 
+### New Advanced Features
+✔ **Goals Management System** - Set, track, and achieve financial goals
+✔ **Income Tracking** - Comprehensive income management with categorization
+✔ **Balance Management** - Real-time balance tracking across multiple sources
+✔ **Advanced Analytics** - Detailed financial insights and reporting
+✔ **Calendar Integration** - Visual expense and income timeline
+✔ **Bulk Operations** - Mass edit capabilities for income and expenses
+✔ **Progress Tracking** - Visual progress indicators for financial goals
+✔ **Modern UI Components** - Enhanced user experience with shadcn/ui components
+
+### Monitoring & Observability
+✔ **Prometheus Metrics** - Comprehensive service monitoring
+✔ **Grafana Dashboards** - Real-time performance visualization
+✔ **Service Health Checks** - Automated health monitoring
+✔ **Performance Metrics** - Response time, throughput, and error tracking
+
 ## 🔧 Installation & Setup  
 
 ### Prerequisites  
 Ensure you have the following installed:  
 - **Docker**  
-- **Go**  
-- **Node.js** (for Next.js)  
+- **Go** (1.21+)  
+- **Node.js** (18+) (for Next.js)  
 - **Envoy Proxy**  
 - **C++ & Tesseract OCR**  
   - Install Tesseract on Linux/macOS:  
@@ -96,52 +116,153 @@ Ensure you have the following installed:
 6. **Access the frontend**  
    Open `http://localhost:3000` in your browser.  
 
+7. **Access monitoring dashboards** (when running with Docker)
+   - **Grafana:** http://localhost:3001 (admin/admin)
+   - **Prometheus:** http://localhost:9090
+
 ---
 
 ## 📂 Project Structure  
 
 ```
-backend/          # Handles business logic, OCR processing, and database storage
-  ├── data/       # File handling utilities
-  ├── db/         # Database logic (PostgreSQL)
-  ├── grpc/       # gRPC service definitions
-  ├── redis/      # Redis caching setup
-  ├── user_grpc/  # gRPC services for user authentication
-  ├── utils/      # Utility functions (Auth, OCR, JWT, AI-based text extraction)
-  ├── uploads/    # Stores uploaded receipt images
-  ├── main.go     # Backend entry point
-  ├── .env        # Environment file for Docker setup (loads during Docker run)
-  ├── .env-dev    # Local development environment file
+backend/                    # Handles business logic, OCR processing, and database storage
+  ├── api_gateway/         # API gateway service
+  ├── balance/             # Balance management service
+  ├── config/              # Configuration management
+  ├── data/                # File handling utilities
+  ├── db/                  # Database logic (PostgreSQL)
+  ├── goals/               # Goals management service
+  ├── grpc/                # gRPC service definitions
+  ├── grpc_balance/        # Balance service gRPC definitions
+  ├── grpc_goal/           # Goals service gRPC definitions
+  ├── grpc_file/           # File service gRPC definitions
+  ├── middleware/          # Middleware components
+  ├── models/              # Data models
+  ├── products/            # Product management service
+  ├── redis/               # Redis caching setup
+  ├── services/            # Microservices implementation
+  ├── shared/              # Shared utilities and constants
+  ├── states/              # State management
+  ├── user_grpc/           # gRPC services for user authentication
+  ├── utils/               # Utility functions (Auth, OCR, JWT, AI-based text extraction)
+  ├── uploads/             # Stores uploaded receipt images
+  ├── main.go              # Backend entry point
+  ├── .env                 # Environment file for Docker setup (loads during Docker run)
+  ├── .env-dev             # Local development environment file
 
-frontend/         # Next.js UI for tracking and managing expenses
-  ├── app/        # Main application files
-  ├── components/ # Reusable UI components
-  ├── dashboard/  # Dashboard page
-  ├── login/      # Login page
-  ├── register/   # Register page
-  ├── profile/    # User profile page
-  ├── utils/      # API requests, gRPC clients, and authentication handling
+frontend/                   # Next.js UI for tracking and managing expenses
+  ├── app/                 # Main application files
+  │   ├── components/      # Reusable UI components
+  │   ├── dashboard/       # Dashboard page
+  │   ├── goal/            # Goals management page
+  │   ├── income/          # Income tracking page
+  │   ├── calendar/        # Calendar view for expenses and income
+  │   ├── balance/         # Balance management page
+  │   ├── login/           # Login page
+  │   ├── register/        # Register page
+  │   ├── profile/         # User profile page
+  │   ├── update/          # Update user information
+  │   ├── summary/         # Financial summary and reports
+  │   ├── verify-email/    # Email verification
+  │   ├── hooks/           # Custom React hooks
+  │   ├── services/        # API service layer
+  │   ├── styles/          # Custom styles and themes
+  │   ├── types/           # TypeScript type definitions
+  │   ├── utils/           # Utility functions
+  │   └── grpc_schema/     # gRPC client definitions
+  ├── components/          # Global UI components (shadcn/ui)
+  │   └── ui/              # Modern UI component library
+  │       ├── button.tsx   # Button components
+  │       ├── card.tsx     # Card components
+  │       ├── dialog.tsx   # Modal dialogs
+  │       ├── tabs.tsx     # Tabbed interfaces
+  │       ├── progress.tsx # Progress indicators
+  │       ├── chart.tsx    # Data visualization
+  │       └── ...          # Additional UI components
 
-grpc_schema/      # Stores .proto files for defining gRPC services
+grpc_schema/               # Stores .proto files for defining gRPC services
+  ├── file.proto          # File service definitions
+  ├── goal.proto          # Goals service definitions
+  └── balance.proto       # Balance service definitions
 
-├── Dockerfile-envoy     # Envoy Docker setup
-├── create_proto_file.sh # Script to generate gRPC files
-├── envoy-dev.yaml       # Local Envoy configuration
-├── envoy.yaml           # Docker Envoy configuration
-├── docker-compose.yml   # Docker setup
-├── run.sh               # Local run script
+k8s/                      # Kubernetes deployment configurations
+  ├── envoy_deployment.yaml    # Envoy proxy deployment
+  └── envoy_configmap.yaml     # Envoy configuration
+
+monitoring/                # Monitoring and observability
+  ├── prometheus.yml       # Prometheus metrics configuration
+  ├── grafana.json         # Grafana dashboard configuration
+  └── envoy-dev.yaml       # Local Envoy configuration
+
+├── Dockerfile-envoy       # Envoy Docker setup
+├── create_proto_file.sh   # Script to generate gRPC files
+├── envoy-dev.yaml         # Local Envoy configuration
+├── envoy.yaml             # Docker Envoy configuration
+├── docker-compose.yml     # Docker setup with monitoring
+├── run.sh                 # Local run script
 ```
 
 ---
 
 ## 🏗 Architecture  
-- **Go Backend:** Handles receipt processing, authentication, and business logic  
-- **Next.js Frontend:** Provides an intuitive UI for expense tracking  
-- **Tesseract (C++):** Extracts text from uploaded images  
-- **Gemini AI:** Improves text recognition for better accuracy  
-- **gRPC & Envoy:** Enables fast, efficient service communication  
-- **Redis & PostgreSQL:** Stores expenses and caches data  
-- **Docker:** Simplifies deployment and scalability  
+- **Microservices Backend:** Go-based services for different domains (goals, balance, income, products, files)
+- **Next.js Frontend:** Modern React-based UI with TypeScript for type safety
+- **Tesseract (C++) + Gemini AI:** Advanced text extraction with AI enhancement
+- **gRPC & Envoy:** High-performance service communication with intelligent routing
+- **Redis & PostgreSQL:** Multi-layer data storage with caching for performance
+- **Docker & Kubernetes:** Containerized deployment with orchestration support
+- **Monitoring Stack:** Prometheus + Grafana for comprehensive observability
+- **Modern UI:** shadcn/ui components for enhanced user experience
+
+### Service Architecture
+- **User Service:** Authentication and user management
+- **Product Service:** Product and expense management
+- **File Service:** File upload and processing
+- **File Processing Service:** OCR and text extraction
+- **Balance Service:** Financial balance tracking
+- **Goals Service:** Financial goals and progress tracking
+- **API Gateway:** Centralized request routing and authentication
+
+---
+
+## 📊 Monitoring & Observability
+
+### Prometheus Metrics
+The application exposes comprehensive metrics for monitoring:
+- **Service Metrics:** Response times, request counts, error rates
+- **Business Metrics:** File uploads, OCR processing, user activities
+- **System Metrics:** Resource usage, database performance, cache hit rates
+
+### Grafana Dashboards
+Pre-configured dashboards provide:
+- **Performance Overview:** Real-time service performance metrics
+- **Business Intelligence:** User activity, file processing statistics
+- **System Health:** Infrastructure and service health monitoring
+
+### Health Checks
+Automated health monitoring for all services with:
+- **Liveness Probes:** Service availability checks
+- **Readiness Probes:** Service readiness for traffic
+- **Custom Metrics:** Business-specific health indicators
+
+---
+
+## 🚀 Deployment Options
+
+### Local Development
+```sh
+./run.sh
+```
+
+### Docker Compose (Recommended for development)
+```sh
+docker-compose up --build
+```
+
+### Kubernetes (Production)
+```sh
+kubectl apply -f k8s/
+```
 
 ---
 

@@ -1,83 +1,132 @@
+# version: '3.8'
+#
+# services:
+#   redis:
+#     image: redis:7
+#     container_name: redis
+#     restart: on-failure
+#     ports:
+#       - '6379:6379'
+#     command: redis-server --save 20 1 --loglevel warning --requirepass redispassword
+#     volumes: 
+#       - cache:/data
+#     networks:
+#         - app
+#   db:
+#     image: postgres:latest
+#     container_name: postgres-db
+#     environment:
+#       POSTGRES_USER: user
+#       POSTGRES_PASSWORD: example_password
+#       POSTGRES_DB: products
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     networks:
+#       - app
+#
+#   backend:
+#     build: ./backend
+#     depends_on:
+#       - db
+#       - envoy
+#       - redis
+#     container_name: go-backend
+#     env_file:
+#       - ./backend/.env
+#     environment:
+#       DB_URL: postgres://user:example_password@db:5432/products?sslmode=disable
+#     restart: on-failure
+#     ports:
+#       - "8081:8081"
+#       - "50051:50051"
+#     volumes:
+#       - ./:/src
+#     networks:
+#       - app
+#
+#   frontend:
+#     build: ./frontend
+#     container_name: nextjs-frontend
+#     ports:
+#       - "3000:3000"
+#     env_file:
+#       - ./frontend/.env
+#     depends_on:
+#       - backend
+#       - envoy
+#     networks:
+#       - app
+#
+#   envoy:
+#     build: 
+#       dockerfile: Dockerfile-envoy
+#     restart: on-failure
+#     container_name: envoy
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - ./envoy.yaml:/etc/envoy/envoy.yaml
+#     networks:
+#       - app
+#
+# volumes:
+#   postgres_data:
+#     driver: local
+#   cache:
+#     driver: local
+#
+# networks:
+#   app:
+#     driver: bridge
 version: '3.8'
 
 services:
-  redis:
-    image: redis:7
-    container_name: redis
-    restart: on-failure
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
     ports:
-      - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning --requirepass redispassword
-    volumes: 
-      - cache:/data
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
-        - app
-  db:
-    image: postgres:latest
-    container_name: postgres-db
+      - monitoring
+
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: example_password
-      POSTGRES_DB: products
-    ports:
-      - "5432:5432"
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/microservices-dashboard.json
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app
-
-  backend:
-    build: ./backend
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning  # Mount provisioning configs
     depends_on:
-      - db
-      - envoy
-      - redis
-    container_name: go-backend
-    env_file:
-      - ./backend/.env
-    environment:
-      DB_URL: postgres://user:example_password@db:5432/products?sslmode=disable
-    restart: on-failure
-    ports:
-      - "8081:8081"
-      - "50051:50051"
-    volumes:
-      - ./:/src
+      - prometheus
     networks:
-      - app
-
-  frontend:
-    build: ./frontend
-    container_name: nextjs-frontend
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./frontend/.env
-    depends_on:
-      - backend
-      - envoy
-    networks:
-      - app
-
-  envoy:
-    build: 
-      dockerfile: Dockerfile-envoy
-    restart: on-failure
-    container_name: envoy
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./envoy.yaml:/etc/envoy/envoy.yaml
-    networks:
-      - app
-
-volumes:
-  postgres_data:
-    driver: local
-  cache:
-    driver: local
+      - monitoring
 
 networks:
-  app:
+  monitoring:
     driver: bridge
 
+volumes:
+  prometheus_data:
+  grafana_data:
